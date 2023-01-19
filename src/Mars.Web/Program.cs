@@ -1,6 +1,10 @@
+using Mars.MissionControl;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+
+builder.Services.AddSingleton<Game>();
 
 var app = builder.Build();
 
@@ -17,6 +21,9 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.MapBlazorHub();
+
+app.MapGet("/join", (string name, Game game) => game.Join(name));
+
 app.MapFallbackToPage("/_Host");
 
 app.Run();

@@ -42,4 +42,14 @@ internal class BasicIntegrationTestDemo
         var actualContent = await response.Content.ReadAsStringAsync();
         actualContent.Should().Contain(contentFragment);
     }
+
+    [Test]
+    public async Task JoinGame()
+    {
+        var client = _factory.CreateClient();
+
+        var joinResponse = await client.GetStringAsync("/join?name=Jonathan");
+
+        joinResponse.Length.Should().Be(13);
+    }
 }
