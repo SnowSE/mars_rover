@@ -6,4 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Mars.MissionControl\Mars.MissionControl.csproj" />
+  </ItemGroup>
+
 </Project>
