@@ -22,27 +22,11 @@ Another Snow College coding competition game. Get your rover to the destination 
 
 ### Endpoints
 
-| Request URL                               | Response                           |
-| ----------------------------------------- | ---------------------------------- |
-| /join?name={playerName}                   | {token}                            |
-| /status?token={token}                     | {state: waiting}                   |
-|                                           | - OR -                             |
-|                                           | { state: playing,                  |
-|                                           | startingRow: \_\_,                 |
-|                                           | startingCol: \_\_,                 |
-|                                           | perseverenceHealth: \_\_,          |
-|                                           | targetRow: \_\_,                   |
-|                                           | targetCol: \_\_ }                  |
-|                                           | - OR -                             |
-|                                           | {state: gameOver}                  |
-| /move/perseverance?direction=\_\_\_       | {sight: \[cell\], newHealth: \_\_} |
-| (direction is Right, Left, Forward, Back) |                                    |
-|                                           | - OR -                             |
-|                                           | {error: "Rate limit exceeded"}     |
-|                                           | - OR -                             |
-|                                           | {error: "Invalid direction"}       |
-|                                           | - OR -                             |
-|                                           | {error: "You're dead"}             |
+| Request URL                                                                        | Response                                                                                                                                                                                                  |
+| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| /join?name={playerName}                                                            | {token}                                                                                                                                                                                                   |
+| /status?token={token}                                                              | {state: waiting} <br> - OR - <br> { state: playing,<br>startingRow: int,<br>startingCol: int,<br>perseverenceHealth: int,<br> targetRow: int,<br>targetCol: int } <br> - OR - <br> {state: gameOver} |
+| /move/perseverance?direction=\_\_\_ <br> (direction is Right, Left, Forward, Back) | {sight: \[cell\], newHealth: int} <br> - OR - <br> {error: "Rate limit exceeded"} <br> - OR - <br> {error: "Invalid direction"} <br> - OR - <br> {error: "You're dead"}                                  |
 
 ## Future Enhancement - Ingenuity Helicopter
 
