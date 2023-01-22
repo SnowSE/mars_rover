@@ -22,7 +22,7 @@ app.UseRouting();
 
 app.MapBlazorHub();
 
-app.MapGet("/join", (string name, Game game) => game.Join(name));
+app.MapGet("/join", (string name, Game game) => game.Join(name).Value);
 
 app.MapFallbackToPage("/_Host");
 
