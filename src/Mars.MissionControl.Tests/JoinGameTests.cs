@@ -40,6 +40,7 @@ internal class JoinGameTests
     public void CannotPlayIfYouHaveNotJoined()
     {
         var game = new Game();
+        game.StartGame();
         var token1 = PlayerToken.Generate();
         Assert.Throws<UnrecognizedTokenException>(() => game.Move(token1, Direction.Forward));
     }
@@ -50,5 +51,14 @@ internal class JoinGameTests
         var game = new Game();
         var token1 = game.Join("P1");
         Assert.Throws<InvalidGameStateException>(() => game.Move(token1, Direction.Forward));
+    }
+
+    [Test]
+    public void WhenAPlayerJoinsTheyArePlacedOnTheMap()
+    {
+        var game = new Game();
+        var token = game.Join("P1");
+        var location = game.GetPlayerLocation(token);
+        location.Should().NotBeNull();
     }
 }
