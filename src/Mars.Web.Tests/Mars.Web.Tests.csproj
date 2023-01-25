@@ -21,4 +21,9 @@
     <ProjectReference Include="..\Mars.Web\Mars.Web.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\" />
+    <Folder Include="Steps\" />
+  </ItemGroup>
+
 </Project>

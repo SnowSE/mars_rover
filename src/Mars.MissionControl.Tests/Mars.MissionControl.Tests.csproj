@@ -17,4 +17,9 @@
     <ProjectReference Include="..\Mars.MissionControl\Mars.MissionControl.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\" />
+    <Folder Include="Steps\" />
+  </ItemGroup>
+
 </Project>

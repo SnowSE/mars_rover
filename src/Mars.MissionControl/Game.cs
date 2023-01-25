@@ -4,24 +4,29 @@ using System.Runtime.Serialization;
 namespace Mars.MissionControl;
 public class Game
 {
-    public Game()
+    public Game(int boardWidth = 5, int boardHeight = 5)
     {
         GameState = GameState.Joining;
+        Board = new Board(boardWidth, boardHeight);
     }
 
-    private ConcurrentBag<PlayerToken> players = new();
+    private ConcurrentDictionary<PlayerToken, Player> players = new();
 
     public PlayerToken Join(string playerName)
     {
         if (GameState != GameState.Joining)
+        {
             throw new InvalidGameStateException();
+        }
 
-        var token = PlayerToken.Generate();
-        players.Add(token);
-        return token;
+        var player = new Player(playerName);
+        players.TryAdd(player.Token, player);
+        Board.PlaceNewPlayer(player);
+        return player.Token;
     }
 
     public GameState GameState { get; set; }
+    public Board Board { get; private set; }
 
     public void StartGame()
     {
@@ -30,15 +35,20 @@ public class Game
 
     public void Move(PlayerToken token, Direction direction)
     {
-        if(GameState != GameState.Playing)
+        if (GameState != GameState.Playing)
         {
             throw new InvalidGameStateException();
         }
 
-        if (players.Contains(token) is false)
+        if (players.ContainsKey(token) is false)
         {
             throw new UnrecognizedTokenException();
         }
+    }
+
+    public Location GetPlayerLocation(PlayerToken token)
+    {
+        return Board.FindPlayer(token);
     }
 }
 
