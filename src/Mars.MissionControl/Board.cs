@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.ComponentModel;
 
 namespace Mars.MissionControl;
 
@@ -63,6 +64,36 @@ public class Board
         }
 
         return location;
+    }
+
+    public Location MovePlayer(Player player, Direction direction)
+    {
+        var currentPlayerLocation = FindPlayer(player);
+        var currentPlayerCell = Cells[currentPlayerLocation];
+        var newLocation = direction switch
+        {
+            Direction.Forward => currentPlayerLocation with { Column = currentPlayerLocation.Column + 1 },
+            Direction.Left => currentPlayerLocation with { Row = currentPlayerLocation.Row - 1 },
+            Direction.Right => currentPlayerLocation with { Row = currentPlayerLocation.Row + 1 },
+            Direction.Reverse => currentPlayerLocation with { Column = currentPlayerLocation.Column - 1 },
+            _ => throw new InvalidEnumArgumentException(direction.ToString())
+        };
+
+        var requestedCell = Cells[newLocation];
+        var newPlayerCell = requestedCell with { Occupant = currentPlayerCell.Occupant };
+        var emptyCell = currentPlayerCell with { Occupant = null };
+
+        if (!Cells.TryUpdate(newLocation, newPlayerCell, requestedCell))
+        {
+            throw new UnableToUpdateBoardException();
+        }
+
+        if (!Cells.TryUpdate(currentPlayerLocation, emptyCell, currentPlayerCell))
+        {
+            throw new UnableToUpdateBoardException();
+        }
+
+        return newLocation;
     }
 
     public Location FindPlayer(Player player)

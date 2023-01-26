@@ -44,6 +44,10 @@ public class Game
         {
             throw new UnrecognizedTokenException();
         }
+
+        var player = players[token];
+
+        Board.MovePlayer(player, direction);
     }
 
     public Location GetPlayerLocation(PlayerToken token)

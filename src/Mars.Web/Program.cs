@@ -24,6 +24,8 @@ app.MapBlazorHub();
 
 app.MapGet("/join", (string name, Game game) => game.Join(name).Value);
 
+app.MapGet("/move", (PlayerToken token, Direction direction, Game game) => game.Move(token, direction));
+
 app.MapFallbackToPage("/_Host");
 
 app.Run();
