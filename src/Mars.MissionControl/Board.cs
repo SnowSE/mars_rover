@@ -9,9 +9,15 @@ public class Board
         Width = numRows;
         Height = numColumns;
         Cells = new ConcurrentDictionary<Location, Cell>();
-        foreach (var row in Enumerable.Range(0, numRows))
+        initializeCells();
+        initializeStartingLocations();
+    }
+
+    private void initializeCells()
+    {
+        foreach (var row in Enumerable.Range(0, Width))
         {
-            foreach (var col in Enumerable.Range(0, numColumns))
+            foreach (var col in Enumerable.Range(0, Height))
             {
                 var newCell = new Cell(new Location(row, col), new DamageValue(0), null);
                 if (!Cells.TryAdd(newCell.Location, newCell))
@@ -22,10 +28,29 @@ public class Board
         }
     }
 
+    private void initializeStartingLocations()
+    {
+        var locations = new List<Location>();
+        for (int i = 0; i < Width; i++)
+        {
+            locations.Add(new Location(i, 0));
+            locations.Add(new Location(i, Height - 1));
+        }
+
+        for (int i = 1; i < Height - 1; i++)
+        {
+            locations.Add(new Location(0, i));
+            locations.Add(new Location(Width - 1, i));
+        }
+
+        startingLocations = new(locations.OrderBy(_ => Random.Shared.Next()));
+    }
+
     public int Width { get; private set; }
     public int Height { get; private set; }
 
     public ConcurrentDictionary<Location, Cell> Cells { get; init; }
+    private ConcurrentQueue<Location> startingLocations;
 
     public Cell this[Location location]
     {
@@ -54,7 +79,9 @@ public class Board
 
     public Location PlaceNewPlayer(Player player)
     {
-        var location = new Location(0, 0);
+        Location location;
+        while (!startingLocations.TryDequeue(out location)) ;
+
         var origCell = Cells[location];
         var newCell = origCell with { Occupant = player };
         if (!Cells.TryUpdate(location, newCell, origCell))
@@ -71,6 +98,8 @@ public class Board
     }
     public Location FindPlayer(PlayerToken token)
     {
+        var location = new Location(1, 2);
+        var newLocation = location with { Column = 5 };
         return Cells.FirstOrDefault(kvp => kvp.Value.Occupant?.Token == token).Key;
     }
 }
@@ -83,7 +112,7 @@ public record DamageValue
 {
     public DamageValue(int value)
     {
-        if (value < 0)
+        if (value < 0 || value > 100)
         {
             throw new ArgumentOutOfRangeException();
         }

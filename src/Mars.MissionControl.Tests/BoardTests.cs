@@ -33,4 +33,5 @@ public class BoardTests
         Location location = board.PlaceNewPlayer(player);
         board.FindPlayer(player).Should().Be(location);
     }
+
 }

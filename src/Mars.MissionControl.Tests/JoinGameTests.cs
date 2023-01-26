@@ -61,4 +61,5 @@ internal class JoinGameTests
         var location = game.GetPlayerLocation(token);
         location.Should().NotBeNull();
     }
+
 }
