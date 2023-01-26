@@ -80,7 +80,10 @@ public class Board
     public Location PlaceNewPlayer(Player player)
     {
         Location location;
-        while (!startingLocations.TryDequeue(out location)) ;
+        if (!startingLocations.TryDequeue(out location))
+        {
+            throw new TooManyPlayersException();
+        }
 
         var origCell = Cells[location];
         var newCell = origCell with { Occupant = player };

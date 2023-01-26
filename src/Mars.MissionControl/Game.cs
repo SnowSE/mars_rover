@@ -6,6 +6,10 @@ public class Game
 {
     public Game(int boardWidth = 5, int boardHeight = 5)
     {
+        if (boardWidth < 3 || boardHeight < 3)
+        {
+            throw new BoardTooSmallException();
+        }
         GameState = GameState.Joining;
         Board = new Board(boardWidth, boardHeight);
     }
@@ -20,8 +24,8 @@ public class Game
         }
 
         var player = new Player(playerName);
-        players.TryAdd(player.Token, player);
         Board.PlaceNewPlayer(player);
+        players.TryAdd(player.Token, player);
         return player.Token;
     }
 

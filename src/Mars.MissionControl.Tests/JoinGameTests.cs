@@ -1,4 +1,6 @@
-﻿namespace Mars.MissionControl.Tests;
+﻿using System.Linq;
+
+namespace Mars.MissionControl.Tests;
 
 internal class JoinGameTests
 {
@@ -62,4 +64,23 @@ internal class JoinGameTests
         location.Should().NotBeNull();
     }
 
+    [Test]
+    public void TooManyPlayersCannotJoinGame()
+    {
+        var game = new Game(3, 3);
+        foreach (var i in Enumerable.Range(0, 8))
+        {
+            game.Join($"P{i}");
+        }
+        Assert.Throws<TooManyPlayersException>(() => game.Join("P9"));
+    }
+
+    [TestCase(2, 2)]
+    [TestCase(1, 2)]
+    [TestCase(2, 1)]
+    [TestCase(1, 1)]
+    public void BoardMustBeAtLeast3x3(int rows, int cols)
+    {
+        Assert.Throws<BoardTooSmallException>(() => new Game(rows, cols));
+    }
 }
