@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using Mars.MissionControl.Tests;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 
 namespace Mars.MissionControl;
@@ -78,8 +79,15 @@ public class Board
             Direction.Reverse => currentPlayerLocation with { Column = currentPlayerLocation.Column - 1 },
             _ => throw new InvalidEnumArgumentException(direction.ToString())
         };
-
-        var requestedCell = Cells[newLocation];
+        Cell? requestedCell;
+        try
+        {
+            requestedCell = Cells[newLocation];
+        }
+        catch (KeyNotFoundException e)
+        {
+            throw new InvalidDirectionException();
+        }
         var newPlayerCell = requestedCell with { Occupant = currentPlayerCell.Occupant };
         var emptyCell = currentPlayerCell with { Occupant = null };
 

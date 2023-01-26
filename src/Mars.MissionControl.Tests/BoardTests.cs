@@ -1,4 +1,6 @@
-﻿namespace Mars.MissionControl.Tests;
+﻿using System;
+
+namespace Mars.MissionControl.Tests;
 
 public class BoardTests
 {
@@ -39,9 +41,9 @@ public class BoardTests
     {
         var board = new Board(5, 5);
         var player = new Player("P1");
-        Location location = board.PlaceNewPlayer(player);
+        Location initialLocation = board.PlaceNewPlayer(player);
         var newLocation = board.MovePlayer(player, Direction.Forward);
-        newLocation.Should().Be(new Location(0, 1));
+        newLocation.Should().Be(new Location(initialLocation.Row, initialLocation.Column + 1));
         board.FindPlayer(player).Should().Be(new Location(0, 1));
     }
 
@@ -50,14 +52,29 @@ public class BoardTests
     {
         var board = new Board(5, 5);
         var player = new Player("P1");
-        Location location = board.PlaceNewPlayer(player);
+        Location initialLocation = board.PlaceNewPlayer(player);
         board.MovePlayer(player, Direction.Forward);
-        board.FindPlayer(player).Should().Be(new Location(0, 1));
+        board.FindPlayer(player).Should().Be(new Location(initialLocation.Row, initialLocation.Column + 1));
         board.MovePlayer(player, Direction.Right);
-        board.FindPlayer(player).Should().Be(new Location(1, 1));
+        board.FindPlayer(player).Should().Be(new Location(initialLocation.Row + 1, initialLocation.Column + 1));
         board.MovePlayer(player, Direction.Reverse);
-        board.FindPlayer(player).Should().Be(new Location(1, 0));
+        board.FindPlayer(player).Should().Be(new Location(initialLocation.Row + 1, initialLocation.Column));
         board.MovePlayer(player, Direction.Left);
-        board.FindPlayer(player).Should().Be(new Location(0, 0));
+        board.FindPlayer(player).Should().Be(initialLocation);
+    }
+
+    [Test]
+    public void MovingPlayerOffBoardIsInvalidMove()
+    {
+        var board = new Board(5, 5);
+        var player = new Player("P1");
+        Location initialLocation = board.PlaceNewPlayer(player);
+        //Move to edge of board
+        while (board.FindPlayer(player).Column > 0)
+        {
+            board.MovePlayer(player, Direction.Reverse);
+        }
+        //Move off board
+        Assert.Throws<InvalidDirectionException>(() => board.MovePlayer(player, Direction.Reverse));
     }
 }
