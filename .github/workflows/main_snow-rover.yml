@@ -30,7 +30,7 @@ jobs:
         run: dotnet build --configuration Release
         
       - name: Run Tests
-        working-directory: /
+        working-directory: ../
         run: dotnet test        
 
       - name: dotnet publish
