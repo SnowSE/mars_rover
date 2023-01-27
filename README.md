@@ -4,6 +4,10 @@
 
 Another Snow College coding competition game. Get your rover to the destination before everyone else!
 
+## Object of the game
+
+Get your rover to the target first!
+
 ## Terms
 
 | Term  | Definition                                                        |
@@ -15,27 +19,22 @@ Another Snow College coding competition game. Get your rover to the destination 
 ## Features - Perseverance Rover
 
 - Map of unknown size
-- Rover has a health value, once health gets to zero your rover is dead and immovable.
-- Terrain can vary from safe to rough, driving over rougher terrain damages the rover more.
-- A low-res map is given to each player at the beginning of the game
-- As your rover moves you can see high-res terrain info (its location + 2 cells in each direction, 25 cells total)
+- Rover has a battery level, moving over terrain will drain your battery based on the difficulty of the terrain.  If you run out of battery you cannot move and have to wait for your solar panels to charge your batteries.  Your batteries will charge at the rate of x points per second.
+- Terrain can vary from smooth to difficult, driving over more difficult terrain drains the the rover battery more.
+- A low-res map is given to each player at the beginning of the game.  From this you can learn the overall size of the board and, on average, what parts of the board are more or less difficult.
+- As your rover moves you can see high-res terrain info (its location + 2 cells in each direction, 25 cells total).
 - Rover can turn right, turn left, go forward, go backward (no diagonal movement)
-- As your rover moves over terrain, its health score decreases by the terrain score
+- As your rover moves over terrain, its battery level decreases by the terrain difficulty
 
 ### Endpoints
 
-| Request URL                                                                        | Response                                                                                                                                                                                                  |
-| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| /join?name={playerName}                                                            | {token}                                                                                                                                                                                                   |
-| /status?token={token}                                                              | {state: waiting} <br> - OR - <br> { state: playing,<br>startingRow: int,<br>startingCol: int,<br>perseverenceHealth: int,<br> targetRow: int,<br>targetCol: int } <br> - OR - <br> {state: gameOver} |
-| /move/perseverance?direction=\_\_\_ <br> (direction is Right, Left, Forward, Back) | {sight: \[cell\], newHealth: int} <br> - OR - <br> {error: "Rate limit exceeded"} <br> - OR - <br> {error: "Invalid direction"} <br> - OR - <br> {error: "You're dead"}                                  |
+> Link to azure instance up and running here
 
 ## Future Enhancement - Ingenuity Helicopter
 
-- Ingenuity starts off with less health than rover
+- Ingenuity starts off with a certain amount of battery power
+- Moving over a cell costs 1 battery point
 - Ingenuity can see current location + 5 cells in each direction
-- Ingenuity can move in any direction (including diagonal), 2x rate limit of rover
-- Send movement commands (W, NW, N, NE, E, SE, S, SW, Hover)
-- If no movement command sent within 1 second Ingenuity lands, its health is reduced by the terrain score
-
-### Endpoints for Ingenuity
+- Ingenuity can move in any direction (including diagonal) by giving it a destination within 2 cells of its current location
+- If no movement command sent within 1 second Ingenuity lands, no battery is used while landed
+- When the battery dies, you're dead.  Ingenuity does not recharge.
