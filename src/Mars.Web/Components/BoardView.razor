@@ -1,38 +1,86 @@
-﻿@inject Game game
+﻿@using System.Text
+@inject Game game
 
-<h3>Board View</h3>
-
-<table border="1">
-    @foreach (var row in Enumerable.Range(0, game.Board.Width))
-    {
-        <tr>
-            @foreach(var col in Enumerable.Range(0, game.Board.Height))
-            {
-                var cell = game.Board[row, col];
-                var summary = cell.Difficulty.Value.ToString();
-                if(locations.ContainsKey((row, col)))
-                {
-                    summary += $" ({locations[(row,col)].Name})";
-                }
-                <td>
-                @summary
-            </td>
-            }
-        </tr>
+<style>
+    .gridboard {
+        display: grid;
+        grid-template-columns: @gridTemplateColumns;
+        grid-template-rows: @gridTemplateRows;
+        gap: 0px 0px;
+        grid-template-areas: @gridTemplateAreas()
     }
-</table>
-<button @onclick=refresh>Refresh</button>
+
+    @cellClasses()
+</style>
+
+<div class="gridboard">
+    @for (int row = 0; row < game.Board.Width; row++)
+    {
+        @for (int col = 0; col < game.Board.Height; col++)
+        {
+            var classname = $"r{row}c{col} border";
+            var cell = game.Board[row, col];
+            var summary = cell.Difficulty.Value.ToString();
+            if(locations.ContainsKey((row, col)))
+            {
+                summary += $" ({locations[(row,col)].Name})";
+            }
+
+            <div class=@classname>
+                @summary
+            </div>
+        }
+    }
+</div>
 
 @code {
-    Dictionary<(int row, int col), Player> locations = new();
-    void refresh()
-    {
-        locations.Clear();
-        foreach(var item in game.Board.RoverLocations)
-        {
-            locations.Add((item.Value.Row, item.Value.Column), item.Key);
-        }
+    [CascadingParameter]
+    public SharedState SharedState{  get;  set; }
 
-        StateHasChanged();
+    protected override void OnInitialized()
+    {
+        game.GameStateChanged += (_, _) => InvokeAsync(() =>
+        {
+            locations.Clear();
+            foreach(var item in game.Board.RoverLocations)
+            {
+                locations.Add((item.Value.Row, item.Value.Column), item.Key);
+            }
+            StateHasChanged();
+        });
     }
+
+    public string gridTemplateRows => String.Join(" ", Enumerable.Repeat("1fr", game.Board.Width));
+    public string gridTemplateColumns => String.Join(" ", Enumerable.Repeat("1fr", game.Board.Height));
+
+    public string gridTemplateAreas()
+    {
+        var sb = new StringBuilder();
+        for(int row=0;row<game.Board.Width;row++)
+        {
+            sb.Append("\"");
+            for(int col=0;col<game.Board.Height;col++)
+            {
+                sb.Append($"r{row}c{col} ");
+            }
+            sb.AppendLine("\"");
+        }
+        return sb.ToString();
+    }
+
+    public string cellClasses()
+    {
+        var sb = new StringBuilder();
+        for(int row=0;row<game.Board.Width;row++)
+        {
+            for(int col=0;col<game.Board.Height;col++)
+            {
+                sb.AppendLine($".r{row}c{col} {{grid-area: r{row}c{col};}} ");
+            }
+        }
+        return sb.ToString();
+    }
+
+    Dictionary<(int row, int col), Player> locations = new();
+
 }

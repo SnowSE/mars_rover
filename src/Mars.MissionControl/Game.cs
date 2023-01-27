@@ -13,6 +13,20 @@ public class Game
 
     private ConcurrentDictionary<PlayerToken, Player> players = new();
 
+    #region State Changed
+    public event EventHandler? GameStateChanged;
+    public DateTime lastStateChange;
+    public TimeSpan stateChangeFrequency;
+    private void raiseStateChange()
+    {
+        if (lastStateChange + stateChangeFrequency < DateTime.Now)
+        {
+            GameStateChanged?.Invoke(this, EventArgs.Empty);
+            lastStateChange = DateTime.Now;
+        }
+    }
+    #endregion
+
     public PlayerToken Join(string playerName)
     {
         if (GameState != GameState.Joining)
@@ -23,6 +37,7 @@ public class Game
         var player = new Player(playerName);
         Board.PlaceNewPlayer(player);
         players.TryAdd(player.Token, player);
+        raiseStateChange();
         return player.Token;
     }
 
