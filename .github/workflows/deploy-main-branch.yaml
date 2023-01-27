@@ -1,5 +1,11 @@
 name: Release to prod
 
+# Note: For this to work you must 
+# 1) Create the service principal:
+#    az ad sp create-for-rbac --name "mars-rover-sp" --sdk-auth --role contributor --scopes /subscriptions/53a27438-41b3-4bcb-90fc-76fa03e0b11f/resourceGroups/mars_rover/providers/Microsoft.Web/sites/snow-rover
+#    Then put the json you get back from that command into a secret named AZURE_CREDENTIALS
+# 2) change the WEBAPP_NAME and RESOURCE_NAME below
+
 on:
   push:
     branches:
