@@ -9,10 +9,6 @@ on:
       - main
   workflow_dispatch:
   
-defaults:
-  run:
-    working-directory: src/Mars.Web
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,15 +23,15 @@ jobs:
           include-prerelease: true
         
       - name: Run Tests
-        working-directory: ../
-        run: |
-          pwd
-          dotnet test                  
+        working-directory: src
+        run: dotnet test                  
 
       - name: Build with dotnet
+        working-directory: src
         run: dotnet build --configuration Release
 
       - name: dotnet publish
+        working-directory: src/Mars.Web
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload artifact for deployment job
