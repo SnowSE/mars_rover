@@ -35,10 +35,6 @@ jobs:
         working-directory: src
         run: dotnet test                  
 
-      - name: Build with dotnet
-        working-directory: src
-        run: dotnet build --configuration Release
-
       - name: dotnet publish
         working-directory: src/Mars.Web
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
@@ -89,7 +85,6 @@ jobs:
       with: 
         app-name: ${{ env.WEBAPP_NAME }}
         slot-name:  ${{ env.SLOT_NAME }}
-        #publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_235E84DC2BA04B6B81C410EA17587A4D }}
         package: .
     
     - name: Comment on PR with the preview link
