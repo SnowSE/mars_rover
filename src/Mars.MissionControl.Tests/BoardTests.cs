@@ -34,4 +34,21 @@ public class BoardTests
         board.RoverLocations[player].Should().Be(location);
     }
 
+    [Test]
+    public void GetNeighborsInCornerReturnsThree()
+    {
+        var board = new Board(5, 5);
+        var neighbors = board.GetNeighbors(new Location(0, 0), 2);
+        neighbors.Should().BeEquivalentTo(new[]
+        {
+            board[1,0],
+            board[1,1],
+            board[0,1],
+            board[2,0],
+            board[2,1],
+            board[2,2],
+            board[1,2],
+            board[0,2],
+        });
+    }
 }

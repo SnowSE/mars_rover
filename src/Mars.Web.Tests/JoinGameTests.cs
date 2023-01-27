@@ -1,5 +1,6 @@
 ﻿using Mars.Web.Types;
 using Microsoft.AspNetCore.Mvc.Testing;
+using System.Linq;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 
@@ -26,10 +27,23 @@ public class JoinGameTests
     public async Task JoinGame()
     {
         var client = _factory.CreateClient();
+        var expectedLowResolutionMap = new[]
+        {
+            new LowResolutionMapTile
+            {
+                AverageDifficulty = 0,
+                LowerLeftColumn= 0,
+                LowerLeftRow= 0,
+                UpperRightColumn = 4,
+                UpperRightRow = 4
+            }
+        };
 
         var joinResponse = await client.GetFromJsonAsync<JoinResponse>("/game/join?name=Jonathan");
 
         joinResponse.Token.Length.Should().Be(13);
+        joinResponse.LowResolutionMap.Should().BeEquivalentTo(expectedLowResolutionMap);
+        joinResponse.Neighbors.Count().Should().BeOneOf(8, 11, 14);
     }
 
     [Test]

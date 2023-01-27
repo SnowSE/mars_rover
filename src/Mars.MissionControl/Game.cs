@@ -9,9 +9,12 @@ public class Game
         }
         GameState = GameState.Joining;
         Board = new Board(boardWidth, boardHeight);
+        Map = new Map(this);
     }
 
+    public Map Map { get; private set; }
     private ConcurrentDictionary<PlayerToken, Player> players = new();
+    private ConcurrentDictionary<string, PlayerToken> playerTokenCache = new();
 
     #region State Changed
     public event EventHandler? GameStateChanged;
@@ -37,6 +40,7 @@ public class Game
         var player = new Player(playerName);
         Board.PlaceNewPlayer(player);
         players.TryAdd(player.Token, player);
+        playerTokenCache.TryAdd(player.Token.Value, player.Token);
         raiseStateChange();
         return player.Token;
     }
@@ -66,6 +70,17 @@ public class Game
     {
         return Board.RoverLocations
             .Single(kvp => kvp.Key.Token == token).Value;
+    }
+
+    public bool TryTranslateToken(string tokenString, out PlayerToken token)
+    {
+        token = null;
+        if (playerTokenCache.ContainsKey(tokenString))
+        {
+            token = playerTokenCache[tokenString];
+            return true;
+        }
+        return false;
     }
 }
 
