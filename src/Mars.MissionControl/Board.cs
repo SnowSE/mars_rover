@@ -1,6 +1,4 @@
-﻿using System.Collections.Concurrent;
-
-namespace Mars.MissionControl;
+﻿namespace Mars.MissionControl;
 
 public class Board
 {
@@ -19,7 +17,7 @@ public class Board
         {
             foreach (var col in Enumerable.Range(0, Height))
             {
-                var newCell = new Cell(new Location(row, col), new Difficulty(0), null);
+                var newCell = new Cell(new Location(row, col), new Difficulty(0));
                 if (!Cells.TryAdd(newCell.Location, newCell))
                 {
                     throw new UnableToGenerateBoardException();
@@ -51,6 +49,8 @@ public class Board
 
     public ConcurrentDictionary<Location, Cell> Cells { get; init; }
     private ConcurrentQueue<Location> startingLocations;
+
+    public ConcurrentDictionary<Player, Location> RoverLocations { get; init; } = new();
 
     public Cell this[Location location]
     {
@@ -85,24 +85,8 @@ public class Board
             throw new TooManyPlayersException();
         }
 
-        var origCell = Cells[location];
-        var newCell = origCell with { Occupant = player };
-        if (!Cells.TryUpdate(location, newCell, origCell))
-        {
-            throw new UnableToUpdateBoardException();
-        }
+        RoverLocations.TryAdd(player, location);
 
         return location;
-    }
-
-    public Location FindPlayer(Player player)
-    {
-        return Cells.FirstOrDefault(kvp => kvp.Value.Occupant == player).Key;
-    }
-    public Location FindPlayer(PlayerToken token)
-    {
-        var location = new Location(1, 2);
-        var newLocation = location with { Column = 5 };
-        return Cells.FirstOrDefault(kvp => kvp.Value.Occupant?.Token == token).Key;
     }
 }

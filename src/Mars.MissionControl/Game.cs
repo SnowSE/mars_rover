@@ -1,7 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Runtime.Serialization;
-
-namespace Mars.MissionControl;
+﻿namespace Mars.MissionControl;
 public class Game
 {
     public Game(int boardWidth = 5, int boardHeight = 5)
@@ -52,7 +49,8 @@ public class Game
 
     public Location GetPlayerLocation(PlayerToken token)
     {
-        return Board.FindPlayer(token);
+        return Board.RoverLocations
+            .Single(kvp => kvp.Key.Token == token).Value;
     }
 }
 

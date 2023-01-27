@@ -2,7 +2,7 @@
 
 public record Location(int Row, int Column);
 
-public record Cell(Location Location, Difficulty Difficulty, Player? Occupant);
+public record Cell(Location Location, Difficulty Difficulty);
 
 public record Difficulty
 {

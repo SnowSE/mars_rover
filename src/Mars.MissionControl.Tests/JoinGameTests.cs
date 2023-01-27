@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using Mars.MissionControl.Exceptions;
+using System.Linq;
 
 namespace Mars.MissionControl.Tests;
 

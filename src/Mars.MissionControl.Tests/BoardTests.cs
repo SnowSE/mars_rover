@@ -31,7 +31,7 @@ public class BoardTests
         var board = new Board(5, 5);
         var player = new Player("P1");
         Location location = board.PlaceNewPlayer(player);
-        board.FindPlayer(player).Should().Be(location);
+        board.RoverLocations[player].Should().Be(location);
     }
 
 }

@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace Mars.MissionControl;
+namespace Mars.MissionControl.Exceptions;
 
 [Serializable]
 public class InvalidGameStateException : Exception

@@ -1,8 +1,4 @@
-﻿using Mars.MissionControl;
-using Mars.Web.Types;
-using Microsoft.AspNetCore.Mvc;
-
-namespace Mars.Web.Controllers;
+﻿namespace Mars.Web.Controllers;
 
 [ApiController]
 [Route("[controller]")]
