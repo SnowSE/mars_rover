@@ -25,13 +25,15 @@ jobs:
         with:
           dotnet-version: '7.x'
           include-prerelease: true
-
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
         
       - name: Run Tests
         working-directory: ../
-        run: dotnet test        
+        run: |
+          pwd
+          dotnet test                  
+
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
