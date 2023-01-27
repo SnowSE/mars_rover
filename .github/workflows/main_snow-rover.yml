@@ -8,6 +8,10 @@ on:
     branches:
       - main
   workflow_dispatch:
+  
+defaults:
+  run:
+    working-directory: src/Mars.Web
 
 jobs:
   build:
@@ -24,6 +28,10 @@ jobs:
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
+        
+      - name: Run Tests
+        working-directory: /
+        run: dotnet test        
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
