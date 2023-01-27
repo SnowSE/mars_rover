@@ -1,12 +1,15 @@
 ﻿@using System.Text
 @inject Game game
 
+<h3>Surface Map</h3>
+
 <style>
     .gridboard {
         display: grid;
         grid-template-columns: @gridTemplateColumns;
         grid-template-rows: @gridTemplateRows;
         gap: 0px 0px;
+        background-color:darksalmon;
         grid-template-areas: @gridTemplateAreas()
     }
 
@@ -21,12 +24,13 @@
             var classname = $"r{row}c{col} border";
             var cell = game.Board[row, col];
             var summary = cell.Difficulty.Value.ToString();
-            if(locations.ContainsKey((row, col)))
-            {
-                summary += $" ({locations[(row,col)].Name})";
-            }
-
             <div class=@classname>
+                @if(locations.ContainsKey((row, col)))
+                {
+                    var playerName = $" ({locations[(row,col)].Name})";
+                    summary += playerName;
+                    <img src="/images/persevarance_32.png" alt="@playerName" />
+                }
                 @summary
             </div>
         }
