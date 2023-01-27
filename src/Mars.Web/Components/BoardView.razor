@@ -21,15 +21,17 @@
     {
         @for (int col = 0; col < game.Board.Height; col++)
         {
-            var classname = $"r{row}c{col} border";
             var cell = game.Board[row, col];
             var summary = cell.Difficulty.Value.ToString();
-            <div class=@classname>
+            <div class=@($"r{row}c{col} border")>
                 @if(locations.ContainsKey((row, col)))
                 {
                     var playerName = $" ({locations[(row,col)].Name})";
-                    summary += playerName;
-                    <img src="/images/persevarance_32.png" alt="@playerName" />
+                    @summary
+                    <div class="position: absolute; top: 0px;">
+                        <img src="/images/persevarance_32.png" alt="@playerName" />
+                        <br/>@playerName
+                    </div>
                 }
                 @summary
             </div>

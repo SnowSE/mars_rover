@@ -31,7 +31,7 @@ public class JoinGameTests
         {
             new LowResolutionMapTile
             {
-                AverageDifficulty = 0,
+                AverageDifficulty = 1,
                 LowerLeftColumn= 0,
                 LowerLeftRow= 0,
                 UpperRightColumn = 4,

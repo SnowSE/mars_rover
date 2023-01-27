@@ -1,7 +1,7 @@
 ﻿namespace Mars.MissionControl;
 public class Game
 {
-    public Game(int boardWidth = 5, int boardHeight = 5)
+    public Game(int boardWidth = 50, int boardHeight = 25)
     {
         if (boardWidth < 3 || boardHeight < 3)
         {
