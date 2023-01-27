@@ -28,7 +28,7 @@ Get your rover to the target first!
 
 ### Endpoints
 
-> Link to azure instance up and running here
+[Swagger API Page](https://snow-rover.azurewebsites.net/swagger/index.html)
 
 ## Future Enhancement - Ingenuity Helicopter
 
