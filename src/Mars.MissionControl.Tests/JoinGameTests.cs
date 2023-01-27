@@ -6,6 +6,14 @@ namespace Mars.MissionControl.Tests;
 internal class JoinGameTests
 {
     [Test]
+    public void GameHasTarget()
+    {
+        var game = new Game();
+        game.TargetLocation.Row.Should().BeGreaterThan(0);
+        game.TargetLocation.Column.Should().BeGreaterThan(0);
+    }
+
+    [Test]
     public void CanJoinGame()
     {
         var game = new Game();

@@ -41,6 +41,7 @@ public class BoardTests
         var neighbors = board.GetNeighbors(new Location(0, 0), 2);
         neighbors.Should().BeEquivalentTo(new[]
         {
+            board[0,0],
             board[1,0],
             board[1,1],
             board[0,1],

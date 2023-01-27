@@ -38,7 +38,9 @@ public class GameController : ControllerBase
                     LowerLeftColumn = t.LowerLeftColumn,
                     UpperRightColumn = t.UpperRightColumn,
                     UpperRightRow = t.UpperRightRow
-                })
+                }),
+                TargetRow = game.TargetLocation.Row,
+                TargetColumn = game.TargetLocation.Column
             };
         }
         catch (TooManyPlayersException)

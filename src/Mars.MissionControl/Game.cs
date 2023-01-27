@@ -10,8 +10,10 @@ public class Game
         GameState = GameState.Joining;
         Board = new Board(boardWidth, boardHeight);
         Map = new Map(this);
+        TargetLocation = new Location(boardWidth / 2, boardHeight / 2);
     }
 
+    public Location TargetLocation { get; private set; }
     public Map Map { get; private set; }
     private ConcurrentDictionary<PlayerToken, Player> players = new();
     private ConcurrentDictionary<string, PlayerToken> playerTokenCache = new();
