@@ -1,0 +1,31 @@
+﻿@inject Game game
+
+<h3>Board View</h3>
+
+<table border="1">
+    @foreach (var row in Enumerable.Range(0, game.Board.Width))
+    {
+        <tr>
+            @foreach(var col in Enumerable.Range(0, game.Board.Height))
+            {
+                var cell = game.Board[row, col];
+                var summary = cell.DamageValue.Value.ToString();
+                if(cell.Occupant != null)
+                {
+                    summary += $" ({cell.Occupant.Name})";
+                }
+                <td>
+                @summary
+            </td>
+            }
+        </tr>
+    }
+</table>
+<button @onclick=refresh>Refresh</button>
+
+@code {
+    void refresh()
+    {
+        StateHasChanged();
+    }
+}
