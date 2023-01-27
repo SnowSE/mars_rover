@@ -19,7 +19,7 @@ public class Board
         {
             foreach (var col in Enumerable.Range(0, Height))
             {
-                var newCell = new Cell(new Location(row, col), new DamageValue(0), null);
+                var newCell = new Cell(new Location(row, col), new Difficulty(0), null);
                 if (!Cells.TryAdd(newCell.Location, newCell))
                 {
                     throw new UnableToGenerateBoardException();

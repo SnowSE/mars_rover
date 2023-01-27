@@ -9,7 +9,7 @@
             @foreach(var col in Enumerable.Range(0, game.Board.Height))
             {
                 var cell = game.Board[row, col];
-                var summary = cell.DamageValue.Value.ToString();
+                var summary = cell.Difficulty.Value.ToString();
                 if(cell.Occupant != null)
                 {
                     summary += $" ({cell.Occupant.Name})";

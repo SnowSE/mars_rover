@@ -2,11 +2,11 @@
 
 public record Location(int Row, int Column);
 
-public record Cell(Location Location, DamageValue DamageValue, Player? Occupant);
+public record Cell(Location Location, Difficulty Difficulty, Player? Occupant);
 
-public record DamageValue
+public record Difficulty
 {
-    public DamageValue(int value)
+    public Difficulty(int value)
     {
         if (value < 0 || value > 100)
         {
@@ -40,7 +40,7 @@ public record LowResolutionCell
 {
     public LowResolutionCell(IEnumerable<Cell> cells)
     {
-        DamageValue = new DamageValue((int)cells.Average(c => c.DamageValue.Value));
+        Difficulty = new Difficulty((int)cells.Average(c => c.Difficulty.Value));
     }
-    public DamageValue DamageValue { get; private set; }
+    public Difficulty Difficulty { get; private set; }
 }

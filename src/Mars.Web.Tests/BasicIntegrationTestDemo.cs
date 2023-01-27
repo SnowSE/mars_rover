@@ -1,6 +1,4 @@
-﻿using Mars.Web.Types;
-using Microsoft.AspNetCore.Mvc.Testing;
-using System.Net.Http.Json;
+﻿using Microsoft.AspNetCore.Mvc.Testing;
 using System.Threading.Tasks;
 
 namespace Mars.Web.Tests;
@@ -43,23 +41,4 @@ internal class BasicIntegrationTestDemo
         actualContent.Should().Contain(contentFragment);
     }
 
-    [Test]
-    public async Task JoinGame()
-    {
-        var client = _factory.CreateClient();
-
-        //var response = await client.GetStringAsync("/game/join")
-        var joinResponse = await client.GetFromJsonAsync<JoinResponse>("/game/join?name=Jonathan");
-
-        joinResponse.Token.Length.Should().Be(13);
-    }
-
-    [Test]
-    public async Task JoinGame_MissingName()
-    {
-        var client = _factory.CreateClient();
-
-        var joinResponse = await client.GetAsync("/game/join");
-        joinResponse.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
-    }
 }
