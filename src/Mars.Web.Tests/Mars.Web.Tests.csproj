@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Mars.Web.Types\Mars.Web.Types.csproj" />
     <ProjectReference Include="..\Mars.Web\Mars.Web.csproj" />
   </ItemGroup>
 

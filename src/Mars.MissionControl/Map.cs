@@ -17,17 +17,19 @@ public class Map
     {
         var lowResTiles = new List<LowResolutionCell>();
 
-        for (int startingCol = 0; startingCol < game.Board.Width; startingCol += TileSize)
+        for (int startingRow = 0; startingRow < game.Board.Width; startingRow += TileSize)
         {
-            for (int startingRow = 0; startingRow < game.Board.Height; startingRow += TileSize)
+            for (int startingCol = 0; startingCol < game.Board.Height; startingCol += TileSize)
             {
                 bool isInChunk(Location l) =>
-                    l.Row >= startingRow && l.Row < startingRow + TileSize &&
-                    l.Column >= startingCol && l.Column < startingCol + TileSize;
+                    l.Row >= startingRow && l.Row < (startingRow + TileSize) &&
+                    l.Column >= startingCol && l.Column < (startingCol + TileSize);
 
-                lowResTiles.Add(new LowResolutionCell(game.Board.Cells
+                var innerCells = game.Board.Cells
                     .Where(c => isInChunk(c.Value.Location))
-                    .Select(c => c.Value)));
+                    .Select(c => c.Value);
+                var newTile = new LowResolutionCell(innerCells);
+                lowResTiles.Add(newTile);
             }
         }
 
