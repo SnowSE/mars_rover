@@ -41,13 +41,19 @@
     {
         game.GameStateChanged += (_, _) => InvokeAsync(() =>
         {
-            locations.Clear();
-            foreach(var item in game.Board.RoverLocations)
-            {
-                locations.Add((item.Value.Row, item.Value.Column), item.Key);
-            }
-            StateHasChanged();
+            refresh();
         });
+        refresh();
+    }
+
+    private void refresh()
+    {
+        locations.Clear();
+        foreach (var item in game.Board.RoverLocations)
+        {
+            locations.Add((item.Value.Row, item.Value.Column), item.Key);
+        }
+        StateHasChanged();
     }
 
     public string gridTemplateRows => String.Join(" ", Enumerable.Repeat("1fr", game.Board.Width));
