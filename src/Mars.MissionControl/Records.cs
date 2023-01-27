@@ -10,13 +10,13 @@ public record DamageValue
     {
         if (value < 0 || value > 100)
         {
-            throw new ArgumentOutOfRangeException();
+            throw new ArgumentOutOfRangeException(nameof(value));
         }
 
         Value = value;
     }
 
-    public int Value { get; set; }
+    public int Value { get; init; }
 }
 
 public record Player
@@ -44,4 +44,3 @@ public record LowResolutionCell
     }
     public DamageValue DamageValue { get; private set; }
 }
-
