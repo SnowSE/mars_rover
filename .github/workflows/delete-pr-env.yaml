@@ -10,8 +10,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  WEBAPP_NAME: tomcat-app
-  RESOURCE_GROUP: freeberg-tomcat-slots-demo
+  WEBAPP_NAME: snow-rover
+  RESOURCE_GROUP: mars_rover
   SLOT_NAME: pr-${{ github.event.number }}
 
 jobs:
