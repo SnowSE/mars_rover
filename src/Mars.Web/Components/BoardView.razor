@@ -22,11 +22,7 @@
     {
         @if (locations.ContainsKey((row, col)))
         {
-            var playerName = locations[(row, col)].Name;
-
-            <img class=@($"position: absolute; bottom: {col}px; left: {row}px; z-index: 100")
-                    src="/images/persevarance_side_128.png"
-                    alt="@playerName" />
+            <RoverView Row="row" Column="col" PlayerName="locations[(row, col)].Name" />
         }
     }
 }
