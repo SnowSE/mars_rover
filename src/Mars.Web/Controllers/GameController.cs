@@ -70,10 +70,20 @@ public class GameController : ControllerBase
         {
             if (Enum.TryParse<Direction>(direction, true, out var dir))
             {
-                game.Move(player, dir);
+                try
+                {
+                    game.Move(player, dir);
+                }
+                catch (InvalidMoveException){
+                    return Problem($"You cannot move in that direction.", statusCode: 400, title: "Bad Move");
+                }
+                catch(InvalidGameStateException)
+                {
+                    return Problem($"You cannot move until the game starts.", statusCode: 400, title: "Game Not Started");
+                }
                 return Ok();
             }
-            return Problem($"You cannot move in that direction.", statusCode: 400, title: "Bad Move");
+            return Problem($"You gave an invalid direction. Valid directions are: Forward, Reverse, Right, Left.", statusCode: 400, title: "Bad Direction");
         }
         return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
     }
