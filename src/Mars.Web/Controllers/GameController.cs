@@ -60,4 +60,21 @@ public class GameController : ControllerBase
         }
         return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
     }
+
+    [HttpGet("[action]")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public ActionResult Move(string token, string direction)
+    {
+        if (game.TryTranslateToken(token, out var player))
+        {
+            if (Enum.TryParse<Direction>(direction, true, out var dir))
+            {
+                game.Move(player, dir);
+                return Ok();
+            }
+            return Problem($"You cannot move in that direction.", statusCode: 400, title: "Bad Move");
+        }
+        return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
+    }
 }

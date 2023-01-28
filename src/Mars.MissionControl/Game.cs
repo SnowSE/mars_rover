@@ -1,4 +1,6 @@
-﻿namespace Mars.MissionControl;
+﻿using System.ComponentModel;
+
+namespace Mars.MissionControl;
 public class Game
 {
     public Game(int boardWidth = 5, int boardHeight = 5)
@@ -55,7 +57,7 @@ public class Game
         GameState = GameState.Playing;
     }
 
-    public void Move(PlayerToken token, Direction direction)
+    public Location Move(PlayerToken token, Direction direction)
     {
         if (GameState != GameState.Playing)
         {
@@ -66,6 +68,25 @@ public class Game
         {
             throw new UnrecognizedTokenException();
         }
+        
+        var player = players[token];
+        var currentLocation = Board.RoverLocations[player];
+        var newLocation = direction switch
+        {
+            Direction.Forward => new Location(currentLocation.Row + 1, currentLocation.Column),
+            Direction.Left => new Location(currentLocation.Row, currentLocation.Column - 1),
+            Direction.Right => new Location(currentLocation.Row, currentLocation.Column + 1),
+            Direction.Reverse => new Location(currentLocation.Row - 1, currentLocation.Column),
+            _ => throw new InvalidEnumArgumentException()
+        };
+
+        if (newLocation.Row < 0 || newLocation.Row >= Board.Width || newLocation.Column < 0 || newLocation.Column >= Board.Height)
+        {
+            throw new InvalidMoveException();
+        }
+            
+        Board.RoverLocations[player] = newLocation;
+        return newLocation;
     }
 
     public Location GetPlayerLocation(PlayerToken token)
