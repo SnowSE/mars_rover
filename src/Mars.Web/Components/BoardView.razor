@@ -16,24 +16,29 @@
     @cellClasses()
 </style>
 
+@for (int row = 0; row < game.Board.Width; row++)
+{
+    @for (int col = 0; col < game.Board.Height; col++)
+    {
+        @if (locations.ContainsKey((row, col)))
+        {
+            var playerName = locations[(row, col)].Name;
+
+            <img class=@($"position: absolute; bottom: {col}px; left: {row}px; z-index: 100")
+                    src="/images/persevarance_side_128.png"
+                    alt="@playerName" />
+        }
+    }
+}
+
 <div class="gridboard">
     @for (int row = 0; row < game.Board.Width; row++)
     {
         @for (int col = 0; col < game.Board.Height; col++)
         {
             var cell = game.Board[row, col];
-            var summary = cell.Difficulty.Value.ToString();
             <div class=@($"r{row}c{col} border")>
-                @if(locations.ContainsKey((row, col)))
-                {
-                    var playerName = $" ({locations[(row,col)].Name})";
-                    @summary
-                    <div class="position: absolute; top: 0px;">
-                        <img src="/images/persevarance_32.png" alt="@playerName" />
-                        <br/>@playerName
-                    </div>
-                }
-                @summary
+                @cell.Difficulty.Value
             </div>
         }
     }
