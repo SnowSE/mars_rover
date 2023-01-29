@@ -1,0 +1,18 @@
+﻿@inject GameManager gameManager
+@using Microsoft.Extensions.DependencyInjection.Extensions
+
+<h3>New Game</h3>
+<input type="number" placeholder="width" @bind=startOptions.Width />
+<input type="number" placeholder="height" @bind=startOptions.Heigh />
+
+<button @onclick=makeNewGame>Start New Game</button>
+
+@code {
+    GameStartOptions startOptions = new();
+
+    void makeNewGame()
+    {
+
+        gameManager.StartNewGame(startOptions);
+    }
+}
