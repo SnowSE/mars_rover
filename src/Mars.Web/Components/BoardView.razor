@@ -1,17 +1,19 @@
 ﻿@using System.Text
 @inject GameManager gameManager
 
-<div style="position: absolute; top: 200px; bottom: 0; right: 110px; width: 95%;">
-    @for (int row = 0; row < gameManager.Game.Board.Width; row++)
-    {
-        @for (int col = 0; col < gameManager.Game.Board.Height; col++)
+<div style="background-image: url('/images/terrain_01.png'); height: 100%; background-size: 100% 100%; background-repeat: no-repeat; background-position:center;">
+    <div style="position: absolute; top: 200px; bottom: 0; right: 110px; width: 95%; background-color: transparent;">
+        @for (int row = 0; row < gameManager.Game.Board.Width; row++)
         {
-            @if (locations.ContainsKey((row, col)))
+            @for (int col = 0; col < gameManager.Game.Board.Height; col++)
             {
-                <RoverView Row="row" Column="col" PlayerName="@locations[(row, col)].Name" BatteryRemaining="26" />
+                @if (locations.ContainsKey((row, col)))
+                {
+                    <RoverView Row="row" Column="col" PlayerName="@locations[(row, col)].Name" BatteryRemaining="26" />
+                }
             }
         }
-    }
+    </div>
 </div>
 
 @code {
