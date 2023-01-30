@@ -20,7 +20,7 @@
 
     protected override void OnInitialized()
     {
-        gameManager.Game.GameStateChanged += (_, _) => InvokeAsync(() =>
+        gameManager.GameStateChanged += (_, _) => InvokeAsync(() =>
         {
             refresh();
         });
