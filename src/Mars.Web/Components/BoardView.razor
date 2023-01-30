@@ -1,7 +1,7 @@
 ﻿@using System.Text
 @inject GameManager gameManager
 
-<div style="background-image: url('/images/terrain_01.png'); height: 100%; background-size: 100% 100%; background-repeat: no-repeat; background-position:center;">
+<div class="background" style=@(backgroundStyle)>
     <div style="position: absolute; top: 200px; bottom: 0; right: 110px; width: 95%; background-color: transparent;">
         @for (int row = 0; row < gameManager.Game.Board.Width; row++)
         {
@@ -17,6 +17,7 @@
 </div>
 
 @code {
+    string backgroundStyle = "background-image: url('/images/terrain_03.png'); ";
     [CascadingParameter]
     public SharedState SharedState { get; set; }
 

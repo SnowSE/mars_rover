@@ -1,0 +1,12 @@
+img {
+    position: absolute;
+    z-index: -100;
+    height: auto;
+    width: 100vw;
+}
+
+.background {
+    background-size: 100vw 100vh;
+    height: 89vh;
+    background-repeat: no-repeat; 
+}
