@@ -1,5 +1,7 @@
 [![Board Status](https://dev.azure.com/sn0/6b8f452c-c20f-44c6-a6e3-bbd6e2e3bb69/2e6df97a-2fc1-4faa-b6d8-55ac9875d901/_apis/work/boardbadge/cce13adf-1d2f-486b-b006-dfbdfcfe7123)](https://dev.azure.com/sn0/6b8f452c-c20f-44c6-a6e3-bbd6e2e3bb69/_boards/board/t/2e6df97a-2fc1-4faa-b6d8-55ac9875d901/Microsoft.RequirementCategory/)
 
+[![Release to prod](https://github.com/SnowSE/mars_rover/actions/workflows/deploy-main-branch.yaml/badge.svg)](https://github.com/SnowSE/mars_rover/actions/workflows/deploy-main-branch.yaml)
+
 # mars_rover
 
 Another Snow College coding competition game. Get your rover to the destination before everyone else!
