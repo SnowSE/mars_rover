@@ -13,6 +13,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddSingleton<GameManager>();
+builder.Services.AddSingleton<GameStartOptions>();
 
 var app = builder.Build();
 

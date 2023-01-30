@@ -1,4 +1,6 @@
 ﻿@inject GameManager gameManager
+@inject GameStartOptions startOptions
+@inject IConfiguration config
 @using Microsoft.Extensions.DependencyInjection.Extensions
 
 @if (isOpen || true)
@@ -15,9 +17,17 @@
                         <label for="width">Width</label>
                     </div>
                     <div class="form-floating mb-3">
-                        <input class="form-control" type="number" id="height" placeholder="height" @bind=startOptions.Heigh />
+                        <input class="form-control" type="number" id="height" placeholder="height" @bind=startOptions.Height />
                         <label for="height">Height</label>
                     </div>
+                    <div class="form-floating mb-3">
+                        <input class="form-control" type="password" id="password" placeholder="what's the magic word?" @bind=password />
+                        <label for="password">Password</label>
+                </div>
+                    @if(error != null)
+                    {
+                        <p class="error-text">@error</p>
+                    }
                 </div>
                 <div class="modal-footer">
                     <div class="col-auto">
@@ -34,7 +44,9 @@
 
 @code {
     bool isOpen = false;
-    GameStartOptions startOptions = new();
+    string password;
+    string error;
+    string modalClass = "modal";
 
     void makeNewGame()
     {

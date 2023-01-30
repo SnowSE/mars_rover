@@ -11,12 +11,12 @@ public class GameManager
 
 	public void StartNewGame(GameStartOptions startOptions)
 	{
-		Game = new Game(startOptions.Width, startOptions.Heigh);
+		Game = new Game(startOptions.Width, startOptions.Height);
 	}
 }
 
 public class GameStartOptions
 {
-	public int Heigh { get; set; } = 100;
+	public int Height { get; set; } = 100;
 	public int Width { get; set; } = 100;
 }
