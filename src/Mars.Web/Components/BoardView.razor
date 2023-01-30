@@ -1,55 +1,22 @@
 ﻿@using System.Text
 @inject GameManager gameManager
 
-<h3>Surface Map</h3>
-@*
-<div style="position: relative; margin-top: 70px; margin-right: 80px; display: contents;">
-    *@
-    <div style="position: absolute; top: 300px; bottom: 0; right: 110px; width: 93%;">
-<style>
-    .gridboard {
-        display: grid;
-        grid-template-columns: @gridTemplateColumns;
-        grid-template-rows: @gridTemplateRows;
-        gap: 0px 0px;
-        background-color:darksalmon;
-        grid-template-areas: @gridTemplateAreas()
-    }
-
-    @cellClasses()
-</style>
-
-@for (int row = 0; row < gameManager.Game.Board.Width; row++)
-{
-    @for (int col = 0; col < gameManager.Game.Board.Height; col++)
-    {
-        @if (locations.ContainsKey((row, col)))
-        {
-            <RoverView Row="row" Column="col" PlayerName="locations[(row, col)].Name" />
-        }
-    }
-}
-
-@*
-<div class="gridboard" style="margin-right: -80px;">
+<div style="position: absolute; top: 200px; bottom: 0; right: 110px; width: 95%;">
     @for (int row = 0; row < gameManager.Game.Board.Width; row++)
     {
         @for (int col = 0; col < gameManager.Game.Board.Height; col++)
         {
-            var cell = gameManager.Game.Board[row, col];
-            <div class=@($"r{row}c{col} border") style=@($"background-color: hsl(0, 100%, {100-cell.Difficulty.Value}%)")>
-                🔸
-            </div>
+            @if (locations.ContainsKey((row, col)))
+            {
+                <RoverView Row="row" Column="col" PlayerName="locations[(row, col)].Name" />
+            }
         }
     }
-</div>
-*@
-
 </div>
 
 @code {
     [CascadingParameter]
-    public SharedState SharedState{  get;  set; }
+    public SharedState SharedState { get; set; }
 
     protected override void OnInitialized()
     {
@@ -76,10 +43,10 @@
     public string gridTemplateAreas()
     {
         var sb = new StringBuilder();
-        for(int row=0;row<gameManager.Game.Board.Width;row++)
+        for (int row = 0; row < gameManager.Game.Board.Width; row++)
         {
             sb.Append("\"");
-            for(int col=0;col<gameManager.Game.Board.Height;col++)
+            for (int col = 0; col < gameManager.Game.Board.Height; col++)
             {
                 sb.Append($"r{row}c{col} ");
             }
@@ -91,9 +58,9 @@
     public string cellClasses()
     {
         var sb = new StringBuilder();
-        for(int row=0;row<gameManager.Game.Board.Width;row++)
+        for (int row = 0; row < gameManager.Game.Board.Width; row++)
         {
-            for(int col=0;col<gameManager.Game.Board.Height;col++)
+            for (int col = 0; col < gameManager.Game.Board.Height; col++)
             {
                 sb.AppendLine($".r{row}c{col} {{grid-area: r{row}c{col};}} ");
             }

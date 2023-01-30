@@ -1,16 +1,16 @@
 ﻿@page "/"
 
-<div class="container mx-1">
-    <div class="row my-2 border-bottom">
+<div class="">
+    <div class="row mt-2 mx-1 border-bottom">
         <h1 class="col">Mars Rover - 2023 Coding Challenge</h1>
         <div class="col-auto text-end">
-            <GameStatus />
-        </div>
-    </div>
-    <div class="row">
-        <a class="col" href="/swagger/index.html">Swagger API Page</a>
-        <div class="col-auto align-end">
-            <NewGame />
+            <div class="row">
+                <GameStatus />
+                <a class="col" href="/swagger/index.html">Swagger API Page</a>
+                <div class="float-end">
+                <NewGame />
+                </div>
+            </div>
         </div>
     </div>
 </div>
