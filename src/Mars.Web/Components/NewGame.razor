@@ -1,18 +1,46 @@
 ﻿@inject GameManager gameManager
 @using Microsoft.Extensions.DependencyInjection.Extensions
 
-<h3>New Game</h3>
-<input type="number" placeholder="width" @bind=startOptions.Width />
-<input type="number" placeholder="height" @bind=startOptions.Heigh />
+@if (isOpen || true)
+{
+    <div class="modal" id="optionsModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">New Game</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="form-floating mb-3">
+                        <input class="form-control" type="number" id="width" placeholder="width" @bind=startOptions.Width />
+                        <label for="width">Width</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input class="form-control" type="number" id="height" placeholder="height" @bind=startOptions.Heigh />
+                        <label for="height">Height</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-auto">
+                        <button class="btn btn-link" type="button" data-bs-dismiss="modal" @onclick=makeNewGame>Start New Game</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<button @onclick=makeNewGame>Start New Game</button>
+    <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#optionsModal">New Game</button>
+}
+
 
 @code {
+    bool isOpen = false;
     GameStartOptions startOptions = new();
 
     void makeNewGame()
     {
-
         gameManager.StartNewGame(startOptions);
+        isOpen = false;
     }
+
+    void toggleOpenState() => isOpen = !isOpen;
 }
