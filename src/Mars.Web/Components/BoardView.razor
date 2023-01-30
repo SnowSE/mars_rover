@@ -8,7 +8,7 @@
         {
             @if (locations.ContainsKey((row, col)))
             {
-                <RoverView Row="row" Column="col" PlayerName="locations[(row, col)].Name" />
+                <RoverView Row="row" Column="col" PlayerName="@locations[(row, col)].Name" BatteryRemaining="26" />
             }
         }
     }

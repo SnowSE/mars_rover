@@ -1,19 +1,27 @@
 ﻿@inject GameManager gameManager
+@inject IConfiguration config
 
-
-<img style=@($"position: absolute; bottom: {bottomPercent}%; left: {leftPercent}%; z-index: 100")
-     src="/images/persevarance_side_128.png"
-     alt="@PlayerName" />
+<div style=@($"position: absolute; bottom: {bottomPercent}%; left: {leftPercent}%; z-index: 100")>
+    <div class="playerName">
+        <span>@PlayerName</span>
+    </div>
+    <progress value="@BatteryRemaining" max="100">@BatteryRemaining</progress>
+    <img src="/images/persevarance_side_128.png"
+         alt="@PlayerName" />
+</div>
 
 @code {
     [Parameter]
     public int Row { get; set; }
 
     [Parameter]
-    public int Column{ get; set; }
+    public int Column { get; set; }
 
     [Parameter]
-    public string PlayerName{ get; set; }
+    public string PlayerName { get; set; }
+
+    [Parameter]
+    public int BatteryRemaining { get; set; } = 78;
 
     private double leftPercent, bottomPercent;
 
