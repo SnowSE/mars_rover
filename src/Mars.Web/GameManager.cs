@@ -22,7 +22,7 @@ public class GameManager
 			Game.GameStateChanged -= Game_GameStateChanged;
 		}
 
-		Game = new Game(startOptions.Width, startOptions.Height);
+		Game = new Game(startOptions);
 		GameStateChanged?.Invoke(this, EventArgs.Empty);
 
 		//subscribe to new event
@@ -33,10 +33,4 @@ public class GameManager
 	{
 		GameStateChanged?.Invoke(this, e);
 	}
-}
-
-public class GameStartOptions
-{
-	public int Height { get; set; } = 100;
-	public int Width { get; set; } = 100;
 }

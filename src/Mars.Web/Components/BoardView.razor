@@ -17,12 +17,13 @@
 </div>
 
 @code {
-    string backgroundStyle = "background-image: url('/images/terrain_03.png'); ";
+    string backgroundStyle = "";
     [CascadingParameter]
     public SharedState SharedState { get; set; }
 
     protected override void OnInitialized()
     {
+        backgroundStyle = $"background-image: url('/images/terrain_{gameManager.Game.MapNumber:00}.png'); ";
         gameManager.GameStateChanged += (_, _) => InvokeAsync(() =>
         {
             refresh();
