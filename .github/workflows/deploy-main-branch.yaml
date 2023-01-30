@@ -1,6 +1,6 @@
 name: Release to prod
 
-# Note: For this to work you must 
+# Note: For this to work you must
 # 1) Create the service principal:
 #    az ad sp create-for-rbac --name "mars-rover-sp" --sdk-auth --role contributor --scopes /subscriptions/53a27438-41b3-4bcb-90fc-76fa03e0b11f/resourceGroups/mars_rover/providers/Microsoft.Web/sites/snow-rover
 #    Then put the json you get back from that command into a secret named AZURE_CREDENTIALS
@@ -28,7 +28,7 @@ jobs:
         with:
           dotnet-version: '7.x'
           include-prerelease: true
-        
+
       - name: Run Tests
         working-directory: src
         run: dotnet test
@@ -42,7 +42,7 @@ jobs:
         with:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
-    
+
   deploy-to-stage:
     name: Deploy to staging
     needs: build
@@ -61,11 +61,11 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: .net-app
-    
+
     - name: Deploy to stage env
       uses: azure/webapps-deploy@v2
       id: deploy-to-stage
-      with: 
+      with:
         app-name: ${{ env.WEBAPP_NAME }}
         slot-name:  ${{ env.SLOT_NAME }}
         package: .

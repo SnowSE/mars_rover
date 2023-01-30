@@ -5,7 +5,7 @@ on:
   pull_request:
     types: [closed]
 
-concurrency: 
+concurrency:
   group: ci-${{ github.event.number }}
   cancel-in-progress: true
 
@@ -23,7 +23,7 @@ jobs:
       uses: azure/login@v1.1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
+
     - name: Delete slot on staging site
       run: az webapp deployment slot delete --resource-group $RESOURCE_GROUP  --name $WEBAPP_NAME --slot $SLOT_NAME
 

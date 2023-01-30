@@ -4,11 +4,11 @@
 [Route("[controller]")]
 public class GameController : ControllerBase
 {
-    private readonly Game game;
+    private readonly GameManager gameManager;
 
-    public GameController(Game game)
+    public GameController(GameManager gameManager)
     {
-        this.game = game;
+        this.gameManager = gameManager;
     }
 
     [HttpGet("[action]")]
@@ -18,20 +18,20 @@ public class GameController : ControllerBase
     {
         try
         {
-            var token = game.Join(name);
-            var location = game.GetPlayerLocation(token);
+            var token = gameManager.Game.Join(name);
+            var location = gameManager.Game.GetPlayerLocation(token);
             return new JoinResponse
             {
                 Token = token.Value,
                 StartingColumn = location.Column,
                 StartingRow = location.Row,
-                Neighbors = game.Board.GetNeighbors(location, 2).Select(c => new Types.Cell()
+                Neighbors = gameManager.Game.Board.GetNeighbors(location, 2).Select(c => new Types.Cell()
                 {
                     Column = c.Location.Column,
                     Row = c.Location.Row,
                     Difficulty = c.Difficulty.Value
                 }),
-                LowResolutionMap = game.Map.LowResolution.Select(t => new LowResolutionMapTile
+                LowResolutionMap = gameManager.Game.Map.LowResolution.Select(t => new LowResolutionMapTile
                 {
                     AverageDifficulty = t.AverageDifficulty.Value,
                     LowerLeftRow = t.LowerLeftRow,
@@ -39,8 +39,8 @@ public class GameController : ControllerBase
                     UpperRightColumn = t.UpperRightColumn,
                     UpperRightRow = t.UpperRightRow
                 }),
-                TargetRow = game.TargetLocation.Row,
-                TargetColumn = game.TargetLocation.Column
+                TargetRow = gameManager.Game.TargetLocation.Row,
+                TargetColumn = gameManager.Game.TargetLocation.Column
             };
         }
         catch (TooManyPlayersException)
@@ -54,9 +54,9 @@ public class GameController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<StatusResponse> Status(string token)
     {
-        if (game.TryTranslateToken(token, out _))
+        if (gameManager.Game.TryTranslateToken(token, out _))
         {
-            return new StatusResponse { Status = game.GameState.ToString() };
+            return new StatusResponse { Status = gameManager.Game.GameState.ToString() };
         }
         return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
     }
