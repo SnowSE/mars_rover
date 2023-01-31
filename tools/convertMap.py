@@ -4,6 +4,7 @@ import numpy as np
 from argparse import ArgumentParser
 
 def intensities_to_damages(intensities):
+    intensities = np.array(intensities, dtype=np.int64)
     out = np.zeros_like(intensities)
     num_rows, num_columns = out.shape
     for row in range(1, num_rows - 1):
