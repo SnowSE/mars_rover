@@ -1,4 +1,4 @@
-﻿namespace Mars.MissionControl
+﻿namespace Mars.MissionControl.Exceptions
 {
     [Serializable]
     internal class UnableToUpdatePlayerException : Exception

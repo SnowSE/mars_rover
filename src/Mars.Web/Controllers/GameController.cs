@@ -59,4 +59,7 @@ public class GameController : ControllerBase
         }
         return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
     }
+
+    [HttpGet("[action]")]
+    public ActionResult<MoveResponse>
 }

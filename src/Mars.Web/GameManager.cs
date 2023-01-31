@@ -29,6 +29,11 @@ public class GameManager
 		Game.GameStateChanged += Game_GameStateChanged;
 	}
 
+	public void PlayGame(GamePlayOptions playOptions)
+	{
+		Game.PlayGame(playOptions);
+	}
+
 	private void Game_GameStateChanged(object? sender, EventArgs e)
 	{
 		GameStateChanged?.Invoke(this, e);

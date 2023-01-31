@@ -99,6 +99,9 @@ public class Game
 
     public void PlayGame(GamePlayOptions gamePlayOptions)
     {
+        if (GameState != GameState.Joining)
+            throw new InvalidGameStateException($"Cannot play game if currently {GameState}");
+
         GamePlayOptions = gamePlayOptions;
         GameState = GameState.Playing;
     }
