@@ -65,7 +65,7 @@ public class Game
         player = player with
         {
             Location = Board.PlaceNewPlayer(player),
-            Direction = getRandomDirection()
+            Orientation = getRandomOrientation()
         };
         if (!players.TryAdd(player.Token, player) ||
            !playerTokenCache.TryAdd(player.Token.Value, player.Token))
@@ -78,7 +78,7 @@ public class Game
         return new JoinResult(
             player.Token,
             player.Location,
-            player.Direction,
+            player.Orientation,
             player.BatteryLevel,
             TargetLocation,
             Board.GetNeighbors(player.Location, PerseveranceVisibilityRadius),
@@ -86,9 +86,9 @@ public class Game
         );
     }
 
-    private static Direction getRandomDirection()
+    private static Orientation getRandomOrientation()
     {
-        return (Direction)Random.Shared.Next(0, 3);
+        return (Orientation)Random.Shared.Next(0, 4);
     }
 
     public GamePlayOptions GamePlayOptions { get; private set; }
@@ -115,14 +115,56 @@ public class Game
             throw new UnrecognizedTokenException();
         }
 
-        //actually move the player...
-
         var player = players[token];
+        var unmodifiedPlayer = player;
+        string? message;
+
+        if (direction == Direction.Right || direction == Direction.Left)
+        {
+            player = player with
+            {
+                BatteryLevel = player.BatteryLevel - 1,
+                Orientation = player.Orientation.Turn(direction)
+            };
+            message = "Turned OK";
+        }
+        else
+        {
+            var desiredLocation = direction switch
+            {
+                Direction.Forward => player.CellInFront(),
+                Direction.Reverse => player.CellInBack(),
+                _ => throw new Exception("What direction do you think you're going?")
+            };
+
+            if (Board.Cells.ContainsKey(desiredLocation) is false)
+            {
+                player = player with
+                {
+                    BatteryLevel = player.BatteryLevel - 1
+                };
+                message = GameMessages.MovedOutOfBounds;
+            }
+            else
+            {
+                player = player with
+                {
+                    BatteryLevel = player.BatteryLevel - Board[desiredLocation].Difficulty.Value,
+                    Location = desiredLocation
+                };
+                message = GameMessages.MovedOK;
+            }
+        }
+
+        if (!players.TryUpdate(token, player, unmodifiedPlayer))
+            throw new UnableToUpdatePlayerException();
+
         return new MoveResult(
             player.Location,
             player.BatteryLevel,
             Board.GetNeighbors(player.Location, PerseveranceVisibilityRadius),
-            "Move OK");
+            message ?? throw new Exception("Game message not set?!")
+        );
     }
 
     public Location GetPlayerLocation(PlayerToken token) => players[token].Location;
@@ -138,7 +180,13 @@ public class Game
     }
 }
 
-public record JoinResult(PlayerToken Token, Location PlayerLocation, Direction Direction, int BatteryLevel, Location TargetLocation, IEnumerable<Cell> Neighbors, IEnumerable<LowResolutionCell> LowResolutionMap);
+public static class GameMessages
+{
+    public const string MovedOutOfBounds = "Looks like you tried to move beyond the borders of the game.";
+    public const string MovedOK = "Moved OK";
+}
+
+public record JoinResult(PlayerToken Token, Location PlayerLocation, Orientation Orientation, int BatteryLevel, Location TargetLocation, IEnumerable<Cell> Neighbors, IEnumerable<LowResolutionCell> LowResolutionMap);
 public record MoveResult(Location Location, int BatteryLevel, IEnumerable<Cell> Neighbors, string Message);
 
 public enum GameState

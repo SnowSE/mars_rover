@@ -36,8 +36,10 @@ public record Player
     public PlayerToken Token { get; private set; }
     public string Name { get; private set; }
     public Location Location { get; init; }
-    public Direction Direction { get; init; }
+    public Orientation Orientation { get; init; }
 }
+
+public enum Orientation { North, East, South, West}
 
 public record LowResolutionCell
 {
