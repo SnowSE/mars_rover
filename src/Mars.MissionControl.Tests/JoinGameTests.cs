@@ -1,4 +1,5 @@
 ﻿using Mars.MissionControl.Exceptions;
+using System;
 using System.Linq;
 
 namespace Mars.MissionControl.Tests;
@@ -17,16 +18,17 @@ internal class JoinGameTests
     public void CanJoinGame()
     {
         var game = new Game();
-        var token = game.Join("Jonathan");
-        token.Should().NotBeNull();
+        var joinResult = game.Join("Jonathan");
+        joinResult.Should().NotBeNull();
+        joinResult.BatteryLevel.Should().Be(500);
     }
 
     [Test]
     public void GameGeneratesATokenValueObject()
     {
         var game = new Game();
-        var token = game.Join("P1");
-        token.Should().BeOfType<PlayerToken>();
+        var joinResult = game.Join("P1");
+        joinResult.Token.Should().BeOfType<PlayerToken>();
     }
 
     [Test]
@@ -43,7 +45,7 @@ internal class JoinGameTests
     {
         var game = new Game();
         var token1 = game.Join("P1");
-        game.StartGame();
+        game.PlayGame();
         Assert.Throws<InvalidGameStateException>(() => game.Join("P2"));
     }
 
@@ -51,24 +53,26 @@ internal class JoinGameTests
     public void CannotPlayIfYouHaveNotJoined()
     {
         var game = new Game();
-        game.StartGame();
+        game.PlayGame();
         var token1 = PlayerToken.Generate();
-        Assert.Throws<UnrecognizedTokenException>(() => game.Move(token1, Direction.Forward));
+        Assert.Throws<UnrecognizedTokenException>(() => game.MovePerseverance(token1, Direction.Forward));
     }
 
     [Test]
     public void PlayerCannotMoveIfGameStateIsNotPlaying()
     {
         var game = new Game();
-        var token1 = game.Join("P1");
-        Assert.Throws<InvalidGameStateException>(() => game.Move(token1, Direction.Forward));
+        var joinResult = game.Join("P1");
+        var token1 = joinResult.Token;
+        Assert.Throws<InvalidGameStateException>(() => game.MovePerseverance(token1, Direction.Forward));
     }
 
     [Test]
     public void WhenAPlayerJoinsTheyArePlacedOnTheMap()
     {
         var game = new Game();
-        var token = game.Join("P1");
+        var joinResult = game.Join("P1");
+        var token = joinResult.Token;
         var location = game.GetPlayerLocation(token);
         location.Should().NotBeNull();
     }
@@ -76,20 +80,22 @@ internal class JoinGameTests
     [Test]
     public void TooManyPlayersCannotJoinGame()
     {
-        var game = new Game(3, 3);
-        foreach (var i in Enumerable.Range(0, 8))
+        var game = new Game(5, 5);
+        foreach (var i in Enumerable.Range(0, 16))
         {
             game.Join($"P{i}");
         }
-        Assert.Throws<TooManyPlayersException>(() => game.Join("P9"));
+        Assert.Throws<TooManyPlayersException>(() => game.Join("P17"));
     }
 
     [TestCase(2, 2)]
     [TestCase(1, 2)]
     [TestCase(2, 1)]
     [TestCase(1, 1)]
-    public void BoardMustBeAtLeast3x3(int rows, int cols)
+    [TestCase(4, 4)]
+    [TestCase(3, 3)]
+    public void BoardMustBeAtLeast5x5(int rows, int cols)
     {
-        Assert.Throws<BoardTooSmallException>(() => new Game(rows, cols));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new Game(rows, cols));
     }
 }

@@ -52,8 +52,6 @@ public class Board
     public ConcurrentDictionary<Location, Cell> Cells { get; init; }
     private ConcurrentQueue<Location> startingLocations;
 
-    public ConcurrentDictionary<Player, Location> RoverLocations { get; init; } = new();
-
     public Cell this[Location location]
     {
         get => Cells[location];
@@ -86,8 +84,6 @@ public class Board
         {
             throw new TooManyPlayersException();
         }
-
-        RoverLocations.TryAdd(player, location);
 
         return location;
     }

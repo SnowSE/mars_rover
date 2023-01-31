@@ -1,4 +1,6 @@
-﻿namespace Mars.MissionControl;
+﻿using System.Collections.ObjectModel;
+
+namespace Mars.MissionControl;
 public class Game
 {
     public Game(int boardWidth = 5, int boardHeight = 5) : this(new GameStartOptions
@@ -20,14 +22,23 @@ public class Game
         Board = new Board(startOptions.Width, startOptions.Height, startOptions.MapNumber);
         Map = new Map(this);
         TargetLocation = new Location(startOptions.Width / 2, startOptions.Height / 2);
+        PerseveranceVisibilityRadius = startOptions.PerseveranceVisibilityRadius;
+        IngenuityVisibilityRadius = startOptions.IngenuityVisibilityRadius;
+        StartingBatteryLevel = startOptions.StartingBatteryLevel;
     }
 
     public int MapNumber => Board.MapNumber;
 
     public Location TargetLocation { get; private set; }
+    public int PerseveranceVisibilityRadius { get; }
+    public int IngenuityVisibilityRadius { get; }
+    public int StartingBatteryLevel { get; }
     public Map Map { get; private set; }
     private ConcurrentDictionary<PlayerToken, Player> players = new();
     private ConcurrentDictionary<string, PlayerToken> playerTokenCache = new();
+
+    public ReadOnlyCollection<Player> Players =>
+        new ReadOnlyCollection<Player>(players.Values.ToList());
 
     #region State Changed
     public event EventHandler? GameStateChanged;
@@ -43,30 +54,56 @@ public class Game
     }
     #endregion
 
-    public PlayerToken Join(string playerName)
+    public JoinResult Join(string playerName)
     {
         if (GameState != GameState.Joining)
         {
             throw new InvalidGameStateException();
         }
 
-        var player = new Player(playerName);
-        Board.PlaceNewPlayer(player);
-        players.TryAdd(player.Token, player);
-        playerTokenCache.TryAdd(player.Token.Value, player.Token);
+        var player = new Player(playerName) { BatteryLevel = StartingBatteryLevel };
+        player = player with
+        {
+            Location = Board.PlaceNewPlayer(player),
+            Direction = getRandomDirection()
+        };
+        if (!players.TryAdd(player.Token, player) ||
+           !playerTokenCache.TryAdd(player.Token.Value, player.Token))
+        {
+            throw new Exception("Unable to add new player...that token already exists?!");
+        }
+
         raiseStateChange();
-        return player.Token;
+
+        return new JoinResult(
+            player.Token,
+            player.Location,
+            player.Direction,
+            player.BatteryLevel,
+            TargetLocation,
+            Board.GetNeighbors(player.Location, PerseveranceVisibilityRadius),
+            Map.LowResolution
+        );
     }
 
+    private static Direction getRandomDirection()
+    {
+        return (Direction)Random.Shared.Next(0, 3);
+    }
+
+    public GamePlayOptions GamePlayOptions { get; private set; }
     public GameState GameState { get; set; }
     public Board Board { get; private set; }
 
-    public void StartGame()
+    public void PlayGame() => PlayGame(new GamePlayOptions());
+
+    public void PlayGame(GamePlayOptions gamePlayOptions)
     {
+        GamePlayOptions = gamePlayOptions;
         GameState = GameState.Playing;
     }
 
-    public void Move(PlayerToken token, Direction direction)
+    public MoveResult MovePerseverance(PlayerToken token, Direction direction)
     {
         if (GameState != GameState.Playing)
         {
@@ -77,14 +114,18 @@ public class Game
         {
             throw new UnrecognizedTokenException();
         }
+
+        //actually move the player...
+
+        var player = players[token];
+        return new MoveResult(
+            player.Location,
+            player.BatteryLevel,
+            Board.GetNeighbors(player.Location, PerseveranceVisibilityRadius),
+            "Move OK");
     }
 
-    public Location GetPlayerLocation(PlayerToken token)
-    {
-        return Board.RoverLocations
-            .Single(kvp => kvp.Key.Token == token).Value;
-    }
-
+    public Location GetPlayerLocation(PlayerToken token) => players[token].Location;
     public bool TryTranslateToken(string tokenString, out PlayerToken token)
     {
         token = null;
@@ -96,6 +137,9 @@ public class Game
         return false;
     }
 }
+
+public record JoinResult(PlayerToken Token, Location PlayerLocation, Direction Direction, int BatteryLevel, Location TargetLocation, IEnumerable<Cell> Neighbors, IEnumerable<LowResolutionCell> LowResolutionMap);
+public record MoveResult(Location Location, int BatteryLevel, IEnumerable<Cell> Neighbors, string Message);
 
 public enum GameState
 {
@@ -110,23 +154,4 @@ public enum Direction
     Left,
     Right,
     Reverse
-}
-
-public class GameAlreadyStartedException : Exception
-{
-    public GameAlreadyStartedException()
-    {
-    }
-
-    public GameAlreadyStartedException(string? message) : base(message)
-    {
-    }
-
-    public GameAlreadyStartedException(string? message, Exception? innerException) : base(message, innerException)
-    {
-    }
-
-    protected GameAlreadyStartedException(SerializationInfo info, StreamingContext context) : base(info, context)
-    {
-    }
 }

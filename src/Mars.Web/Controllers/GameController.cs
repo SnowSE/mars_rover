@@ -18,20 +18,19 @@ public class GameController : ControllerBase
     {
         try
         {
-            var token = gameManager.Game.Join(name);
-            var location = gameManager.Game.GetPlayerLocation(token);
+            var joinResult = gameManager.Game.Join(name);
             return new JoinResponse
             {
-                Token = token.Value,
-                StartingColumn = location.Column,
-                StartingRow = location.Row,
-                Neighbors = gameManager.Game.Board.GetNeighbors(location, 2).Select(c => new Types.Cell()
+                Token = joinResult.Token.Value,
+                StartingColumn = joinResult.PlayerLocation.Column,
+                StartingRow = joinResult.PlayerLocation.Row,
+                Neighbors = joinResult.Neighbors.Select(c => new Types.Cell()
                 {
                     Column = c.Location.Column,
                     Row = c.Location.Row,
                     Difficulty = c.Difficulty.Value
                 }),
-                LowResolutionMap = gameManager.Game.Map.LowResolution.Select(t => new LowResolutionMapTile
+                LowResolutionMap = joinResult.LowResolutionMap.Select(t => new LowResolutionMapTile
                 {
                     AverageDifficulty = t.AverageDifficulty.Value,
                     LowerLeftRow = t.LowerLeftRow,
@@ -39,8 +38,8 @@ public class GameController : ControllerBase
                     UpperRightColumn = t.UpperRightColumn,
                     UpperRightRow = t.UpperRightRow
                 }),
-                TargetRow = gameManager.Game.TargetLocation.Row,
-                TargetColumn = gameManager.Game.TargetLocation.Column
+                TargetRow = joinResult.TargetLocation.Row,
+                TargetColumn = joinResult.TargetLocation.Column
             };
         }
         catch (TooManyPlayersException)

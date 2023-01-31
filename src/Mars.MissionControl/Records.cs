@@ -32,8 +32,11 @@ public record Player
         Token = PlayerToken.Generate();
     }
 
+    public int BatteryLevel { get; init; }
     public PlayerToken Token { get; private set; }
     public string Name { get; private set; }
+    public Location Location { get; init; }
+    public Direction Direction { get; init; }
 }
 
 public record LowResolutionCell

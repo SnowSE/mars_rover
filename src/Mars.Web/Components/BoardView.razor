@@ -34,9 +34,9 @@
     private void refresh()
     {
         locations.Clear();
-        foreach (var item in gameManager.Game.Board.RoverLocations)
+        foreach (var item in gameManager.Game.Players)
         {
-            locations.Add((item.Value.Row, item.Value.Column), item.Key);
+            locations.Add((item.Location.Row, item.Location.Column), item);
         }
         StateHasChanged();
     }
