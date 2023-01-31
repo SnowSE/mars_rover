@@ -1,6 +1,6 @@
 name: Deploy PR to staging env
 
-# Note: For this to work you must 
+# Note: For this to work you must
 # 1) Create the service principal:
 #    az ad sp create-for-rbac --name "mars-rover-sp" --sdk-auth --role contributor --scopes /subscriptions/53a27438-41b3-4bcb-90fc-76fa03e0b11f/resourceGroups/mars_rover/providers/Microsoft.Web/sites/snow-rover
 #    Then put the json you get back from that command into a secret named AZURE_CREDENTIALS
@@ -30,10 +30,10 @@ jobs:
         with:
           dotnet-version: '7.x'
           include-prerelease: true
-        
+
       - name: Run Tests
         working-directory: src
-        run: dotnet test                  
+        run: dotnet test
 
       - name: dotnet publish
         working-directory: src/Mars.Web
@@ -44,7 +44,7 @@ jobs:
         with:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
-  
+
   set-up-test-env:
     name: Create test env
     runs-on: ubuntu-latest
@@ -78,25 +78,24 @@ jobs:
       uses: azure/login@v1.1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
+
     - name: Deploy to slot on staging site
       uses: azure/webapps-deploy@v2
       id: deploy-to-webapp
-      with: 
+      with:
         app-name: ${{ env.WEBAPP_NAME }}
         slot-name:  ${{ env.SLOT_NAME }}
         package: .
-    
+
     - name: Comment on PR with the preview link
       uses: mshick/add-pr-comment@v1
       with:
         message: |
-          ## Preview link: https://${{ env.WEBAPP_NAME }}-${{env.SLOT_NAME }}.azurewebsites.net 
-          
+          ## Preview link: https://${{ env.WEBAPP_NAME }}-${{env.SLOT_NAME }}.azurewebsites.net
+
           - Your changes have been deployed to the preview site. The preview site will update as you add more commits to this branch.
           - The preview link is shareable, but will be deleted when the pull request is merged or closed.
 
           > *This is an automated message.*
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         repo-token-user-login: 'github-actions[bot]'
-   

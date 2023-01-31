@@ -1,9 +1,20 @@
 ﻿@page "/"
-@inject Game game
 
-<h1>Mars Rover - 2023 Coding Challenge</h1>
-<a href="/swagger/index.html">Swagger API Page</a>
-
-<GameStatus />
+<div class="">
+    <div class="row mt-2 mx-1 border-bottom">
+        <h1 class="col">Mars Rover - 2023 Coding Challenge</h1>
+        <div class="col-auto text-end">
+            <div class="row">
+                <GameStatus />
+                <div class="float-end">
+                    <a class="" href="/swagger/index.html">Swagger API Page</a>
+                </div>
+                <div class="float-end">
+                    <NewGame />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <BoardView />

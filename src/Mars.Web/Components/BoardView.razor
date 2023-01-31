@@ -1,51 +1,30 @@
 ﻿@using System.Text
-@inject Game game
+@inject GameManager gameManager
 
-<h3>Surface Map</h3>
-
-<style>
-    .gridboard {
-        display: grid;
-        grid-template-columns: @gridTemplateColumns;
-        grid-template-rows: @gridTemplateRows;
-        gap: 0px 0px;
-        background-color:darksalmon;
-        grid-template-areas: @gridTemplateAreas()
-    }
-
-    @cellClasses()
-</style>
-
-<div class="gridboard">
-    @for (int row = 0; row < game.Board.Width; row++)
-    {
-        @for (int col = 0; col < game.Board.Height; col++)
+<div class="background" style=@(backgroundStyle)>
+    <div style="position: absolute; top: 200px; bottom: 0; right: 110px; width: 95%; background-color: transparent;">
+        @for (int row = 0; row < gameManager.Game.Board.Width; row++)
         {
-            var cell = game.Board[row, col];
-            var summary = cell.Difficulty.Value.ToString();
-            <div class=@($"r{row}c{col} border")>
-                @if(locations.ContainsKey((row, col)))
+            @for (int col = 0; col < gameManager.Game.Board.Height; col++)
+            {
+                @if (locations.ContainsKey((row, col)))
                 {
-                    var playerName = $" ({locations[(row,col)].Name})";
-                    @summary
-                    <div class="position: absolute; top: 0px;">
-                        <img src="/images/persevarance_32.png" alt="@playerName" />
-                        <br/>@playerName
-                    </div>
+                    <RoverView Row="row" Column="col" PlayerName="@locations[(row, col)].Name" BatteryRemaining="26" />
                 }
-                @summary
-            </div>
+            }
         }
-    }
+    </div>
 </div>
 
 @code {
+    string backgroundStyle = "";
     [CascadingParameter]
-    public SharedState SharedState{  get;  set; }
+    public SharedState SharedState { get; set; }
 
     protected override void OnInitialized()
     {
-        game.GameStateChanged += (_, _) => InvokeAsync(() =>
+        backgroundStyle = $"background-image: url('/images/terrain_{gameManager.Game.MapNumber:00}.png'); ";
+        gameManager.GameStateChanged += (_, _) => InvokeAsync(() =>
         {
             refresh();
         });
@@ -55,23 +34,23 @@
     private void refresh()
     {
         locations.Clear();
-        foreach (var item in game.Board.RoverLocations)
+        foreach (var item in gameManager.Game.Board.RoverLocations)
         {
             locations.Add((item.Value.Row, item.Value.Column), item.Key);
         }
         StateHasChanged();
     }
 
-    public string gridTemplateRows => String.Join(" ", Enumerable.Repeat("1fr", game.Board.Width));
-    public string gridTemplateColumns => String.Join(" ", Enumerable.Repeat("1fr", game.Board.Height));
+    public string gridTemplateRows => String.Join(" ", Enumerable.Repeat("1fr", gameManager.Game.Board.Width));
+    public string gridTemplateColumns => String.Join(" ", Enumerable.Repeat("1fr", gameManager.Game.Board.Height));
 
     public string gridTemplateAreas()
     {
         var sb = new StringBuilder();
-        for(int row=0;row<game.Board.Width;row++)
+        for (int row = 0; row < gameManager.Game.Board.Width; row++)
         {
             sb.Append("\"");
-            for(int col=0;col<game.Board.Height;col++)
+            for (int col = 0; col < gameManager.Game.Board.Height; col++)
             {
                 sb.Append($"r{row}c{col} ");
             }
@@ -83,9 +62,9 @@
     public string cellClasses()
     {
         var sb = new StringBuilder();
-        for(int row=0;row<game.Board.Width;row++)
+        for (int row = 0; row < gameManager.Game.Board.Width; row++)
         {
-            for(int col=0;col<game.Board.Height;col++)
+            for (int col = 0; col < gameManager.Game.Board.Height; col++)
             {
                 sb.AppendLine($".r{row}c{col} {{grid-area: r{row}c{col};}} ");
             }

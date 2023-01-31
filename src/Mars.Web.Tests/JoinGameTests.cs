@@ -1,4 +1,5 @@
-﻿using Mars.Web.Types;
+﻿using Mars.MissionControl;
+using Mars.Web.Types;
 using Microsoft.AspNetCore.Mvc.Testing;
 using System.Linq;
 using System.Net.Http.Json;
@@ -26,6 +27,8 @@ public class JoinGameTests
     [Test]
     public async Task JoinGame()
     {
+        var gameManager = _factory.Services.GetRequiredService<GameManager>();
+        gameManager.StartNewGame(new GameStartOptions { Height = 5, Width = 5 });
         var client = _factory.CreateClient();
         var expectedLowResolutionMap = new[]
         {

@@ -1,0 +1,33 @@
+﻿@inject GameManager gameManager
+@inject IConfiguration config
+
+<div style=@($"position: absolute; bottom: {bottomPercent}%; left: {leftPercent}%; z-index: 100")>
+    <div class="playerName">
+        <span>@PlayerName</span>
+    </div>
+    <progress value="@BatteryRemaining" max="100">@BatteryRemaining</progress>
+    <img src="/images/persevarance_side_128.png"
+         alt="@PlayerName" />
+</div>
+
+@code {
+    [Parameter]
+    public int Row { get; set; }
+
+    [Parameter]
+    public int Column { get; set; }
+
+    [Parameter]
+    public string PlayerName { get; set; }
+
+    [Parameter]
+    public int BatteryRemaining { get; set; } = 78;
+
+    private double leftPercent, bottomPercent;
+
+    protected override void OnParametersSet()
+    {
+        leftPercent = ((double)Row) / gameManager.Game.Board.Width * 100;
+        bottomPercent = ((double)Column) / gameManager.Game.Board.Height * 100;
+    }
+}

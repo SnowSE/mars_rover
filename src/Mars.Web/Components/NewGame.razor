@@ -1,0 +1,66 @@
+﻿@inject GameManager gameManager
+@inject GameStartOptions startOptions
+@inject ILogger<NewGame> logger
+@inject IConfiguration config
+@using Microsoft.Extensions.DependencyInjection.Extensions
+
+<div class="modal" id="optionsModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">New Game</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-floating mb-3">
+                    <input class="form-control" type="number" id="width" placeholder="width" @bind=startOptions.Width />
+                    <label for="width">Width</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input class="form-control" type="number" id="height" placeholder="height" @bind=startOptions.Height />
+                    <label for="height">Height</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input class="form-control" type="password" id="password" placeholder="what's the magic word?" @bind=Password @bind:event="oninput" />
+                    <label for="password">Password</label>
+                </div>
+                <div class="modal-footer">
+                    <div class="col-auto">
+                        <button class="btn btn-link" type="button" data-bs-dismiss="modal" hidden="@startGameButtonHidden" @onclick=makeNewGame>Start New Game</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<button type="button" class="btn btn-link" style="margin-right: -12px" data-bs-toggle="modal" data-bs-target="#optionsModal">New Game</button>
+
+@code {
+    bool startGameButtonHidden = true;
+    string modalClass = "modal";
+
+    private string password;
+    public string Password
+    {
+        get => password;
+        set
+        {
+            password = value;
+            startGameButtonHidden = (password != config["GAME_PASSWORD"]);
+            StateHasChanged();
+        }
+    }
+
+    void makeNewGame()
+    {
+        if (password != config["GAME_PASSWORD"])
+        {
+            logger.LogWarning("What?!  How did they click the button with a password mismatch?");
+            return;
+        }
+
+        logger.LogInformation("Starting new game with {options}", startOptions);
+        gameManager.StartNewGame(startOptions);
+    }
+
+}

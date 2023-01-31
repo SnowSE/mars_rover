@@ -1,3 +1,4 @@
+using Mars.Web;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,7 +12,8 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Mars Rover", Version = "v1" });
 });
 
-builder.Services.AddSingleton<Game>();
+builder.Services.AddSingleton<GameManager>();
+builder.Services.AddSingleton<GameStartOptions>();
 
 var app = builder.Build();
 

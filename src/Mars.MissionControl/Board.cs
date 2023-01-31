@@ -2,10 +2,11 @@
 
 public class Board
 {
-    public Board(int numRows, int numColumns)
+    public Board(int numRows, int numColumns, int mapNumber = 1)
     {
         Width = numRows;
         Height = numColumns;
+        MapNumber = mapNumber;
         Cells = new ConcurrentDictionary<Location, Cell>();
         initializeCells();
         initializeStartingLocations();
@@ -44,6 +45,7 @@ public class Board
         startingLocations = new(locations.OrderBy(_ => Random.Shared.Next()));
     }
 
+    public int MapNumber { get; private set; }
     public int Width { get; private set; }
     public int Height { get; private set; }
 

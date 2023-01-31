@@ -3,17 +3,28 @@
 namespace Mars.MissionControl;
 public class Game
 {
-    public Game(int boardWidth = 5, int boardHeight = 5)
+    public Game(int boardWidth = 5, int boardHeight = 5) : this(new GameStartOptions
     {
-        if (boardWidth < 3 || boardHeight < 3)
+        Height = boardHeight,
+        Width = boardWidth,
+        MapNumber = 1
+    })
+    {
+    }
+
+    public Game(GameStartOptions startOptions)
+    {
+        if (startOptions.Width < 3 || startOptions.Height < 3)
         {
             throw new BoardTooSmallException();
         }
         GameState = GameState.Joining;
-        Board = new Board(boardWidth, boardHeight);
+        Board = new Board(startOptions.Width, startOptions.Height, startOptions.MapNumber);
         Map = new Map(this);
-        TargetLocation = new Location(boardWidth / 2, boardHeight / 2);
+        TargetLocation = new Location(startOptions.Width / 2, startOptions.Height / 2);
     }
+
+    public int MapNumber => Board.MapNumber;
 
     public Location TargetLocation { get; private set; }
     public Map Map { get; private set; }
