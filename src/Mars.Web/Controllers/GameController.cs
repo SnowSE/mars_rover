@@ -66,13 +66,13 @@ public class GameController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult Move(string token, string direction)
     {
-        if (game.TryTranslateToken(token, out var player))
+        if (gameManager.Game.TryTranslateToken(token, out var player))
         {
             if (Enum.TryParse<Direction>(direction, true, out var dir))
             {
                 try
                 {
-                    game.Move(player, dir);
+                    gameManager.Game.Move(player, dir);
                 }
                 catch (InvalidMoveException){
                     return Problem($"You cannot move in that direction.", statusCode: 400, title: "Bad Move");
