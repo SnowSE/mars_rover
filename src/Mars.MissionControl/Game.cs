@@ -94,6 +94,7 @@ public class Game
     public GamePlayOptions GamePlayOptions { get; private set; }
     public GameState GameState { get; set; }
     public Board Board { get; private set; }
+    private Timer rechargeTimer;
 
     public void PlayGame() => PlayGame(new GamePlayOptions());
 
@@ -106,6 +107,18 @@ public class Game
 
         GamePlayOptions = gamePlayOptions;
         GameState = GameState.Playing;
+        rechargeTimer = new Timer(timer_Callback, null, 1_000, 1_000);
+    }
+
+    private void timer_Callback(object? _)
+    {
+        foreach (var playerToken in players.Keys)
+        {
+            var origPlayer = players[playerToken];
+            var newPlayer = origPlayer with { BatteryLevel = origPlayer.BatteryLevel + 1 };
+            players.TryUpdate(playerToken, newPlayer, origPlayer);
+        }
+        raiseStateChange();
     }
 
     public MoveResult MovePerseverance(PlayerToken token, Direction direction)
