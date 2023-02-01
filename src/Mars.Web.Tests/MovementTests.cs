@@ -1,4 +1,5 @@
 ﻿using Mars.MissionControl;
+using Mars.Web.Pages;
 using Mars.Web.Types;
 using Microsoft.AspNetCore.Mvc.Testing;
 using System;
@@ -9,6 +10,8 @@ namespace Mars.Web.Tests;
 public class MovementTests
 {
     private WebApplicationFactory<Program> _factory;
+    private MultiGameHoster multiGameHoster;
+    private string gameId;
     private GameManager gameManager;
     private HttpClient client;
     private JoinResponse player1;
@@ -19,7 +22,6 @@ public class MovementTests
     [SetUp]
     public async Task Setup()
     {
-
         _factory = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
             {
@@ -28,11 +30,13 @@ public class MovementTests
                     services.AddApplicationInsightsTelemetry(options => options.DeveloperMode = true);
                 });
             });
-        gameManager = _factory.Services.GetRequiredService<GameManager>();
+        multiGameHoster = _factory.Services.GetRequiredService<MultiGameHoster>();
+        gameId = multiGameHoster.MakeNewGame();
+        gameManager = multiGameHoster.Games[gameId];
         gameManager.StartNewGame(new GameStartOptions { Height = 5, Width = 5 });
 
         client = _factory.CreateClient();
-        player1 = await client.GetFromJsonAsync<JoinResponse>("/game/join?name=P1");
+        player1 = await client.GetFromJsonAsync<JoinResponse>($"/game/join?gameId={gameId}&name=P1");
         currentOrientation = Enum.Parse<Orientation>(player1.Orientation);
         lastLocation = currentLocation = new Location(player1.StartingRow, player1.StartingColumn);
         iWon = false;

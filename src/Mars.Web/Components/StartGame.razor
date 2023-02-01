@@ -1,6 +1,4 @@
-﻿@inject GameManager gameManager
-@inject GameStartOptions startOptions
-@inject ILogger<NewGame> logger
+﻿@inject ILogger<NewGame> logger
 @inject IConfiguration config
 @using Microsoft.Extensions.DependencyInjection.Extensions
 
@@ -36,6 +34,11 @@
 <button type="button" class="btn btn-link" style="margin-right: -12px" data-bs-toggle="modal" data-bs-target="#startGameModal">Start Game</button>
 
 @code {
+    [CascadingParameter(Name = "GameManager")]
+    public GameManager? gameManager { get; set; }
+
+    private GameStartOptions startOptions => gameManager!.GameStartOptions;
+
     bool startGameButtonHidden = true;
     GamePlayOptions gamePlayOptions = new();
 
@@ -53,6 +56,9 @@
 
     void startPlaying()
     {
+        if (gameManager == null)
+            return;
+
         if (password != config["GAME_PASSWORD"])
         {
             logger.LogWarning("What?!  How did they click the 'start playing' button with a password mismatch?");

@@ -1,21 +1,43 @@
 ﻿@page "/"
+@using System.Collections.Concurrent;
+@inject MultiGameHoster multiGameHoster
+@inject NavigationManager navManager
 
-<div class="">
-    <div class="row mt-2 mx-1 border-bottom">
-        <h1 class="col">Mars Rover - 2023 Coding Challenge</h1>
-        <div class="col-auto text-end">
+<div class="container">
+    <h1>2023 Coding Challenge - Mars Rover</h1>
+
+    <h3>Join an Existing Game</h3>
+    <div class="row">
+        @foreach (var game in multiGameHoster.Games.OrderBy(g=>g.Value.CreatedOn))
+        {
             <div class="row">
-                <GameStatus />
-                <div class="float-end">
-                    <a class="" href="/swagger/index.html">Swagger API Page</a>
-                </div>
-                <div class="float-end">
-                    <NewGame />
-                    <StartGame />
-                </div>
+                <p>
+                    ➡️ <a href=@($"/game/{game.Key}")>Game '@game.Key'</a><span> (started @(game.Value.CreatedOn.ToString("g")))</span>
+                </p>
             </div>
+        }
+    </div>
+    <h3 class="mt-5">Make your own game</h3>
+    <div class="row">
+        <div class="col-auto">
+            <button class="btn btn-primary" @onclick=makeNewGame>Make a new game</button>
         </div>
     </div>
 </div>
 
-<BoardView />
+@code {
+
+    protected override void OnInitialized()
+    {
+        if (multiGameHoster.Games.Count == 0)
+        {
+            makeNewGame();
+        }
+    }
+
+    void makeNewGame()
+    {
+        var gameId = multiGameHoster.MakeNewGame();
+        navManager.NavigateTo($"/game/{gameId}");
+    }
+}

@@ -1,8 +1,8 @@
-﻿@inject GameManager gameManager
-
-<span style="float: right">Game State: @gameManager.Game.GameState</span>
+﻿
+<span style="float: right">Game State: @gameManager?.Game.GameState</span>
 
 
 @code {
-
+    [CascadingParameter(Name = "GameManager")]
+    public GameManager? gameManager{ get; set; }
 }

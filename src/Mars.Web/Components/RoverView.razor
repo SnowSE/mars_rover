@@ -1,5 +1,4 @@
-﻿@inject GameManager gameManager
-@inject IConfiguration config
+﻿@inject IConfiguration config
 
 <div style=@($"position: absolute; bottom: {bottomPercent}%; left: {leftPercent}%; z-index: 100")>
     <div class="playerName">
@@ -10,6 +9,9 @@
 </div>
 
 @code {
+    [CascadingParameter(Name = "GameManager")]
+    public GameManager? gameManager { get; set; }
+
     [Parameter]
     public Player? Player{ get; set; }
 
@@ -18,7 +20,7 @@
 
     protected override void OnParametersSet()
     {
-        if (Player == null)
+        if (Player == null || gameManager == null)
             return;
 
         batteryPercent = (int)(Player.BatteryLevel * 100.0 / gameManager.Game.StartingBatteryLevel);

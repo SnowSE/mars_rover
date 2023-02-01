@@ -6,6 +6,8 @@ public class GameManager
 {
 	public GameManager()
 	{
+		CreatedOn = DateTime.Now;
+
 		StartNewGame(new GameStartOptions()
 		{
 			Height = 100,
@@ -13,6 +15,8 @@ public class GameManager
 		});
 	}
 
+	public GameStartOptions GameStartOptions { get; } = new();
+	public DateTime CreatedOn { get; }
 	public Game Game { get; private set; }
 	public event EventHandler? GameStateChanged;
 

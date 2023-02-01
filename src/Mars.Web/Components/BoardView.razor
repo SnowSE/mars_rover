@@ -1,10 +1,9 @@
 ﻿@using System.Text
-@inject GameManager gameManager
 
 <div class="background" style=@(backgroundStyle)>
     <img src="/images/pin_100.png" width="40" style=@($"position: absolute; bottom: {pinBottom}%; left: {pinLeft}%; z-index: 80;") alt="Destination target location" />
     <div style="position: absolute; top: 200px; bottom: 0; right: 110px; width: 95%; background-color: transparent;">
-        @foreach (var player in gameManager.Game.Players)
+        @foreach (var player in gameManager!.Game.Players)
         {
             <RoverView Player="player" />
         }
@@ -16,12 +15,15 @@
     [CascadingParameter]
     public SharedState? SharedState { get; set; }
 
+    [CascadingParameter(Name = "GameManager")]
+    public GameManager? gameManager { get; set; }
+
     double pinBottom;
     double pinLeft;
 
     protected override void OnInitialized()
     {
-        var target = gameManager.Game.TargetLocation;
+        var target = gameManager!.Game.TargetLocation;
         pinBottom = target.Row * 100.0 / gameManager.Game.Board.Height;
         pinLeft = target.Column * 100.0 / gameManager.Game.Board.Width;
 
