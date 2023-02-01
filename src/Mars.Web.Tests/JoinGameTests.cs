@@ -45,7 +45,7 @@ public class JoinGameTests
             }
         };
 
-        var joinResponse = await client.GetFromJsonAsync<JoinResponse>($"/game/join?gameId={gameId}name=Jonathan");
+        var joinResponse = await client.GetFromJsonAsync<JoinResponse>($"/game/join?gameId={gameId}&name=Jonathan");
 
         joinResponse.Token.Length.Should().Be(13);
         joinResponse.LowResolutionMap.Should().BeEquivalentTo(expectedLowResolutionMap);
@@ -70,7 +70,7 @@ public class JoinGameTests
     {
         var client = _factory.CreateClient();
 
-        var joinResponse = await client.GetFromJsonAsync<JoinResponse>("/game/join?name=p1");
+        var joinResponse = await client.GetFromJsonAsync<JoinResponse>($"/game/join?gameId={gameId}&name=p1");
         var moveResponse = await client.GetAsync($"/game/moveperseverance?token={joinResponse.Token}&move=Forward");
         var content = await moveResponse.Content.ReadAsStringAsync();
         content.Should().Contain("invalid game state");

@@ -6,7 +6,7 @@ public class MultiGameHoster
     public ConcurrentDictionary<string, GameManager> Games { get; } = new();
     public ConcurrentDictionary<string, string> TokenMap { get; } = new();
 
-    private string nextGame = "y";
+    private string nextGame = "a";
     private object lockObject = new();
 
     public string MakeNewGame()
