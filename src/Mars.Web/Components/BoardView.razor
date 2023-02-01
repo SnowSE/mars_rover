@@ -2,16 +2,11 @@
 @inject GameManager gameManager
 
 <div class="background" style=@(backgroundStyle)>
+    <img src="/images/pin_100.png" width="40px" style=@($"position: absolute; bottom: {pinBottom}%; left: {pinLeft}%; z-index: 80;") alt="Destination target location" />
     <div style="position: absolute; top: 200px; bottom: 0; right: 110px; width: 95%; background-color: transparent;">
-        @for (int row = 0; row < gameManager.Game.Board.Width; row++)
+        @foreach (var player in gameManager.Game.Players)
         {
-            @for (int col = 0; col < gameManager.Game.Board.Height; col++)
-            {
-                @if (locations.ContainsKey((row, col)))
-                {
-                    <RoverView Row="row" Column="col" Player="@locations[(row, col)]" />
-                }
-            }
+            <RoverView Player="player" />
         }
     </div>
 </div>
@@ -21,57 +16,22 @@
     [CascadingParameter]
     public SharedState SharedState { get; set; }
 
+    double pinBottom;
+    double pinLeft;
+
     protected override void OnInitialized()
     {
+        var target = gameManager.Game.TargetLocation;
+        pinBottom = target.Row * 100.0 / gameManager.Game.Board.Height;
+        pinLeft = target.Column * 100.0 / gameManager.Game.Board.Width;
+
         backgroundStyle = $"background-image: url('/images/terrain_{gameManager.Game.MapNumber:00}.png'); ";
+
         gameManager.GameStateChanged += (_, _) => InvokeAsync(() =>
         {
-            refresh();
+            StateHasChanged();
         });
-        refresh();
-    }
 
-    private void refresh()
-    {
-        locations.Clear();
-        foreach (var item in gameManager.Game.Players)
-        {
-            locations.Add((item.Location.Row, item.Location.Column), item);
-        }
         StateHasChanged();
     }
-
-    public string gridTemplateRows => String.Join(" ", Enumerable.Repeat("1fr", gameManager.Game.Board.Width));
-    public string gridTemplateColumns => String.Join(" ", Enumerable.Repeat("1fr", gameManager.Game.Board.Height));
-
-    public string gridTemplateAreas()
-    {
-        var sb = new StringBuilder();
-        for (int row = 0; row < gameManager.Game.Board.Width; row++)
-        {
-            sb.Append("\"");
-            for (int col = 0; col < gameManager.Game.Board.Height; col++)
-            {
-                sb.Append($"r{row}c{col} ");
-            }
-            sb.AppendLine("\"");
-        }
-        return sb.ToString();
-    }
-
-    public string cellClasses()
-    {
-        var sb = new StringBuilder();
-        for (int row = 0; row < gameManager.Game.Board.Width; row++)
-        {
-            for (int col = 0; col < gameManager.Game.Board.Height; col++)
-            {
-                sb.AppendLine($".r{row}c{col} {{grid-area: r{row}c{col};}} ");
-            }
-        }
-        return sb.ToString();
-    }
-
-    Dictionary<(int row, int col), Player> locations = new();
-
 }

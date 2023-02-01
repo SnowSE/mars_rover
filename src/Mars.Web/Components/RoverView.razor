@@ -6,37 +6,27 @@
         <span>@Player.Name</span>
     </div>
     <progress value="@batteryPercent" max="100">@Player.BatteryLevel</progress>
-    <img src="/images/persevarance_side_128.png"
-         style=@($"transform: rotate({imageRotationDegrees}deg); z-index: 0;")
-         alt="@Player.Name" />
+    <img src=@imageName alt="@Player.Name" />
 </div>
 
 @code {
     [Parameter]
-    public int Row { get; set; }
-
-    [Parameter]
-    public int Column { get; set; }
-
-    [Parameter]
     public Player Player{ get; set; }
 
-
     private double leftPercent, bottomPercent, batteryPercent;
-    private int imageRotationDegrees = 0;
-    private int imageCorrectionDegrees = -65;
+    private string imageName;
 
     protected override void OnParametersSet()
     {
         batteryPercent = (int)(Player.BatteryLevel * 100.0 / gameManager.Game.StartingBatteryLevel);
-        leftPercent = ((double)Row) / gameManager.Game.Board.Width * 100;
-        bottomPercent = ((double)Column) / gameManager.Game.Board.Height * 100;
-        imageRotationDegrees = Player.Orientation switch
+        leftPercent = ((double)Player.Location.Row) / gameManager.Game.Board.Width * 100;
+        bottomPercent = ((double)Player.Location.Column) / gameManager.Game.Board.Height * 100;
+        imageName = "/images/"+Player.Orientation switch
         {
-            Orientation.North => 0,
-            Orientation.East => 90,
-            Orientation.South => 180,
-            _ => 270,
-        } + imageCorrectionDegrees;
+            Orientation.North => "perseverance_128_north.png",
+            Orientation.East => "perseverance_128_east.png",
+            Orientation.South => "perseverance_128_south.png",
+            _ => "perseverance_128_west.png",
+        };
     }
 }
