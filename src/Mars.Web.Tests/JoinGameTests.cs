@@ -2,8 +2,6 @@
 using Mars.Web.Types;
 using Microsoft.AspNetCore.Mvc.Testing;
 using System.Linq;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
 
 namespace Mars.Web.Tests;
 
@@ -58,6 +56,19 @@ public class JoinGameTests
 
         var joinResponse = await client.GetAsync("/game/join");
         joinResponse.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
+    }
+
+
+
+    [Test]
+    public async Task CannotMoveWithGameInJoiningState()
+    {
+        var client = _factory.CreateClient();
+
+        var joinResponse = await client.GetFromJsonAsync<JoinResponse>("/game/join?name=p1");
+        var moveResponse = await client.GetAsync($"/game/moveperseverance?token={joinResponse.Token}&move=Forward");
+        var content = await moveResponse.Content.ReadAsStringAsync();
+        Assert.Fail();
     }
 
 }

@@ -100,7 +100,9 @@ public class Game
     public void PlayGame(GamePlayOptions gamePlayOptions)
     {
         if (GameState != GameState.Joining)
+        {
             throw new InvalidGameStateException($"Cannot play game if currently {GameState}");
+        }
 
         GamePlayOptions = gamePlayOptions;
         GameState = GameState.Playing;
@@ -160,7 +162,11 @@ public class Game
         }
 
         if (!players.TryUpdate(token, player, unmodifiedPlayer))
+        {
             throw new UnableToUpdatePlayerException();
+        }
+
+        raiseStateChange();
 
         return new MoveResult(
             player.Location,

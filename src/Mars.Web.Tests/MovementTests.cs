@@ -1,10 +1,8 @@
 ﻿using Mars.MissionControl;
 using Mars.Web.Types;
 using Microsoft.AspNetCore.Mvc.Testing;
+using System.Net;
 using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
-
 namespace Mars.Web.Tests;
 
 public class MovementTests
@@ -38,7 +36,24 @@ public class MovementTests
     {
         var token = player1.Token;
         var direction = Direction.Forward;
-        var response = await client.GetFromJsonAsync<MoveResponse>($"/game/move?token={token}&direction={direction}");
+        var response = await client.GetFromJsonAsync<MoveResponse>($"/game/moveperseverance?token={token}&direction={direction}");
         response.Should().NotBeNull();
+    }
+
+    [Test]
+    public async Task P1CannotMoveWithInvalidDirection()
+    {
+        var token = player1.Token;
+        var response = await client.GetAsync($"/game/moveperseverance?token={token}&direction=bogus");
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+
+    [Test]
+    public async Task P1CannotMoveWithoutToken()
+    {
+        var token = player1.Token;
+        var response = await client.GetAsync($"/game/moveperseverance");
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 }
