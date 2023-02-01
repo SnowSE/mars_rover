@@ -3,21 +3,24 @@
 
 <div style=@($"position: absolute; bottom: {bottomPercent}%; left: {leftPercent}%; z-index: 100")>
     <div class="playerName">
-        <span>@Player.Name</span>
+        <span>@Player?.Name</span>
     </div>
-    <progress value="@batteryPercent" max="100">@Player.BatteryLevel</progress>
-    <img src=@imageName alt="@Player.Name" />
+    <progress value="@batteryPercent" max="100">@Player?.BatteryLevel</progress>
+    <img src=@imageName alt="@Player?.Name" />
 </div>
 
 @code {
     [Parameter]
-    public Player Player{ get; set; }
+    public Player? Player{ get; set; }
 
     private double leftPercent, bottomPercent, batteryPercent;
-    private string imageName;
+    private string imageName = "perseverance_128_north.png";
 
     protected override void OnParametersSet()
     {
+        if (Player == null)
+            return;
+
         batteryPercent = (int)(Player.BatteryLevel * 100.0 / gameManager.Game.StartingBatteryLevel);
         leftPercent = ((double)Player.Location.Row) / gameManager.Game.Board.Width * 100;
         bottomPercent = ((double)Player.Location.Column) / gameManager.Game.Board.Height * 100;

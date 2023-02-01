@@ -38,10 +38,7 @@ app.UseSwaggerUI(c =>
 });
 
 app.MapBlazorHub();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+app.MapControllers();
 
 app.MapFallbackToPage("/_Host");
 

@@ -93,10 +93,10 @@ public class Game : IDisposable
         return (Orientation)Random.Shared.Next(0, 4);
     }
 
-    public GamePlayOptions GamePlayOptions { get; private set; }
+    public GamePlayOptions? GamePlayOptions { get; private set; }
     public GameState GameState { get; set; }
     public Board Board { get; private set; }
-    private Timer rechargeTimer;
+    private Timer? rechargeTimer;
 
     public void PlayGame() => PlayGame(new GamePlayOptions());
 
@@ -119,7 +119,7 @@ public class Game : IDisposable
             var origPlayer = players[playerToken];
             if (origPlayer.BatteryLevel < StartingBatteryLevel)
             {
-                var newPlayer = origPlayer with { BatteryLevel = Math.Min(StartingBatteryLevel, origPlayer.BatteryLevel + GamePlayOptions.RechargePointsPerSecond) };
+                var newPlayer = origPlayer with { BatteryLevel = Math.Min(StartingBatteryLevel, origPlayer.BatteryLevel + GamePlayOptions!.RechargePointsPerSecond) };
                 players.TryUpdate(playerToken, newPlayer, origPlayer);
             }
         }
@@ -202,7 +202,7 @@ public class Game : IDisposable
     }
 
     public Location GetPlayerLocation(PlayerToken token) => players[token].Location;
-    public bool TryTranslateToken(string tokenString, out PlayerToken token)
+    public bool TryTranslateToken(string tokenString, out PlayerToken? token)
     {
         token = null;
         if (playerTokenCache.ContainsKey(tokenString))

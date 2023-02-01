@@ -65,7 +65,7 @@ public class GameController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<MoveResponse> MovePerseverance(string token, Direction direction)
     {
-        PlayerToken playerToken;
+        PlayerToken? playerToken;
         if (!gameManager.Game.TryTranslateToken(token, out playerToken))
         {
             return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
@@ -78,7 +78,7 @@ public class GameController : ControllerBase
 
         try
         {
-            var moveResult = gameManager.Game.MovePerseverance(playerToken, direction);
+            var moveResult = gameManager.Game.MovePerseverance(playerToken!, direction);
             return new MoveResponse
             {
                 Row = moveResult.Location.Row,

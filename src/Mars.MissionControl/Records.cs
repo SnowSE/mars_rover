@@ -30,6 +30,7 @@ public record Player
 
         Name = name;
         Token = PlayerToken.Generate();
+        Location = new Location(0, 0);
     }
 
     public int BatteryLevel { get; init; }
@@ -39,7 +40,7 @@ public record Player
     public Orientation Orientation { get; init; }
 }
 
-public enum Orientation { North, East, South, West}
+public enum Orientation { North, East, South, West }
 
 public record LowResolutionCell
 {

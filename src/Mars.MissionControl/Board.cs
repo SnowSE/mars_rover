@@ -9,7 +9,7 @@ public class Board
         MapNumber = mapNumber;
         Cells = new ConcurrentDictionary<Location, Cell>();
         initializeCells();
-        initializeStartingLocations();
+        startingLocations = initializeStartingLocations();
     }
 
     private void initializeCells()
@@ -27,7 +27,7 @@ public class Board
         }
     }
 
-    private void initializeStartingLocations()
+    private ConcurrentQueue<Location> initializeStartingLocations()
     {
         var locations = new List<Location>();
         for (int i = 0; i < Width; i++)
@@ -42,7 +42,7 @@ public class Board
             locations.Add(new Location(Width - 1, i));
         }
 
-        startingLocations = new(locations.OrderBy(_ => Random.Shared.Next()));
+        return new(locations.OrderBy(_ => Random.Shared.Next()));
     }
 
     public int MapNumber { get; private set; }
@@ -79,7 +79,7 @@ public class Board
 
     public Location PlaceNewPlayer(Player player)
     {
-        Location location;
+        Location? location;
         if (!startingLocations.TryDequeue(out location))
         {
             throw new TooManyPlayersException();

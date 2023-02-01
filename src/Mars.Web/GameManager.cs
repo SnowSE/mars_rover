@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Mars.Web;
 
 public class GameManager
@@ -14,6 +16,7 @@ public class GameManager
 	public Game Game { get; private set; }
 	public event EventHandler? GameStateChanged;
 
+	[MemberNotNull(nameof(Game))]
 	public void StartNewGame(GameStartOptions startOptions)
 	{
 		//unsubscribe from old event
@@ -32,7 +35,7 @@ public class GameManager
 
 	public void PlayGame(GamePlayOptions playOptions)
 	{
-		Game.PlayGame(playOptions);
+		Game?.PlayGame(playOptions);
 	}
 
 	private void Game_GameStateChanged(object? sender, EventArgs e)
