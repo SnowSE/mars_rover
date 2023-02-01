@@ -39,6 +39,8 @@ public class Game : IDisposable
 
     public ReadOnlyCollection<Player> Players =>
         new ReadOnlyCollection<Player>(players.Values.ToList());
+    private ConcurrentQueue<Player> winners = new();
+    public IEnumerable<Player> Winners => winners.ToArray();
 
     #region State Changed
     public event EventHandler? GameStateChanged;
@@ -182,6 +184,12 @@ public class Game : IDisposable
             throw new UnableToUpdatePlayerException();
         }
 
+        if (player.Location == TargetLocation)//you win!
+        {
+            winners.Enqueue(player);
+            message = GameMessages.YouMadeItToTheTarget;
+        }
+
         raiseStateChange();
 
         return new MoveResult(
@@ -215,6 +223,7 @@ public static class GameMessages
 {
     public const string MovedOutOfBounds = "Looks like you tried to move beyond the borders of the game.";
     public const string MovedOK = "Moved OK";
+    public const string YouMadeItToTheTarget = "You made it to the target!";
 }
 
 public record JoinResult(PlayerToken Token, Location PlayerLocation, Orientation Orientation, int BatteryLevel, Location TargetLocation, IEnumerable<Cell> Neighbors, IEnumerable<LowResolutionCell> LowResolutionMap);
