@@ -207,7 +207,7 @@ public class Game : IDisposable
 
     public void Dispose()
     {
-        rechargeTimer.Dispose();
+        rechargeTimer?.Dispose();
     }
 }
 
