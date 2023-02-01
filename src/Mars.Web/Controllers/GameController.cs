@@ -34,7 +34,8 @@ public class GameController : ControllerBase
                     UpperRightRow = t.UpperRightRow
                 }),
                 TargetRow = joinResult.TargetLocation.Row,
-                TargetColumn = joinResult.TargetLocation.Column
+                TargetColumn = joinResult.TargetLocation.Column,
+                Orientation = joinResult.Orientation.ToString()
             };
         }
         catch (TooManyPlayersException)
@@ -85,6 +86,7 @@ public class GameController : ControllerBase
                 BatteryLevel = moveResult.BatteryLevel,
                 Neighbors = moveResult.Neighbors.ToDto(),
                 Message = moveResult.Message,
+                Orientation = moveResult.Orientation.ToString()
             };
         }
         catch (Exception ex)

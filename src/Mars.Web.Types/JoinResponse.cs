@@ -9,4 +9,5 @@ public class JoinResponse
     public int TargetColumn { get; set; }
     public IEnumerable<Cell> Neighbors { get; set; }
     public IEnumerable<LowResolutionMapTile> LowResolutionMap { get; set; }
+    public string Orientation { get; set; }
 }

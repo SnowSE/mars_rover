@@ -9,8 +9,7 @@
             {
                 @if (locations.ContainsKey((row, col)))
                 {
-                    var batteryPercent = (int)(locations[(row, col)].BatteryLevel * 100.0 / gameManager.Game.StartingBatteryLevel);
-                    <RoverView Row="row" Column="col" PlayerName="@locations[(row, col)].Name" BatteryRemaining="@batteryPercent" />
+                    <RoverView Row="row" Column="col" Player="@locations[(row, col)]" />
                 }
             }
         }

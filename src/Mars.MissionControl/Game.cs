@@ -187,6 +187,7 @@ public class Game : IDisposable
         return new MoveResult(
             player.Location,
             player.BatteryLevel,
+            player.Orientation,
             Board.GetNeighbors(player.Location, PerseveranceVisibilityRadius),
             message ?? throw new Exception("Game message not set?!")
         );
@@ -217,7 +218,7 @@ public static class GameMessages
 }
 
 public record JoinResult(PlayerToken Token, Location PlayerLocation, Orientation Orientation, int BatteryLevel, Location TargetLocation, IEnumerable<Cell> Neighbors, IEnumerable<LowResolutionCell> LowResolutionMap);
-public record MoveResult(Location Location, int BatteryLevel, IEnumerable<Cell> Neighbors, string Message);
+public record MoveResult(Location Location, int BatteryLevel, Orientation Orientation, IEnumerable<Cell> Neighbors, string Message);
 
 public enum GameState
 {
