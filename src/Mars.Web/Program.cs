@@ -1,4 +1,3 @@
-using Mars.Web;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
 
@@ -16,8 +15,7 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Mars Rover", Version = "v1" });
 });
 
-builder.Services.AddSingleton<GameManager>();
-builder.Services.AddSingleton<GameStartOptions>();
+builder.Services.AddSingleton<MultiGameHoster>();
 
 var app = builder.Build();
 
@@ -39,6 +37,8 @@ app.UseSwaggerUI(c =>
 
 app.MapBlazorHub();
 app.MapControllers();
+app.MapGet("/game", () => "you made it to the game page!");
+
 
 app.MapFallbackToPage("/_Host");
 

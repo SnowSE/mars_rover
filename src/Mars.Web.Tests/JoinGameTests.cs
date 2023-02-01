@@ -8,6 +8,9 @@ namespace Mars.Web.Tests;
 public class JoinGameTests
 {
     private WebApplicationFactory<Program> _factory;
+    private MultiGameHoster multiGameHoster;
+    private string gameId;
+    private GameManager gameManager;
 
     [SetUp]
     public void Setup()
@@ -20,12 +23,14 @@ public class JoinGameTests
 
                 });
             });
+        multiGameHoster = _factory.Services.GetRequiredService<MultiGameHoster>();
+        gameId = multiGameHoster.MakeNewGame();
+        gameManager = multiGameHoster.Games[gameId];
     }
 
     [Test]
     public async Task JoinGame()
     {
-        var gameManager = _factory.Services.GetRequiredService<GameManager>();
         gameManager.StartNewGame(new GameStartOptions { Height = 5, Width = 5 });
         var client = _factory.CreateClient();
         var expectedLowResolutionMap = new[]
@@ -40,7 +45,7 @@ public class JoinGameTests
             }
         };
 
-        var joinResponse = await client.GetFromJsonAsync<JoinResponse>("/game/join?name=Jonathan");
+        var joinResponse = await client.GetFromJsonAsync<JoinResponse>($"/game/join?gameId={gameId}name=Jonathan");
 
         joinResponse.Token.Length.Should().Be(13);
         joinResponse.LowResolutionMap.Should().BeEquivalentTo(expectedLowResolutionMap);
