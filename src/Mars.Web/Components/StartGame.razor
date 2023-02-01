@@ -4,7 +4,7 @@
 @inject IConfiguration config
 @using Microsoft.Extensions.DependencyInjection.Extensions
 
-<div class="modal" id="optionsModal">
+<div class="modal" id="startGameModal">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -12,12 +12,12 @@
             </div>
             <div class="modal-body">
                 <div class="form-floating mb-3">
-                    <input class="form-control" type="number" id="width" placeholder="width" @bind=startOptions.Width />
-                    <label for="width">Width</label>
+                    <input class="form-control" type="number" id="maxPlayerMessagesPerSecond" placeholder="width" @bind=gamePlayOptions.MaxPlayerMessagesPerSecond />
+                    <label for="maxPlayerMessagesPerSecond">Max Player Messages Per Second</label>
                 </div>
                 <div class="form-floating mb-3">
-                    <input class="form-control" type="number" id="height" placeholder="height" @bind=startOptions.Height />
-                    <label for="height">Height</label>
+                    <input class="form-control" type="number" id="RechargePointsPerSecond" placeholder="height" @bind=gamePlayOptions.RechargePointsPerSecond />
+                    <label for="RechargePointsPerSecond">Recharge Points Per Second</label>
                 </div>
                 <div class="form-floating mb-3">
                     <input class="form-control" type="password" id="password" placeholder="what's the magic word?" @bind=Password @bind:event="oninput" />
@@ -33,7 +33,7 @@
     </div>
 </div>
 
-<button type="button" class="btn btn-link" style="margin-right: -12px" data-bs-toggle="modal" data-bs-target="#optionsModal">Start Game</button>
+<button type="button" class="btn btn-link" style="margin-right: -12px" data-bs-toggle="modal" data-bs-target="#startGameModal">Start Game</button>
 
 @code {
     bool startGameButtonHidden = true;
