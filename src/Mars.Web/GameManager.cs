@@ -20,6 +20,7 @@ public class GameManager
 		if (Game != null)
 		{
 			Game.GameStateChanged -= Game_GameStateChanged;
+			Game.Dispose();
 		}
 
 		Game = new Game(startOptions);

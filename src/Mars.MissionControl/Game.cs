@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 
 namespace Mars.MissionControl;
-public class Game
+public class Game : IDisposable
 {
     public Game(int boardWidth = 5, int boardHeight = 5) : this(new GameStartOptions
     {
@@ -115,8 +115,11 @@ public class Game
         foreach (var playerToken in players.Keys)
         {
             var origPlayer = players[playerToken];
-            var newPlayer = origPlayer with { BatteryLevel = origPlayer.BatteryLevel + 1 };
-            players.TryUpdate(playerToken, newPlayer, origPlayer);
+            if (origPlayer.BatteryLevel < StartingBatteryLevel)
+            {
+                var newPlayer = origPlayer with { BatteryLevel = Math.Min(StartingBatteryLevel, origPlayer.BatteryLevel + GamePlayOptions.RechargePointsPerSecond) };
+                players.TryUpdate(playerToken, newPlayer, origPlayer);
+            }
         }
         raiseStateChange();
     }
@@ -199,6 +202,11 @@ public class Game
             return true;
         }
         return false;
+    }
+
+    public void Dispose()
+    {
+        rechargeTimer.Dispose();
     }
 }
 
