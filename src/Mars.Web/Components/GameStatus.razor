@@ -1,8 +1,12 @@
-﻿
-<span style="float: right">Game State: @gameManager?.Game.GameState</span>
+﻿<span>Game State: <strong>@gameManager?.Game.GameState</strong></span>
 
 
 @code {
     [CascadingParameter(Name = "GameManager")]
     public GameManager? gameManager{ get; set; }
+
+    protected override void OnParametersSet()
+    {
+        gameManager.GameStateChanged += (_, _) => InvokeAsync(()=> StateHasChanged());
+    }
 }

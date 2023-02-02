@@ -6,24 +6,15 @@
 @inject NavigationManager navManager
 
 <CascadingValue Name="GameManager" Value="@GameManager">
-    <div class="">
-        <div class="row mt-2 mx-1 border-bottom">
-            <h1 class="col">Mars Rover - 2023 Coding Challenge (Game '@Id')</h1>
-            <div class="col-auto text-end">
-                <div class="row">
-                    <GameStatus />
-                    <div class="float-end">
-                        <a class="" href="/swagger/index.html">Swagger API Page</a>
-                    </div>
-                    <div class="float-end">
-                        <NewGame />
-                        <StartGame />
-                    </div>
-                </div>
-            </div>
+    <div class="row mt-1 mx-1 border-bottom">
+        <span class="h3 col" style="font-family:'Cascadia Code', Consolas">Mars Rover (Game '@Id')</span>
+        <div class="col-auto text-end">
+            <GameStatus /> |
+            <a class="" href="/swagger/index.html">Swagger API Page</a> |
+            <NewGame /> |
+            <StartGame />
         </div>
     </div>
-
     <BoardView />
 </CascadingValue>
 
@@ -31,7 +22,7 @@
     [Parameter]
     public string? Id { get; set; }
 
-    public GameManager? GameManager{ get; set; }
+    public GameManager? GameManager { get; set; }
 
     protected override void OnParametersSet()
     {
