@@ -2,6 +2,7 @@ using Mars.Web;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplicationInsightsTelemetry();
@@ -23,6 +24,21 @@ builder.Services.AddSingleton<MultiGameHoster>();
 
 builder.Services.AddHostedService<CleanupGameService>();
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = 429;
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Request.Query["token"].FirstOrDefault() ?? httpContext.Request.Headers.Host.ToString(),
+            factory: partition => new FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = int.Parse(builder.Configuration["ApiLimitPerSecond"] ?? "2"),
+                QueueLimit = 0,
+                Window = TimeSpan.FromSeconds(1)
+            }));
+});
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -41,12 +57,15 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Mars Rover v1");
 });
 
-app.MapBlazorHub();
+app.MapBlazorHub().DisableRateLimiting();
+
+#if !DEBUG
+app.UseRateLimiter();
+#endif
+
 app.MapControllers();
-app.MapGet("/game", () => "you made it to the game page!");
 
-
-app.MapFallbackToPage("/_Host");
+app.MapFallbackToPage("/_Host").DisableRateLimiting();
 
 app.Run();
 

@@ -1,5 +1,7 @@
 ﻿@page "/"
 @using System.Collections.Concurrent;
+@using Microsoft.AspNetCore.RateLimiting;
+@attribute [DisableRateLimiting]
 @inject MultiGameHoster multiGameHoster
 @inject NavigationManager navManager
 

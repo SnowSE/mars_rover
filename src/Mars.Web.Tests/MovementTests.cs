@@ -1,5 +1,4 @@
 ﻿using Mars.MissionControl;
-using Mars.Web.Pages;
 using Mars.Web.Types;
 using Microsoft.AspNetCore.Mvc.Testing;
 using System;
@@ -28,6 +27,7 @@ public class MovementTests
                 builder.ConfigureServices(services =>
                 {
                     services.AddApplicationInsightsTelemetry(options => options.DeveloperMode = true);
+
                 });
             });
         multiGameHoster = _factory.Services.GetRequiredService<MultiGameHoster>();
