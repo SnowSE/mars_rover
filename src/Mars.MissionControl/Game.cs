@@ -170,12 +170,20 @@ public class Game : IDisposable
             }
             else
             {
-                player = player with
+                int newBatteryLevel = player.BatteryLevel - Board[desiredLocation].Difficulty.Value;
+                if (newBatteryLevel >= 0)
                 {
-                    BatteryLevel = player.BatteryLevel - Board[desiredLocation].Difficulty.Value,
-                    Location = desiredLocation
-                };
-                message = GameMessages.MovedOK;
+                    player = player with
+                    {
+                        BatteryLevel = newBatteryLevel,
+                        Location = desiredLocation
+                    };
+                    message = GameMessages.MovedOK;
+                }
+                else
+                {
+                    message = GameMessages.InsufficientBattery;
+                }
             }
         }
 
@@ -224,6 +232,7 @@ public static class GameMessages
     public const string MovedOutOfBounds = "Looks like you tried to move beyond the borders of the game.";
     public const string MovedOK = "Moved OK";
     public const string YouMadeItToTheTarget = "You made it to the target!";
+    public const string InsufficientBattery = "Insufficient battery to make move.  Wait and recharge your battery.";
 }
 
 public record JoinResult(PlayerToken Token, Location PlayerLocation, Orientation Orientation, int BatteryLevel, Location TargetLocation, IEnumerable<Cell> Neighbors, IEnumerable<LowResolutionCell> LowResolutionMap);
