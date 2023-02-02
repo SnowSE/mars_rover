@@ -1,5 +1,7 @@
-# requirements: python -m pip install imageio
+# requirements: python -m pip install imageio opencv-python
+import os
 import imageio.v2 as imageio
+import cv2
 import numpy as np
 from argparse import ArgumentParser
 
@@ -57,14 +59,25 @@ def test_intensities_to_damages_unsigned():
     observed = intensities_to_damages(map)
     assert (expected == observed).all()
 
-
 def main():
-    parser = ArgumentParser('convertMap', description="Converts image file to json damage map (list of lists) which is printed to the console")
+    parser = ArgumentParser('convertMap', description="Converts image file to json damage map (list of lists).")
     parser.add_argument('--file', '-f', help="path to input image file (.jpg, .png, etc.)", default='../resources/map01.jpg')
+    parser.add_argument('--size', '-s', type=int, help="desired output height and width (in pixels) [defaults to original dimensions]")
+    parser.add_argument('--out-type', '-o', choices=['json', 'csv'], default='json', help="desired format for output file")
     args = parser.parse_args()
+    filename_prefix, _ = os.path.splitext(args.file)
     image = imageio.imread(args.file)
+    if args.size is not None:
+        image = cv2.resize(image, (args.size, args.size))
     damages = intensities_to_damages(image.sum(-1))
-    print(damages.tolist())
+
+    if args.out_type == 'json':
+        out_contents = str(damages.tolist())
+    else:
+        out_contents = '\n'.join([','.join(map(str, line)) for line in damages.tolist()])
+
+    with open(f"{filename_prefix}.{args.out_type}", 'w+') as outfile:
+        print(out_contents, file=outfile)
 
 if __name__ == '__main__':
     main()
