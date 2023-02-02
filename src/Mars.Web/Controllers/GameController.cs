@@ -15,6 +15,12 @@ public class GameController : ControllerBase
         this.tokenMap = multiGameHoster.TokenMap;
     }
 
+    /// <summary>
+    /// Join an existing game.  You can join in the 'Joining' state, or in the 'Playing' state.
+    /// </summary>
+    /// <param name="gameId">What game you'd like to join</param>
+    /// <param name="name">What your player name should be</param>
+    /// <returns></returns>
     [HttpGet("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
