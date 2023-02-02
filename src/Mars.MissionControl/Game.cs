@@ -45,7 +45,7 @@ public class Game : IDisposable
     #region State Changed
     public event EventHandler? GameStateChanged;
     public DateTime lastStateChange;
-    public TimeSpan stateChangeFrequency;
+    public TimeSpan stateChangeFrequency;// = TimeSpan.FromSeconds(1);
     private void raiseStateChange()
     {
         if (lastStateChange + stateChangeFrequency < DateTime.Now)
@@ -97,6 +97,7 @@ public class Game : IDisposable
     public GameState GameState { get; set; }
     public Board Board { get; private set; }
     private Timer? rechargeTimer;
+    public DateTime GameStartedOn { get; private set; }
 
     public void PlayGame() => PlayGame(new GamePlayOptions());
 
@@ -109,6 +110,7 @@ public class Game : IDisposable
 
         GamePlayOptions = gamePlayOptions;
         GameState = GameState.Playing;
+        GameStartedOn = DateTime.Now;
         rechargeTimer = new Timer(timer_Callback, null, 1_000, 1_000);
     }
 
@@ -194,8 +196,9 @@ public class Game : IDisposable
 
         if (player.Location == TargetLocation)//you win!
         {
-            winners.Enqueue(player);
             players.Remove(player.Token, out _);
+            player = player with { WinningTime = DateTime.Now - GameStartedOn };
+            winners.Enqueue(player);
             message = GameMessages.YouMadeItToTheTarget;
         }
 

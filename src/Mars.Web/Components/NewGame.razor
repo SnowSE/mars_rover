@@ -23,7 +23,7 @@
                 </div>
                 <div class="modal-footer">
                     <div class="col-auto">
-                        <button class="btn btn-link" type="button" data-bs-dismiss="modal" hidden="@startGameButtonHidden" @onclick=makeNewGame>Start New Game</button>
+                        <button class="btn btn-link" type="button" data-bs-dismiss="modal" hidden="@startGameButtonHidden" @onclick=makeNewGame>Restart Game</button>
                     </div>
                 </div>
             </div>
@@ -31,7 +31,7 @@
     </div>
 </div>
 
-<button type="button" class="btn btn-link" style="margin-right: -12px; margin-left: -12px;" data-bs-toggle="modal" data-bs-target="#optionsModal">New Game</button>
+<button type="button" class="btn btn-link" style="margin-right: -12px; margin-left: -12px;" data-bs-toggle="modal" data-bs-target="#optionsModal">Restart Game</button>
 
 @code {
     [CascadingParameter(Name = "GameManager")]
