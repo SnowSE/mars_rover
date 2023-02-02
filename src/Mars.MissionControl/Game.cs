@@ -195,6 +195,7 @@ public class Game : IDisposable
         if (player.Location == TargetLocation)//you win!
         {
             winners.Enqueue(player);
+            players.Remove(player.Token, out _);
             message = GameMessages.YouMadeItToTheTarget;
         }
 

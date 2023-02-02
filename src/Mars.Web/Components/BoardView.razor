@@ -8,6 +8,19 @@
             <RoverView Player="player" />
         }
     </div>
+
+    @if(gameManager.Game.Winners.Any())
+    {
+        <div style="position: absolute; right: 25px; top: 75px;z-index: 200;">
+            <h4>Winners:</h4>
+            <ul>
+                @foreach(var winner in gameManager.Game.Winners)
+                {
+                    <li>@winner.Name</li>
+                }
+            </ul>
+        </div>
+    }
 </div>
 
 @code {
