@@ -4,22 +4,42 @@ namespace Mars.Web;
 
 public class GameManager
 {
-	public GameManager()
+	public GameManager(IEnumerable<MissionControl.Cell>[]? parsedMaps = null)
 	{
 		CreatedOn = DateTime.Now;
-
-		StartNewGame(new GameStartOptions()
+		GameStartOptions = new GameStartOptions
 		{
 			Height = 100,
-			Width = 100
-		});
+			Width = 100,
+			ParsedMaps = parsedMaps
+		};
+		StartNewGame(GameStartOptions);
 	}
 
-	public GameStartOptions GameStartOptions { get; } = new();
+	/// <summary>
+	/// If you were to restart this game instance, what options would you use?
+	/// </summary>
+	public GameStartOptions GameStartOptions { get; }
+
+	/// <summary>
+	/// When this instance of the Mars Rover game was instantiated
+	/// </summary>
 	public DateTime CreatedOn { get; }
+
+	/// <summary>
+	/// The game instance
+	/// </summary>
 	public Game Game { get; private set; }
+
+	/// <summary>
+	/// Did something important in the game change?
+	/// </summary>
 	public event EventHandler? GameStateChanged;
 
+	/// <summary>
+	/// Start a new game
+	/// </summary>
+	/// <param name="startOptions"></param>
 	[MemberNotNull(nameof(Game))]
 	public void StartNewGame(GameStartOptions startOptions)
 	{

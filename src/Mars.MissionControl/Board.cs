@@ -2,6 +2,15 @@
 
 public class Board
 {
+    public Board(IEnumerable<Cell> cells, int mapNumber)
+    {
+        Width = cells.Max(c => c.Location.Column);
+        Height = cells.Max(c => c.Location.Row);
+        MapNumber = mapNumber;
+        Cells = new(cells.Select(c => new KeyValuePair<Location, Cell>(c.Location, c)));
+        startingLocations = initializeStartingLocations();
+    }
+
     public Board(int numRows, int numColumns, int mapNumber = 1)
     {
         Width = numRows;

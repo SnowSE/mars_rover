@@ -79,4 +79,6 @@ public class GameStartOptions
             ingenuityVisibilityRadius = value;
         }
     }
+
+    public IEnumerable<Cell>[]? ParsedMaps { get; set; }
 }

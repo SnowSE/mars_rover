@@ -19,7 +19,15 @@ public class Game : IDisposable
             throw new BoardTooSmallException();
         }
         GameState = GameState.Joining;
-        Board = new Board(startOptions.Width, startOptions.Height, startOptions.MapNumber);
+        if (startOptions.ParsedMaps != null && startOptions.ParsedMaps.Length >= startOptions.MapNumber)
+        {
+            var cells = startOptions.ParsedMaps[startOptions.MapNumber - 1];
+            Board = new Board(cells, startOptions.MapNumber);
+        }
+        else
+        {
+            Board = new Board(startOptions.Width, startOptions.Height, startOptions.MapNumber);
+        }
         Map = new Map(this);
         TargetLocation = new Location(startOptions.Width / 2, startOptions.Height / 2);
         PerseveranceVisibilityRadius = startOptions.PerseveranceVisibilityRadius;
