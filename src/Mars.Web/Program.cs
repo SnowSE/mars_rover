@@ -1,3 +1,4 @@
+using Mars.Web;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
 
@@ -16,6 +17,8 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddSingleton<MultiGameHoster>();
+
+builder.Services.AddHostedService<CleanupGameService>();
 
 var app = builder.Build();
 

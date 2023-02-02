@@ -8,13 +8,22 @@
 
     <h3>Join an Existing Game</h3>
     <div class="row">
-        @foreach (var game in multiGameHoster.Games.OrderBy(g=>g.Value.CreatedOn))
+        @if (multiGameHoster.Games.Any())
         {
-            <div class="row">
-                <p>
-                    ➡️ <a href=@($"/game/{game.Key}")>Game '@game.Key'</a><span> (started @(game.Value.CreatedOn.ToString("g")))</span>
-                </p>
-            </div>
+            @foreach (var game in multiGameHoster.Games.OrderBy(g => g.Value.CreatedOn))
+            {
+                <div class="row">
+                    <p>
+                        ➡️ <a href=@($"/game/{game.Key}")>Game '@game.Key'</a><span> (started @(
+                    game.Value.CreatedOn.ToString("g")
+                    ))</span>
+                    </p>
+                </div>
+            }
+        }
+        else
+        {
+            <p>No existing games to join...</p>
         }
     </div>
     <h3 class="mt-5">Make your own game</h3>
@@ -33,6 +42,8 @@
         {
             makeNewGame();
         }
+
+        multiGameHoster.OldGamesPurged += (_, _) => InvokeAsync(()=> StateHasChanged());
     }
 
     void makeNewGame()

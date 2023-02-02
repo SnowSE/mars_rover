@@ -3,6 +3,9 @@ using System.Collections.Concurrent;
 
 public class MultiGameHoster
 {
+    public void RaiseOldGamesPurged() => OldGamesPurged?.Invoke(this, EventArgs.Empty);
+
+    public event EventHandler OldGamesPurged;
     public ConcurrentDictionary<string, GameManager> Games { get; } = new();
     public ConcurrentDictionary<string, string> TokenMap { get; } = new();
 
@@ -16,24 +19,41 @@ public class MultiGameHoster
             var gameId = nextGame;
             Games.TryAdd(gameId, new GameManager());
 
-            nextGame = incrementGameId(nextGame);
+            nextGame = IncrementGameId(nextGame);
             return gameId;
         }
     }
 
-    private string incrementGameId(string nextGame)
+    public static string IncrementGameId(string nextGame)
     {
         var chars = nextGame.ToCharArray();
+
+        if (chars.All(c => c == 'z'))
+        {
+            return new string('a', chars.Length + 1);
+        }
+
         var lastIndex = chars.Length - 1;
         if (chars[lastIndex] < 'z')
         {
             chars[lastIndex]++;
             return new string(chars);
         }
-        else
+
+        chars[lastIndex--] = 'a';
+        while (lastIndex >= 0)
         {
-            chars[lastIndex] = 'a';
-            return new string(chars) + "a";
+            if (chars[lastIndex] < 'z')
+            {
+                chars[lastIndex]++;
+                break;
+            }
+            else
+            {
+                chars[lastIndex--] = 'a';
+            }
         }
+
+        return new string(chars);
     }
 }

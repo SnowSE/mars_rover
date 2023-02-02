@@ -58,7 +58,7 @@ public class Game : IDisposable
 
     public JoinResult Join(string playerName)
     {
-        if (GameState != GameState.Joining)
+        if (GameState != GameState.Joining && GameState != GameState.Playing)
         {
             throw new InvalidGameStateException();
         }

@@ -20,7 +20,7 @@ internal class JoinGameTests
         var game = new Game();
         var joinResult = game.Join("Jonathan");
         joinResult.Should().NotBeNull();
-        joinResult.BatteryLevel.Should().Be(500);
+        joinResult.BatteryLevel.Should().Be(new GameStartOptions().StartingBatteryLevel);
     }
 
     [Test]
@@ -38,15 +38,6 @@ internal class JoinGameTests
         var token1 = game.Join("P1");
         var token2 = game.Join("P2");
         token1.Should().NotBe(token2);
-    }
-
-    [Test]
-    public void CannotJoinGameIfPlayerStateIsNotJoining()
-    {
-        var game = new Game();
-        var token1 = game.Join("P1");
-        game.PlayGame();
-        Assert.Throws<InvalidGameStateException>(() => game.Join("P2"));
     }
 
     [Test]
