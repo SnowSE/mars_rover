@@ -8,6 +8,31 @@
             <RoverView Player="player" />
         }
     </div>
+
+    @if (gameManager.Game.Winners.Any())
+    {
+        <div style="position: absolute; right: 25px; top: 75px;z-index: 200; background-color:antiquewhite;"
+             class="p-3 rounded-3 border border-4 border-success">
+            <span class="h4">Winners:</span>
+            <table class="table table-striped table-dark">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Time</th>
+                    </tr>
+                </thead>
+                <tbody class="">
+                    @foreach (var winner in gameManager.Game.Winners)
+                    {
+                        <tr scope="row">
+                            <td>@winner.Name</td>
+                            <td>@(winner.WinningTime?.ToString(@"m\:ss\.fff"))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
 
 @code {

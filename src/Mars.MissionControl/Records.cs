@@ -32,7 +32,7 @@ public record Player
         Token = PlayerToken.Generate();
         Location = new Location(0, 0);
     }
-
+    public TimeSpan? WinningTime { get; set; }
     public int BatteryLevel { get; init; }
     public PlayerToken Token { get; private set; }
     public string Name { get; private set; }
