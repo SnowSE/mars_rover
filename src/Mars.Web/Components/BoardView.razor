@@ -2,7 +2,7 @@
 
 <div class="background" style=@(backgroundStyle)>
     <img src="/images/pin_100.png" width="40" style=@($"position: absolute; bottom: {pinBottom}%; left: {pinLeft}%; z-index: 80;") alt="Destination target location" />
-    <div style="position: absolute; top: 200px; bottom: 0; right: 110px; width: 95%; background-color: transparent;">
+    <div style="position: absolute; top: 120px; bottom: 0; right: 110px; width: 95%; background-color: transparent;">
         @foreach (var player in gameManager!.Game.Players)
         {
             <RoverView Player="player" />

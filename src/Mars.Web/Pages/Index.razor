@@ -14,11 +14,12 @@
         {
             @foreach (var game in multiGameHoster.Games.OrderBy(g => g.Value.CreatedOn))
             {
+                string minutes = (DateTime.Now - game.Value.CreatedOn).ToString("%m");
+                string minuteText = minutes == "1" ? "minute" : "minutes";
+
                 <div class="row">
                     <p>
-                        ➡️ <a href=@($"/game/{game.Key}")>Game '@game.Key'</a><span> (created @(
-                    game.Value.CreatedOn.ToString("g")
-                    ))</span>
+                        ➡️ <a href=@($"/game/{game.Key}")>Game '@game.Key'</a><span> (created @minutes @minuteText ago)</span>
                     </p>
                 </div>
             }
@@ -36,7 +37,8 @@
     </div>
 </div>
 
-@code {
+@code
+{
     protected override void OnAfterRender(bool firstRender)
     {
         if (multiGameHoster.Games.Count == 0)
