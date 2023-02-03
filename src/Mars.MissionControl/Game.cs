@@ -115,6 +115,23 @@ public class Game : IDisposable
         raiseStateChange();
     }
 
+    public MoveResult MoveIngenuity(PlayerToken token, Location destination)
+    {
+        if (GameState != GameState.Playing)
+        {
+            throw new InvalidGameStateException();
+        }
+
+        if (players.ContainsKey(token) is false)
+        {
+            throw new UnrecognizedTokenException();
+        }
+
+        var player = players[token];
+
+
+    }
+
     public MoveResult MovePerseverance(PlayerToken token, Direction direction)
     {
         if (GameState != GameState.Playing)

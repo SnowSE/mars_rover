@@ -134,6 +134,10 @@ public class StartPlayingTests
     [Test]
     public void IngenuityCanMove_1_space()
     {
-
+        var game = Helpers.CreateGame(20, 20);
+        var playerInfo = game.Join("P1");
+        var destination = new Location(playerInfo.PlayerLocation.Row + 1, playerInfo.PlayerLocation.Column + 1);
+        var moveResult = game.MoveIngenuity(playerInfo.Token, destination);
+        moveResult.Location.Should().Be(destination);
     }
 }
