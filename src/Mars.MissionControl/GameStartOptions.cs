@@ -4,9 +4,7 @@ public class GameStartOptions
 {
     private int perseveranceVisibilityRadius = 2;
     private int ingenuityVisibilityRadius = 5;
-    private int width = 100;
-    private int height = 100;
-    private int startingBatteryLevel = 2_000;
+    private int startingBatteryLevel = 18_000;
 
     public int StartingBatteryLevel
     {
@@ -51,4 +49,7 @@ public class GameStartOptions
     }
 
     public Map Map { get; set; }
+
+    public override string ToString() =>
+        $"Map#={Map.MapNumber}; BatteryLevel={StartingBatteryLevel}; PerseveranceVisibility={PerseveranceVisibilityRadius}, IngenuityVisibility={IngenuityVisibilityRadius}";
 }

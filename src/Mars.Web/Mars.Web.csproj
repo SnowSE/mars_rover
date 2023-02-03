@@ -9,6 +9,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Content Include="data\terrain_01.csv" />
+	  <Content Include="data\terrain_02.csv" />
+	  <Content Include="data\terrain_03.csv" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0-beta1" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.2" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />

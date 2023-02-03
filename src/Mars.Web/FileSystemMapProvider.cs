@@ -20,9 +20,9 @@ public class FileSystemMapProvider : IMapProvider
 
     public IEnumerable<Map> LoadMaps()
     {
-        var imagesFolder = Path.Combine(hostEnvironment.WebRootPath, "images");
+        var imagesFolder = Path.Combine(hostEnvironment.WebRootPath, "..", "data");
 
-        List<Map> maps = new ();
+        List<Map> maps = new();
         var terrainFiles = Directory.GetFiles(imagesFolder, "terrain_*.json");
         foreach (var file in terrainFiles)
         {

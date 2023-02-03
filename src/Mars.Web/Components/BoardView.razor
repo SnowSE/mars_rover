@@ -46,19 +46,29 @@
     double pinBottom;
     double pinLeft;
 
-    protected override void OnInitialized()
+    protected override void OnParametersSet()
+    {
+        gameManager.GameStateChanged += (_, _) => InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+
+        gameManager.NewGameStarted += (_, _) => InvokeAsync(()=>
+        {
+            refreshMap();
+            StateHasChanged();
+        });
+
+        refreshMap();
+        StateHasChanged();
+    }
+
+    void refreshMap()
     {
         var target = gameManager!.Game.TargetLocation;
         pinBottom = target.Row * 100.0 / gameManager.Game.Board.Height;
         pinLeft = target.Column * 100.0 / gameManager.Game.Board.Width;
 
         backgroundStyle = $"background-image: url('/images/terrain_{gameManager.Game.MapNumber:00}.png'); ";
-
-        gameManager.GameStateChanged += (_, _) => InvokeAsync(() =>
-        {
-            StateHasChanged();
-        });
-
-        StateHasChanged();
     }
 }

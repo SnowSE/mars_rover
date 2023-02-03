@@ -37,6 +37,8 @@ public class GameManager
     /// </summary>
     public event EventHandler? GameStateChanged;
 
+    public event EventHandler? NewGameStarted;
+
     /// <summary>
     /// Start a new game
     /// </summary>
@@ -50,6 +52,8 @@ public class GameManager
             Game.GameStateChanged -= Game_GameStateChanged;
             Game.Dispose();
         }
+
+        NewGameStarted?.Invoke(this, new EventArgs());
 
         Game = new Game(startOptions);
         GameStateChanged?.Invoke(this, EventArgs.Empty);
