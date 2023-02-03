@@ -21,6 +21,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddSingleton<MultiGameHoster>();
+builder.Services.AddSingleton<IMapProvider, FileSystemMapProvider>();
 
 builder.Services.AddHostedService<CleanupGameService>();
 

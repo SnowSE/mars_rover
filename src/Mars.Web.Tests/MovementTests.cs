@@ -21,15 +21,8 @@ public class MovementTests
     [SetUp]
     public async Task Setup()
     {
-        _factory = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureServices(services =>
-                {
-                    services.AddApplicationInsightsTelemetry(options => options.DeveloperMode = true);
+        _factory = IntegrationTestHelper.CreateFactory();
 
-                });
-            });
         multiGameHoster = _factory.Services.GetRequiredService<MultiGameHoster>();
         gameId = multiGameHoster.MakeNewGame();
         gameManager = multiGameHoster.Games[gameId];

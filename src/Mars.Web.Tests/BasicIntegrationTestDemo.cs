@@ -1,7 +1,28 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
+﻿using Mars.MissionControl;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Moq;
 using System.Threading.Tasks;
 
 namespace Mars.Web.Tests;
+
+public class IntegrationTestHelper
+{
+    public static WebApplicationFactory<Program> CreateFactory()
+    {
+        var mockMapProvider = new Mock<IMapProvider>();
+        mockMapProvider.Setup(m => m.LoadMaps()).Returns(new[] { Helpers.CreateMap(10, 10) });
+
+        return new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
+                {
+                    services.Replace(new ServiceDescriptor(typeof(IMapProvider), (_) => mockMapProvider.Object, ServiceLifetime.Singleton));
+                });
+            });
+    }
+}
 
 internal class BasicIntegrationTestDemo
 {
@@ -10,14 +31,7 @@ internal class BasicIntegrationTestDemo
     [SetUp]
     public void Setup()
     {
-        _factory = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureServices(services =>
-                {
-
-                });
-            });
+        _factory = IntegrationTestHelper.CreateFactory();
     }
 
     [TestCase("/", "Mars Rover")]
