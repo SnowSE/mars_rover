@@ -31,7 +31,8 @@ public class JoinGameTests
     [Test]
     public async Task JoinGame()
     {
-        gameManager.StartNewGame(new GameStartOptions { Height = 5, Width = 5 });
+        var map = Helpers.CreateMap(5, 5);
+        gameManager.StartNewGame(new GameStartOptions { Map = map });
         var client = _factory.CreateClient();
         var expectedLowResolutionMap = new[]
         {

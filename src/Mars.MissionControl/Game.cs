@@ -3,33 +3,12 @@
 namespace Mars.MissionControl;
 public class Game : IDisposable
 {
-    public Game(int boardWidth = 5, int boardHeight = 5) : this(new GameStartOptions
-    {
-        Height = boardHeight,
-        Width = boardWidth,
-        MapNumber = 1
-    })
-    {
-    }
-
     public Game(GameStartOptions startOptions)
     {
-        if (startOptions.Width < 3 || startOptions.Height < 3)
-        {
-            throw new BoardTooSmallException();
-        }
         GameState = GameState.Joining;
-        if (startOptions.ParsedMaps != null && startOptions.ParsedMaps.Length >= startOptions.MapNumber)
-        {
-            var cells = startOptions.ParsedMaps[startOptions.MapNumber - 1];
-            Board = new Board(cells, startOptions.MapNumber);
-        }
-        else
-        {
-            Board = new Board(startOptions.Width, startOptions.Height, startOptions.MapNumber);
-        }
-        Map = new Map(this);
-        TargetLocation = new Location(startOptions.Width / 2, startOptions.Height / 2);
+        Board = new Board(startOptions.Map);
+        Map = startOptions.Map;
+        TargetLocation = new Location(Map.Width / 2, Map.Height / 2);
         PerseveranceVisibilityRadius = startOptions.PerseveranceVisibilityRadius;
         IngenuityVisibilityRadius = startOptions.IngenuityVisibilityRadius;
         StartingBatteryLevel = startOptions.StartingBatteryLevel;

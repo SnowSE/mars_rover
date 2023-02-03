@@ -22,36 +22,6 @@ public class GameStartOptions
         }
     }
 
-    public int Height
-    {
-        get => height;
-        set
-        {
-            if (value < 5)
-            {
-                throw new ArgumentOutOfRangeException(nameof(Height), "Must be 5 or greater.");
-            }
-
-            height = value;
-        }
-    }
-
-    public int Width
-    {
-        get => width;
-        set
-        {
-            if (value < 5)
-            {
-                throw new ArgumentOutOfRangeException(nameof(Width), "Must be 5 or greater.");
-            }
-
-            width = value;
-        }
-    }
-
-    public int MapNumber { get; set; } = 1;
-
     public int PerseveranceVisibilityRadius
     {
         get => perseveranceVisibilityRadius;
@@ -80,5 +50,5 @@ public class GameStartOptions
         }
     }
 
-    public IEnumerable<Cell>[]? ParsedMaps { get; set; }
+    public Map Map { get; set; }
 }

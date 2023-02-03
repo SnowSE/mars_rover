@@ -5,30 +5,34 @@ public class BoardTests
     [Test]
     public void BoardIsInitializedWithARowAndColumn()
     {
-        var board = new Board(2, 2);
-        board.Cells.Count.Should().Be(4);
-        board.Width.Should().Be(2);
-        board.Height.Should().Be(2);
+        var map = Helpers.CreateMap(3, 3);
+        var board = new Board(map);
+        board.Cells.Count.Should().Be(9);
+        board.Width.Should().Be(3);
+        board.Height.Should().Be(3);
     }
 
     [Test]
     public void CanAccessCellsViaIndexer()
     {
-        var board = new Board(2, 2);
+        var map = Helpers.CreateMap(3, 3);
+        var board = new Board(map);
         board[new Location(0, 0)].Should().Be(board.Cells[new Location(0, 0)]);
     }
 
     [Test]
     public void CanAccessCellsViaIndexerUsingIntegers()
     {
-        var board = new Board(2, 2);
+        var map = Helpers.CreateMap(3, 3);
+        var board = new Board(map);
         board[0, 0].Should().Be(board.Cells[new Location(0, 0)]);
     }
 
     [Test]
-    public void GetNeighborsInCornerReturnsThree()
+    public void GetNeighborsInCornerReturnsEight()
     {
-        var board = new Board(5, 5);
+        var map = Helpers.CreateMap(3, 3);
+        var board = new Board(map);
         var neighbors = board.GetNeighbors(new Location(0, 0), 2);
         neighbors.Should().BeEquivalentTo(new[]
         {

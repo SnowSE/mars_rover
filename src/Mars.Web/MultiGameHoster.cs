@@ -7,16 +7,20 @@ public class MultiGameHoster
     public MultiGameHoster(IWebHostEnvironment hostEnvironment)
     {
         this.hostEnvironment = hostEnvironment;
+        imagesFolder = Path.Combine(hostEnvironment.WebRootPath, "images");
 
         parseMaps();
     }
 
+    string imagesFolder;
+
     private void parseMaps()
     {
-        List<List<Mars.MissionControl.Cell>> maps = new();
-        var terrainFiles = Directory.GetFiles(Path.Combine(hostEnvironment.WebRootPath, "images"), "terrain_*.json");
+        var terrainFiles = Directory.GetFiles(imagesFolder, "terrain_*.json");
         foreach (var file in terrainFiles)
         {
+            var parts = Path.GetFileName(file).Split('_', '.');
+            var mapNumber = int.Parse(parts[1]);
             var content = File.ReadAllText(file);
             var json = JsonSerializer.Deserialize<IEnumerable<IEnumerable<int>>>(content).ToList();
             var cells = new List<Mars.MissionControl.Cell>();
@@ -28,9 +32,28 @@ public class MultiGameHoster
                     cells.Add(new Mars.MissionControl.Cell(new Location(row, col), new Difficulty(cellsInRow[col])));
                 }
             }
-            maps.Add(cells);
+
+            var lowResCachedPath = Path.Combine(imagesFolder, Path.ChangeExtension(file, ".lowres.json"));
+            var lowRes = (File.Exists(lowResCachedPath)) ?
+                parseLowResolutionMap(lowResCachedPath) :
+                fillLowResoulutionMap(cells, lowResCachedPath);
+            ParsedMaps.Add(new Map(mapNumber, cells, lowRes));
         }
-        ParsedMaps = maps.ToArray();
+    }
+
+    private List<LowResolutionCell> parseLowResolutionMap(string lowResCachedPath)
+    {
+        var content = File.ReadAllText(lowResCachedPath);
+        var serializedTiles = JsonSerializer.Deserialize<IEnumerable<SerializedLowResolutionCell>>(content);
+        return new(serializedTiles.Select(t => new LowResolutionCell(t.AverageDifficulty, t.LowerLeftRow, t.LowerLeftColumn, t.UpperRightRow, t.UpperRightColumn)));
+    }
+
+    private List<LowResolutionCell> fillLowResoulutionMap(List<Mars.MissionControl.Cell> cells, string lowResCachedPath)
+    {
+        var lowResTiles = Helpers.BuildLowResMap(cells);
+        var serializableTiles = lowResTiles.Select(t => SerializedLowResolutionCell.FromLowResCel(t));
+        File.WriteAllText(lowResCachedPath, JsonSerializer.Serialize(serializableTiles));
+        return lowResTiles;
     }
 
     public void RaiseOldGamesPurged() => OldGamesPurged?.Invoke(this, EventArgs.Empty);
@@ -88,5 +111,26 @@ public class MultiGameHoster
         return new string(chars);
     }
 
-    public IEnumerable<Mars.MissionControl.Cell>[] ParsedMaps { get; private set; }
+    public List<Map> ParsedMaps { get; private set; } = new();
+}
+
+public class SerializedLowResolutionCell
+{
+    public int AverageDifficulty { get; set; }
+    public int LowerLeftRow { get; set; }
+    public int LowerLeftColumn { get; set; }
+    public int UpperRightRow { get; set; }
+    public int UpperRightColumn { get; set; }
+
+    public static SerializedLowResolutionCell FromLowResCel(LowResolutionCell lowRes)
+    {
+        return new SerializedLowResolutionCell
+        {
+            AverageDifficulty = lowRes.AverageDifficulty.Value,
+            LowerLeftColumn = lowRes.LowerLeftColumn,
+            LowerLeftRow = lowRes.LowerLeftRow,
+            UpperRightColumn = lowRes.UpperRightColumn,
+            UpperRightRow = lowRes.UpperRightRow
+        };
+    }
 }

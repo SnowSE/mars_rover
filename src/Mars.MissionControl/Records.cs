@@ -53,6 +53,15 @@ public record LowResolutionCell
         UpperRightRow = cells.Max(c => c.Location.Row);
     }
 
+    public LowResolutionCell(int averageDifficulty, int lowerLeftRow, int lowerLeftColumn, int upperRightRow, int upperRightColumn)
+    {
+        AverageDifficulty = new Difficulty(averageDifficulty);
+        LowerLeftColumn = lowerLeftColumn;
+        LowerLeftRow = lowerLeftRow;
+        UpperRightColumn = upperRightColumn;
+        UpperRightRow = upperRightRow;
+    }
+
     public Difficulty AverageDifficulty { get; private set; }
     public int LowerLeftRow { get; private set; }
     public int LowerLeftColumn { get; private set; }

@@ -1,5 +1,6 @@
 ﻿@inject ILogger<NewGame> logger
 @inject IConfiguration config
+@inject MultiGameHoster multiGameHoster
 @using Microsoft.Extensions.DependencyInjection.Extensions
 
 <div class="modal" id="optionsModal">
@@ -10,13 +11,10 @@
             </div>
             <div class="modal-body">
                 <div class="form-floating mb-3">
-                    <input class="form-control" type="number" id="width" placeholder="width" @bind=startOptions.Width />
-                    <label for="width">Width</label>
+                    <input class="form-control" type="number" id="mapNumber" placeholder="width" @bind=mapNumber />
+                    <label for="mapNumber">Map Number</label>
                 </div>
-                <div class="form-floating mb-3">
-                    <input class="form-control" type="number" id="height" placeholder="height" @bind=startOptions.Height />
-                    <label for="height">Height</label>
-                </div>
+                <p>Put in radio buttons for each of the available maps!</p>
                 <div class="form-floating mb-3">
                     <input class="form-control" type="password" id="password" placeholder="what's the magic word?" @bind=Password @bind:event="oninput" />
                     <label for="password">Password</label>
@@ -40,6 +38,7 @@
     private GameStartOptions startOptions => gameManager!.GameStartOptions;
 
     bool startGameButtonHidden = true;
+    int mapNumber;
 
     private string? password;
     public string? Password
