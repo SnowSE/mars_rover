@@ -1,8 +1,14 @@
 ﻿using Mars.Web;
 using System.Collections.Concurrent;
+using System.Text.Json;
 
 public class MultiGameHoster
 {
+    public MultiGameHoster(IMapProvider mapProvider)
+    {
+        ParsedMaps = new List<Map>(mapProvider.LoadMaps());
+    }
+
     public void RaiseOldGamesPurged() => OldGamesPurged?.Invoke(this, EventArgs.Empty);
 
     public event EventHandler OldGamesPurged;
@@ -11,13 +17,14 @@ public class MultiGameHoster
 
     private string nextGame = "a";
     private object lockObject = new();
+    private readonly IWebHostEnvironment hostEnvironment;
 
     public string MakeNewGame()
     {
         lock (lockObject)
         {
             var gameId = nextGame;
-            Games.TryAdd(gameId, new GameManager());
+            Games.TryAdd(gameId, new GameManager(ParsedMaps));
 
             nextGame = IncrementGameId(nextGame);
             return gameId;
@@ -55,5 +62,28 @@ public class MultiGameHoster
         }
 
         return new string(chars);
+    }
+
+    public List<Map> ParsedMaps { get; private set; } = new();
+}
+
+public class SerializedLowResolutionCell
+{
+    public int AverageDifficulty { get; set; }
+    public int LowerLeftRow { get; set; }
+    public int LowerLeftColumn { get; set; }
+    public int UpperRightRow { get; set; }
+    public int UpperRightColumn { get; set; }
+
+    public static SerializedLowResolutionCell FromLowResCel(LowResolutionCell lowRes)
+    {
+        return new SerializedLowResolutionCell
+        {
+            AverageDifficulty = lowRes.AverageDifficulty.Value,
+            LowerLeftColumn = lowRes.LowerLeftColumn,
+            LowerLeftRow = lowRes.LowerLeftRow,
+            UpperRightColumn = lowRes.UpperRightColumn,
+            UpperRightRow = lowRes.UpperRightRow
+        };
     }
 }

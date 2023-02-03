@@ -7,8 +7,8 @@ internal class LowResMapTests
     [Test]
     public void Games10by10OrLessGetBackSingleTile()
     {
-        var game = new Game(5, 5);
-        var map = new Map(game);
+        var map = Helpers.CreateMap(5, 5);
+        var game = Helpers.CreateGame(map);
         map.LowResolution.Count().Should().Be(1);
         map.LowResolution.First().AverageDifficulty.Value
             .Should().Be(
@@ -19,8 +19,8 @@ internal class LowResMapTests
     [Test]
     public void Game20by20GetBackTwoTiles()
     {
-        var game = new Game(20, 10);
-        var map = new Map(game);
+        var map = Helpers.CreateMap(20, 10);
+        var game = Helpers.CreateGame(map);
         map.LowResolution.Count().Should().Be(2);
         map.LowResolution.First().AverageDifficulty.Value
             .Should().Be(
@@ -32,8 +32,8 @@ internal class LowResMapTests
     [Test]
     public void Game20by65GetBack14Tiles()
     {
-        var game = new Game(20, 65);
-        var map = new Map(game);
+        var map = Helpers.CreateMap(20, 65);
+        var game = Helpers.CreateGame(map);
         map.LowResolution.Count().Should().Be(14);
         map.LowResolution.First().AverageDifficulty.Value
             .Should().Be(

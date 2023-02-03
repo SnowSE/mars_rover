@@ -1,5 +1,7 @@
 ﻿@inject ILogger<NewGame> logger
 @inject IConfiguration config
+@inject MultiGameHoster multiGameHoster
+@using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.Extensions.DependencyInjection.Extensions
 
 <div class="modal" id="optionsModal">
@@ -9,13 +11,25 @@
                 <h3 class="modal-title">New Game</h3>
             </div>
             <div class="modal-body">
-                <div class="form-floating mb-3">
-                    <input class="form-control" type="number" id="width" placeholder="width" @bind=startOptions.Width />
-                    <label for="width">Width</label>
+                <div class="row">
+                    <div class="col">
+                        <label class="input-label float-start">Select a map</label>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                <InputRadioGroup Name="mapNumber" @bind-Value=mapNumber>
+                    @foreach (var map in multiGameHoster.ParsedMaps)
+                    {
+                        <div class="form-check mx-3">
+                            <InputRadio Value="@map.MapNumber" class="form-check-input" id=@($"map{map.MapNumber}") />
+                            <label class="form-check-label float-start" for=@($"map{map.MapNumber}")>Map #@map.MapNumber</label>
+                        </div>
+                    }
+                </InputRadioGroup>
                 </div>
                 <div class="form-floating mb-3">
-                    <input class="form-control" type="number" id="height" placeholder="height" @bind=startOptions.Height />
-                    <label for="height">Height</label>
+                    <input class="form-control" type="number" id="startingBatteryLevel" placeholder="width" @bind=startOptions.StartingBatteryLevel />
+                    <label for="startingBatteryLevel">Starting Battery Level</label>
                 </div>
                 <div class="form-floating mb-3">
                     <input class="form-control" type="password" id="password" placeholder="what's the magic word?" @bind=Password @bind:event="oninput" />
@@ -40,6 +54,12 @@
     private GameStartOptions startOptions => gameManager!.GameStartOptions;
 
     bool startGameButtonHidden = true;
+    int mapNumber;
+
+    protected override void OnParametersSet()
+    {
+        mapNumber = multiGameHoster.ParsedMaps.First().MapNumber;
+    }
 
     private string? password;
     public string? Password
@@ -64,6 +84,7 @@
             return;
         }
 
+        startOptions.Map = multiGameHoster.ParsedMaps.Single(m => m.MapNumber == mapNumber);
         logger.LogInformation("Starting new game with {options}", startOptions);
         gameManager.StartNewGame(startOptions);
     }

@@ -4,46 +4,71 @@ namespace Mars.Web;
 
 public class GameManager
 {
-	public GameManager()
-	{
-		CreatedOn = DateTime.Now;
+    public GameManager(List<Map> maps)
+    {
+        CreatedOn = DateTime.Now;
+        GameStartOptions = new GameStartOptions
+        {
+            Map = maps[0],
+        };
+        this.Maps = maps;
 
-		StartNewGame(new GameStartOptions()
-		{
-			Height = 100,
-			Width = 100
-		});
-	}
+        StartNewGame(GameStartOptions);
+    }
+    public IReadOnlyList<Map> Maps { get; }
 
-	public GameStartOptions GameStartOptions { get; } = new();
-	public DateTime CreatedOn { get; }
-	public Game Game { get; private set; }
-	public event EventHandler? GameStateChanged;
+    /// <summary>
+    /// If you were to restart this game instance, what options would you use?
+    /// </summary>
+    public GameStartOptions GameStartOptions { get; }
 
-	[MemberNotNull(nameof(Game))]
-	public void StartNewGame(GameStartOptions startOptions)
-	{
-		//unsubscribe from old event
-		if (Game != null)
-		{
-			Game.GameStateChanged -= Game_GameStateChanged;
-			Game.Dispose();
-		}
+    /// <summary>
+    /// When this instance of the Mars Rover game was instantiated
+    /// </summary>
+    public DateTime CreatedOn { get; }
 
-		Game = new Game(startOptions);
-		GameStateChanged?.Invoke(this, EventArgs.Empty);
+    /// <summary>
+    /// The game instance
+    /// </summary>
+    public Game Game { get; private set; }
 
-		//subscribe to new event
-		Game.GameStateChanged += Game_GameStateChanged;
-	}
+    /// <summary>
+    /// Did something important in the game change?
+    /// </summary>
+    public event EventHandler? GameStateChanged;
 
-	public void PlayGame(GamePlayOptions playOptions)
-	{
-		Game?.PlayGame(playOptions);
-	}
+    public event EventHandler? NewGameStarted;
 
-	private void Game_GameStateChanged(object? sender, EventArgs e)
-	{
-		GameStateChanged?.Invoke(this, e);
-	}
+    /// <summary>
+    /// Start a new game
+    /// </summary>
+    /// <param name="startOptions"></param>
+    [MemberNotNull(nameof(Game))]
+    public void StartNewGame(GameStartOptions startOptions)
+    {
+        //unsubscribe from old event
+        if (Game != null)
+        {
+            Game.GameStateChanged -= Game_GameStateChanged;
+            Game.Dispose();
+        }
+
+        NewGameStarted?.Invoke(this, new EventArgs());
+
+        Game = new Game(startOptions);
+        GameStateChanged?.Invoke(this, EventArgs.Empty);
+
+        //subscribe to new event
+        Game.GameStateChanged += Game_GameStateChanged;
+    }
+
+    public void PlayGame(GamePlayOptions playOptions)
+    {
+        Game?.PlayGame(playOptions);
+    }
+
+    private void Game_GameStateChanged(object? sender, EventArgs e)
+    {
+        GameStateChanged?.Invoke(this, e);
+    }
 }

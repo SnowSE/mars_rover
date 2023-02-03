@@ -2,29 +2,13 @@
 
 public class Board
 {
-    public Board(int numRows, int numColumns, int mapNumber = 1)
+    public Board(Map map)
     {
-        Width = numRows;
-        Height = numColumns;
-        MapNumber = mapNumber;
-        Cells = new ConcurrentDictionary<Location, Cell>();
-        initializeCells();
+        Width = map.Width;
+        Height = map.Height;
+        MapNumber = map.MapNumber;
+        Cells = new ConcurrentDictionary<Location, Cell>(map.HighResolution.Select(c => new KeyValuePair<Location, Cell>(c.Location, c)));
         startingLocations = initializeStartingLocations();
-    }
-
-    private void initializeCells()
-    {
-        foreach (var row in Enumerable.Range(0, Width))
-        {
-            foreach (var col in Enumerable.Range(0, Height))
-            {
-                var newCell = new Cell(new Location(row, col), new Difficulty(1));
-                if (!Cells.TryAdd(newCell.Location, newCell))
-                {
-                    throw new UnableToGenerateBoardException();
-                }
-            }
-        }
     }
 
     private ConcurrentQueue<Location> initializeStartingLocations()

@@ -21,19 +21,13 @@ public class MovementTests
     [SetUp]
     public async Task Setup()
     {
-        _factory = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureServices(services =>
-                {
-                    services.AddApplicationInsightsTelemetry(options => options.DeveloperMode = true);
+        _factory = IntegrationTestHelper.CreateFactory();
 
-                });
-            });
         multiGameHoster = _factory.Services.GetRequiredService<MultiGameHoster>();
         gameId = multiGameHoster.MakeNewGame();
         gameManager = multiGameHoster.Games[gameId];
-        gameManager.StartNewGame(new GameStartOptions { Height = 5, Width = 5 });
+        var map = Helpers.CreateMap(5, 5);
+        gameManager.StartNewGame(new GameStartOptions { Map = map });
 
         client = _factory.CreateClient();
         player1 = await client.GetFromJsonAsync<JoinResponse>($"/game/join?gameId={gameId}&name=P1");
