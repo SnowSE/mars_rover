@@ -10,10 +10,12 @@ public interface IMapProvider
 public class FileSystemMapProvider : IMapProvider
 {
     private readonly IWebHostEnvironment hostEnvironment;
+    private readonly ILogger<FileSystemMapProvider> logger;
 
-    public FileSystemMapProvider(IWebHostEnvironment hostEnvironment)
+    public FileSystemMapProvider(IWebHostEnvironment hostEnvironment, ILogger<FileSystemMapProvider> logger)
     {
         this.hostEnvironment = hostEnvironment;
+        this.logger = logger;
     }
 
     public IEnumerable<Map> LoadMaps()
@@ -24,6 +26,8 @@ public class FileSystemMapProvider : IMapProvider
         var terrainFiles = Directory.GetFiles(imagesFolder, "terrain_*.json");
         foreach (var file in terrainFiles)
         {
+            logger.LogInformation("Processing map {file}", file);
+
             var parts = Path.GetFileName(file).Split('_', '.');
             var mapNumber = int.Parse(parts[1]);
             var content = File.ReadAllText(file);
@@ -38,7 +42,7 @@ public class FileSystemMapProvider : IMapProvider
                 }
             }
 
-            var lowResCachedPath = Path.Combine(imagesFolder, Path.ChangeExtension(file, ".lowres.json"));
+            var lowResCachedPath = Path.Combine(imagesFolder, $"lowres_{Path.GetFileName(file)}");
             var lowRes = (File.Exists(lowResCachedPath)) ?
                 parseLowResolutionMap(lowResCachedPath) :
                 fillLowResoulutionMap(cells, lowResCachedPath);
@@ -50,6 +54,8 @@ public class FileSystemMapProvider : IMapProvider
 
     private List<LowResolutionCell> parseLowResolutionMap(string lowResCachedPath)
     {
+        logger.LogInformation("Deserializing previously parsed low-res map.");
+
         var content = File.ReadAllText(lowResCachedPath);
         var serializedTiles = JsonSerializer.Deserialize<IEnumerable<SerializedLowResolutionCell>>(content);
         return new(serializedTiles.Select(t => new LowResolutionCell(t.AverageDifficulty, t.LowerLeftRow, t.LowerLeftColumn, t.UpperRightRow, t.UpperRightColumn)));
@@ -57,8 +63,11 @@ public class FileSystemMapProvider : IMapProvider
 
     private List<LowResolutionCell> fillLowResoulutionMap(List<Mars.MissionControl.Cell> cells, string lowResCachedPath)
     {
+        logger.LogInformation("Parsing low-res map...");
         var lowResTiles = Helpers.BuildLowResMap(cells);
         var serializableTiles = lowResTiles.Select(t => SerializedLowResolutionCell.FromLowResCel(t));
+
+        logger.LogInformation("Serializing low res map to disk {file}", lowResCachedPath);
         File.WriteAllText(lowResCachedPath, JsonSerializer.Serialize(serializableTiles));
         return lowResTiles;
     }
