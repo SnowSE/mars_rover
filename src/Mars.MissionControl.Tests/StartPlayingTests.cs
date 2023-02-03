@@ -1,22 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Mars.MissionControl.Tests;
-
-public class BatteryTests
-{
-    [Test]
-    public async Task BatteryCharges()
-    {
-        var scenario = new GameScenario(height: 7, width: 7, players: 1);
-        scenario.Game.PlayGame();
-        scenario.Game.MovePerseverance(scenario.Players[0].Token, Direction.Right);
-        scenario.Game.Players[0].BatteryLevel.Should().Be(scenario.Game.StartingBatteryLevel - 1);
-        await Task.Delay(TimeSpan.FromMilliseconds(1_100));
-        scenario.Game.Players[0].BatteryLevel.Should().Be(scenario.Game.StartingBatteryLevel);
-    }
-}
+﻿namespace Mars.MissionControl.Tests;
 
 public class StartPlayingTests
 {
@@ -148,24 +130,10 @@ public class StartPlayingTests
         var back = player.CellInBack();
         back.Should().Be(new Location(endRow, endCol));
     }
-}
 
-public class GameScenario
-{
-    public GameScenario(int height, int width, int players)
+    [Test]
+    public void IngenuityCanMove_1_space()
     {
-        Game = new Game(new GameStartOptions
-        {
-            Height = height,
-            Width = width,
-            MapNumber = 1,
-        });
 
-        Players = new(Enumerable.Range(0, players)
-                                .Select(p => Game.Join($"Player{p}")));
     }
-
-    public Game Game { get; private set; }
-
-    public List<JoinResult> Players { get; private set; }
 }
