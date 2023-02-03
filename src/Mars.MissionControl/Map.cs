@@ -2,37 +2,25 @@
 
 public class Map
 {
-    public const int TileSize = 10;
-    private readonly Game game;
-
-    public Map(Game game)
+    public Map(int mapNumber, IEnumerable<Cell> highResMap, IEnumerable<LowResolutionCell> lowResMap)
     {
-        this.game = game;
-        fillLowResoulutionMap();
+        MapNumber = mapNumber;
+        HighResolution = highResMap;
+        LowResolution = lowResMap;
+
+        Height = highResMap.Max(c => c.Location.Column) + 1;
+        Width = highResMap.Max(c => c.Location.Row) + 1;
+
+        if (Width < 3 || Height < 3)
+        {
+            throw new BoardTooSmallException();
+        }
     }
+
+    public int Height { get; }
+    public int Width { get; }
 
     public IEnumerable<LowResolutionCell> LowResolution { get; private set; }
-
-    private void fillLowResoulutionMap()
-    {
-        var lowResTiles = new List<LowResolutionCell>();
-
-        for (int startingRow = 0; startingRow < game.Board.Width; startingRow += TileSize)
-        {
-            for (int startingCol = 0; startingCol < game.Board.Height; startingCol += TileSize)
-            {
-                bool isInChunk(Location l) =>
-                    l.Row >= startingRow && l.Row < (startingRow + TileSize) &&
-                    l.Column >= startingCol && l.Column < (startingCol + TileSize);
-
-                var innerCells = game.Board.Cells
-                    .Where(c => isInChunk(c.Value.Location))
-                    .Select(c => c.Value);
-                var newTile = new LowResolutionCell(innerCells);
-                lowResTiles.Add(newTile);
-            }
-        }
-
-        LowResolution = lowResTiles.ToArray();
-    }
+    public int MapNumber { get; }
+    public IEnumerable<Cell> HighResolution { get; }
 }

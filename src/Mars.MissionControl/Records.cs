@@ -8,7 +8,7 @@ public record Difficulty
 {
     public Difficulty(int value)
     {
-        if (value < 0 || value > 100)
+        if (value < 0 || value > 2048)
         {
             throw new ArgumentOutOfRangeException(nameof(value));
         }
@@ -51,6 +51,15 @@ public record LowResolutionCell
         LowerLeftRow = cells.Min(c => c.Location.Row);
         UpperRightColumn = cells.Max(c => c.Location.Column);
         UpperRightRow = cells.Max(c => c.Location.Row);
+    }
+
+    public LowResolutionCell(int averageDifficulty, int lowerLeftRow, int lowerLeftColumn, int upperRightRow, int upperRightColumn)
+    {
+        AverageDifficulty = new Difficulty(averageDifficulty);
+        LowerLeftColumn = lowerLeftColumn;
+        LowerLeftRow = lowerLeftRow;
+        UpperRightColumn = upperRightColumn;
+        UpperRightRow = upperRightRow;
     }
 
     public Difficulty AverageDifficulty { get; private set; }

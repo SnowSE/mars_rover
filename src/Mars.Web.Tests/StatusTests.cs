@@ -10,14 +10,7 @@ public class StatusTests
     [SetUp]
     public void Setup()
     {
-        _factory = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureServices(services =>
-                {
-
-                });
-            });
+        _factory = IntegrationTestHelper.CreateFactory();
     }
 
     [Test]

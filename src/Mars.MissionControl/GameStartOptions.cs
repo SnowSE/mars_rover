@@ -4,9 +4,7 @@ public class GameStartOptions
 {
     private int perseveranceVisibilityRadius = 2;
     private int ingenuityVisibilityRadius = 5;
-    private int width = 100;
-    private int height = 100;
-    private int startingBatteryLevel = 100;
+    private int startingBatteryLevel = 18_000;
 
     public int StartingBatteryLevel
     {
@@ -21,36 +19,6 @@ public class GameStartOptions
             startingBatteryLevel = value;
         }
     }
-
-    public int Height
-    {
-        get => height;
-        set
-        {
-            if (value < 5)
-            {
-                throw new ArgumentOutOfRangeException(nameof(Height), "Must be 5 or greater.");
-            }
-
-            height = value;
-        }
-    }
-
-    public int Width
-    {
-        get => width;
-        set
-        {
-            if (value < 5)
-            {
-                throw new ArgumentOutOfRangeException(nameof(Width), "Must be 5 or greater.");
-            }
-
-            width = value;
-        }
-    }
-
-    public int MapNumber { get; set; } = 1;
 
     public int PerseveranceVisibilityRadius
     {
@@ -79,4 +47,9 @@ public class GameStartOptions
             ingenuityVisibilityRadius = value;
         }
     }
+
+    public Map Map { get; set; }
+
+    public override string ToString() =>
+        $"Map#={Map.MapNumber}; BatteryLevel={StartingBatteryLevel}; PerseveranceVisibility={PerseveranceVisibilityRadius}, IngenuityVisibility={IngenuityVisibilityRadius}";
 }
