@@ -6,7 +6,7 @@ public class GameStartOptions
     private int ingenuityVisibilityRadius = 5;
     private int width = 100;
     private int height = 100;
-    private int startingBatteryLevel = 100;
+    private int startingBatteryLevel = 2_000;
 
     public int StartingBatteryLevel
     {

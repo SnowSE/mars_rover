@@ -33,7 +33,7 @@ builder.Services.AddRateLimiter(options =>
             factory: partition => new FixedWindowRateLimiterOptions
             {
                 AutoReplenishment = true,
-                PermitLimit = int.Parse(builder.Configuration["ApiLimitPerSecond"] ?? "2"),
+                PermitLimit = int.Parse(builder.Configuration["ApiLimitPerSecond"] ?? throw new Exception("Unable to find ApiLimitPerSecond in config")),
                 QueueLimit = 0,
                 Window = TimeSpan.FromSeconds(1)
             }));
