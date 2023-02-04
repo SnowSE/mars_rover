@@ -124,7 +124,7 @@ public class MovementTests
         var destinationCol = player1.StartingColumn - 1_000;
         var response = await client.GetFromJsonAsync<IngenuityMoveResponse>(
             $"/game/moveingenuity?token={token}&destinationRow={destinationRow}&directionCol={destinationCol}");
-        response.Message.Should().Be(GameMessages.IngenuityTooFar);
+        response.Message.Should().Be(GameMessages.MovedOutOfBounds);
     }
 
     [Test]

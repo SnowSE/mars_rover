@@ -13,6 +13,7 @@ public class Game : IDisposable
         PerseveranceVisibilityRadius = startOptions.PerseveranceVisibilityRadius;
         IngenuityVisibilityRadius = startOptions.IngenuityVisibilityRadius;
         StartingBatteryLevel = startOptions.StartingBatteryLevel;
+        IngenuityStartingBatteryLevel = Board.Width * 2 + Board.Height * 2;
     }
 
     public int MapNumber => Board.MapNumber;
@@ -20,7 +21,7 @@ public class Game : IDisposable
     public Location TargetLocation { get; private set; }
     public int PerseveranceVisibilityRadius { get; }
     public int IngenuityVisibilityRadius { get; }
-    public int StartingBatteryLevel => Board.Width * 2 + Board.Height * 2;
+    public int StartingBatteryLevel { get; }
     public int IngenuityStartingBatteryLevel { get; }
     public Map Map { get; private set; }
     private ConcurrentDictionary<PlayerToken, Player> players = new();
