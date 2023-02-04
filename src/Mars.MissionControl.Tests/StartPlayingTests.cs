@@ -154,6 +154,6 @@ public class StartPlayingTests
 
         var moveResult = game.MoveIngenuity(playerInfo.Token, destination);
 
-        moveResult.Message.Should().Be(GameMessages.IngenuityTooFar);
+        moveResult.Message.Should().Be(GameMessages.MovedOutOfBounds);
     }
 }
