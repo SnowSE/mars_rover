@@ -20,7 +20,8 @@ public class Game : IDisposable
     public Location TargetLocation { get; private set; }
     public int PerseveranceVisibilityRadius { get; }
     public int IngenuityVisibilityRadius { get; }
-    public int StartingBatteryLevel { get; }
+    public int StartingBatteryLevel => Board.Width * 2 + Board.Height * 2;
+    public int IngenuityStartingBatteryLevel { get; }
     public Map Map { get; private set; }
     private ConcurrentDictionary<PlayerToken, Player> players = new();
     private ConcurrentDictionary<string, PlayerToken> playerTokenCache = new();
@@ -57,7 +58,8 @@ public class Game : IDisposable
         {
             BatteryLevel = StartingBatteryLevel,
             PerseveranceLocation = startingLocation,
-            IngenuityLocation = startingLocation, 
+            IngenuityLocation = startingLocation,
+            IngenuityBatteryLevel = StartingBatteryLevel,
             Orientation = getRandomOrientation()
         };
         if (!players.TryAdd(player.Token, player) ||
@@ -137,13 +139,27 @@ public class Game : IDisposable
 
         var deltaRow = Math.Abs(destination.Row - player.IngenuityLocation.Row);
         var deltaCol = Math.Abs(destination.Column - player.IngenuityLocation.Column);
-        if(deltaRow >= 3 || deltaCol >= 3)
+        var movementCost = Math.Max(deltaCol, deltaCol);
+
+        if (player.IngenuityBatteryLevel < movementCost)
+        {
+            message = GameMessages.IngenuityOutOfBattery;
+        }
+        else if (destination.Row < 0 || destination.Column < 0 || destination.Row > Board.Height || destination.Column > Board.Width)
+        {
+            message = GameMessages.MovedOutOfBounds;
+        }
+        else if(deltaRow >= 3 || deltaCol >= 3)
         {
             message = GameMessages.IngenuityTooFar;
         }
         else
         {
-            player = player with { IngenuityLocation = destination };
+            player = player with 
+            {
+                IngenuityLocation = destination ,
+                IngenuityBatteryLevel = player.IngenuityBatteryLevel - movementCost
+            };
             message = GameMessages.IngenuityMoveOK;
         }
 
@@ -156,6 +172,7 @@ public class Game : IDisposable
 
         return new IngenuityMoveResult(
             player.IngenuityLocation,
+            player.IngenuityBatteryLevel,
             Board.GetNeighbors(player.PerseveranceLocation, IngenuityVisibilityRadius),
             message ?? throw new Exception("Game message not set?!")
         );
@@ -270,13 +287,14 @@ public static class GameMessages
     public const string MovedOK = "Moved OK";
     public const string YouMadeItToTheTarget = "You made it to the target!";
     public const string InsufficientBattery = "Insufficient battery to make move.  Wait and recharge your battery.";
+    public const string IngenuityOutOfBattery = "Ingenuity does not have sufficient battery.";
     public const string IngenuityMoveOK = "Ingenuity moved OK.";
     public const string IngenuityTooFar = "Ingenuity cannot fly that far at once.";
 }
 
 public record JoinResult(PlayerToken Token, Location PlayerLocation, Orientation Orientation, int BatteryLevel, Location TargetLocation, IEnumerable<Cell> Neighbors, IEnumerable<LowResolutionCell> LowResolutionMap);
 public record MoveResult(Location Location, int BatteryLevel, Orientation Orientation, IEnumerable<Cell> Neighbors, string Message);
-public record IngenuityMoveResult(Location Location, IEnumerable<Cell> Neighbors, string Message);
+public record IngenuityMoveResult(Location Location, int BatteryLevel, IEnumerable<Cell> Neighbors, string Message);
 
 public enum GameState
 {

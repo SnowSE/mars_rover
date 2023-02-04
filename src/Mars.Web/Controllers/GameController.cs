@@ -162,6 +162,7 @@ public class GameController : ControllerBase
                         Column = moveResult.Location.Column,
                         Neighbors = moveResult.Neighbors.ToDto(),
                         Message = moveResult.Message,
+                        BatteryLevel = moveResult.BatteryLevel
                     };
                 }
                 catch (Exception ex)
