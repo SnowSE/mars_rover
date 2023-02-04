@@ -1,6 +1,4 @@
-﻿using System.Collections.Concurrent;
-
-namespace Mars.Web.Controllers;
+﻿namespace Mars.Web.Controllers;
 
 [ApiController]
 [Route("[controller]")]
@@ -117,6 +115,53 @@ public class GameController : ControllerBase
                         Neighbors = moveResult.Neighbors.ToDto(),
                         Message = moveResult.Message,
                         Orientation = moveResult.Orientation.ToString()
+                    };
+                }
+                catch (Exception ex)
+                {
+                    return Problem("Unable to move", statusCode: 400, title: ex.Message);
+                }
+            }
+        }
+
+        return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
+    }
+
+    /// <summary>
+    /// Move the Ingenuity helicopter.
+    /// </summary>
+    /// <param name="token"></param>
+    /// <param name="destinationColumn"></param>
+    /// <param name="destinationRow"></param>
+    /// <returns></returns>
+    [HttpGet("[action]")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public ActionResult<IngenuityMoveResponse> MoveIngenuity(string token, int destinationRow, int destinationColumn)
+    {
+        if (tokenMap.TryGetValue(token, out string? gameId))
+        {
+            if (games.TryGetValue(gameId, out var gameManager))
+            {
+                PlayerToken? playerToken;
+                if (!gameManager.Game.TryTranslateToken(token, out playerToken))
+                {
+                    return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
+                }
+
+                if (gameManager.Game.GameState != GameState.Playing)
+                {
+                    return Problem("Unable to move, invalid game state.", statusCode: 400, title: "Game not in the Playing state.");
+                }
+
+                try
+                {
+                    var moveResult = gameManager.Game.MoveIngenuity(playerToken!, new Location(destinationRow, destinationColumn));
+                    return new IngenuityMoveResponse
+                    {
+                        Row = moveResult.Location.Row,
+                        Column = moveResult.Location.Column,
+                        Neighbors = moveResult.Neighbors.ToDto(),
+                        Message = moveResult.Message,
                     };
                 }
                 catch (Exception ex)

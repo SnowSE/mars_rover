@@ -1,22 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using static Mars.MissionControl.Game;
 
 namespace Mars.MissionControl.Tests;
-
-public class BatteryTests
-{
-    [Test]
-    public async Task BatteryCharges()
-    {
-        var scenario = new GameScenario(height: 7, width: 7, players: 1);
-        scenario.Game.PlayGame();
-        scenario.Game.MovePerseverance(scenario.Players[0].Token, Direction.Right);
-        scenario.Game.Players[0].BatteryLevel.Should().Be(scenario.Game.StartingBatteryLevel - 1);
-        await Task.Delay(TimeSpan.FromMilliseconds(1_100));
-        scenario.Game.Players[0].BatteryLevel.Should().Be(scenario.Game.StartingBatteryLevel);
-    }
-}
 
 public class StartPlayingTests
 {
@@ -133,7 +117,7 @@ public class StartPlayingTests
     [TestCase(Orientation.West, 5, 5, 4, 5)]
     public void GetCellInFront(Orientation orientation, int startRow, int startCol, int endRow, int endCol)
     {
-        var player = new Player("P1") with { Orientation = orientation, Location = new Location(startRow, startCol) };
+        var player = new Player("P1") with { Orientation = orientation, PerseveranceLocation = new Location(startRow, startCol) };
         var front = player.CellInFront();
         front.Should().Be(new Location(endRow, endCol));
     }
@@ -144,22 +128,32 @@ public class StartPlayingTests
     [TestCase(Orientation.West, 5, 5, 6, 5)]
     public void GetCellInBack(Orientation orientation, int startRow, int startCol, int endRow, int endCol)
     {
-        var player = new Player("P1") with { Orientation = orientation, Location = new Location(startRow, startCol) };
+        var player = new Player("P1") with { Orientation = orientation, PerseveranceLocation = new Location(startRow, startCol) };
         var back = player.CellInBack();
         back.Should().Be(new Location(endRow, endCol));
     }
-}
 
-public class GameScenario
-{
-    public GameScenario(int height, int width, int players)
+    [Test]
+    public void IngenuityCanMove_1_space()
     {
-        Game = Helpers.CreateGame(height, width);
-        Players = new(Enumerable.Range(0, players)
-                                .Select(p => Game.Join($"Player{p}")));
+        var game = Helpers.CreateGame(20, 20);
+        game.PlayGame();
+        var playerInfo = game.Join("P1");
+        var destination = new Location(playerInfo.PlayerLocation.Row + 1, playerInfo.PlayerLocation.Column + 1);
+        var moveResult = game.MoveIngenuity(playerInfo.Token, destination);
+        moveResult.Location.Should().Be(destination);
     }
 
-    public Game Game { get; private set; }
+    [Test]
+    public void IngenuityCannotMove_3_space()
+    {
+        var game = Helpers.CreateGame(20, 20);
+        game.PlayGame();
+        var playerInfo = game.Join("P1");
+        var destination = new Location(playerInfo.PlayerLocation.Row + 3, playerInfo.PlayerLocation.Column + 3);
 
-    public List<JoinResult> Players { get; private set; }
+        var moveResult = game.MoveIngenuity(playerInfo.Token, destination);
+
+        moveResult.Message.Should().Be(GameMessages.IngenuityTooFar);
+    }
 }

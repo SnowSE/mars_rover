@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using static Mars.MissionControl.Game;
 
 namespace Mars.MissionControl;
 public class Game : IDisposable
@@ -50,10 +51,13 @@ public class Game : IDisposable
             throw new InvalidGameStateException();
         }
 
-        var player = new Player(playerName) { BatteryLevel = StartingBatteryLevel };
+        var player = new Player(playerName);
+        var startingLocation = Board.PlaceNewPlayer(player);
         player = player with
         {
-            Location = Board.PlaceNewPlayer(player),
+            BatteryLevel = StartingBatteryLevel,
+            PerseveranceLocation = startingLocation,
+            IngenuityLocation = startingLocation, 
             Orientation = getRandomOrientation()
         };
         if (!players.TryAdd(player.Token, player) ||
@@ -66,11 +70,11 @@ public class Game : IDisposable
 
         return new JoinResult(
             player.Token,
-            player.Location,
+            player.PerseveranceLocation,
             player.Orientation,
             player.BatteryLevel,
             TargetLocation,
-            Board.GetNeighbors(player.Location, PerseveranceVisibilityRadius),
+            Board.GetNeighbors(player.PerseveranceLocation, PerseveranceVisibilityRadius),
             Map.LowResolution
         );
     }
@@ -113,6 +117,48 @@ public class Game : IDisposable
             }
         }
         raiseStateChange();
+    }
+
+    public IngenuityMoveResult MoveIngenuity(PlayerToken token, Location destination)
+    {
+        if (GameState != GameState.Playing)
+        {
+            throw new InvalidGameStateException();
+        }
+
+        if (players.ContainsKey(token) is false)
+        {
+            throw new UnrecognizedTokenException();
+        }
+
+        var player = players[token];
+        var unmodifiedPlayer = player;
+        string? message;
+
+        var deltaRow = Math.Abs(destination.Row - player.IngenuityLocation.Row);
+        var deltaCol = Math.Abs(destination.Column - player.IngenuityLocation.Column);
+        if(deltaRow >= 3 || deltaCol >= 3)
+        {
+            message = GameMessages.IngenuityTooFar;
+        }
+        else
+        {
+            player = player with { IngenuityLocation = destination };
+            message = GameMessages.IngenuityMoveOK;
+        }
+
+        if (!players.TryUpdate(token, player, unmodifiedPlayer))
+        {
+            throw new UnableToUpdatePlayerException();
+        }
+
+        raiseStateChange();
+
+        return new IngenuityMoveResult(
+            player.IngenuityLocation,
+            Board.GetNeighbors(player.PerseveranceLocation, IngenuityVisibilityRadius),
+            message ?? throw new Exception("Game message not set?!")
+        );
     }
 
     public MoveResult MovePerseverance(PlayerToken token, Direction direction)
@@ -165,7 +211,7 @@ public class Game : IDisposable
                     player = player with
                     {
                         BatteryLevel = newBatteryLevel,
-                        Location = desiredLocation
+                        PerseveranceLocation = desiredLocation
                     };
                     message = GameMessages.MovedOK;
                 }
@@ -181,7 +227,7 @@ public class Game : IDisposable
             throw new UnableToUpdatePlayerException();
         }
 
-        if (player.Location == TargetLocation)//you win!
+        if (player.PerseveranceLocation == TargetLocation)//you win!
         {
             players.Remove(player.Token, out _);
             player = player with { WinningTime = DateTime.Now - GameStartedOn };
@@ -192,15 +238,15 @@ public class Game : IDisposable
         raiseStateChange();
 
         return new MoveResult(
-            player.Location,
+            player.PerseveranceLocation,
             player.BatteryLevel,
             player.Orientation,
-            Board.GetNeighbors(player.Location, PerseveranceVisibilityRadius),
+            Board.GetNeighbors(player.PerseveranceLocation, PerseveranceVisibilityRadius),
             message ?? throw new Exception("Game message not set?!")
         );
     }
 
-    public Location GetPlayerLocation(PlayerToken token) => players[token].Location;
+    public Location GetPlayerLocation(PlayerToken token) => players[token].PerseveranceLocation;
     public bool TryTranslateToken(string tokenString, out PlayerToken? token)
     {
         token = null;
@@ -224,10 +270,13 @@ public static class GameMessages
     public const string MovedOK = "Moved OK";
     public const string YouMadeItToTheTarget = "You made it to the target!";
     public const string InsufficientBattery = "Insufficient battery to make move.  Wait and recharge your battery.";
+    public const string IngenuityMoveOK = "Ingenuity moved OK.";
+    public const string IngenuityTooFar = "Ingenuity cannot fly that far at once.";
 }
 
 public record JoinResult(PlayerToken Token, Location PlayerLocation, Orientation Orientation, int BatteryLevel, Location TargetLocation, IEnumerable<Cell> Neighbors, IEnumerable<LowResolutionCell> LowResolutionMap);
 public record MoveResult(Location Location, int BatteryLevel, Orientation Orientation, IEnumerable<Cell> Neighbors, string Message);
+public record IngenuityMoveResult(Location Location, IEnumerable<Cell> Neighbors, string Message);
 
 public enum GameState
 {

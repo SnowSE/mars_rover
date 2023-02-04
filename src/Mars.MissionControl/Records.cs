@@ -30,13 +30,15 @@ public record Player
 
         Name = name;
         Token = PlayerToken.Generate();
-        Location = new Location(0, 0);
+        PerseveranceLocation = new Location(0, 0);
+        IngenuityLocation = new Location(0, 0);
     }
     public TimeSpan? WinningTime { get; set; }
     public int BatteryLevel { get; init; }
     public PlayerToken Token { get; private set; }
     public string Name { get; private set; }
-    public Location Location { get; init; }
+    public Location PerseveranceLocation { get; init; }
+    public Location IngenuityLocation { get;init; }
     public Orientation Orientation { get; init; }
 }
 

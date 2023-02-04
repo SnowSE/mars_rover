@@ -1,0 +1,28 @@
+﻿@inject IConfiguration config
+
+<div style=@($"position: absolute; bottom: {bottomPercent}%; left: {leftPercent}%; z-index: 100")>
+    <img src=@imageName alt="@Player?.Name" />
+    <div class="playerName">
+        <span>@Player?.Name</span>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter(Name = "GameManager")]
+    public GameManager? gameManager { get; set; }
+
+    [Parameter]
+    public Player? Player{ get; set; }
+
+    private double leftPercent, bottomPercent;
+    private string imageName = "images/HELI_icon.png";
+
+    protected override void OnParametersSet()
+    {
+        if (Player == null || gameManager == null)
+            return;
+
+        leftPercent = ((double)Player.IngenuityLocation.Row) / gameManager.Game.Board.Width * 100;
+        bottomPercent = ((double)Player.IngenuityLocation.Column) / gameManager.Game.Board.Height * 100;
+    }
+}
