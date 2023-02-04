@@ -1,0 +1,20 @@
+progress {
+    accent-color: green;
+    width: 8rem;
+    position: absolute;
+    bottom: 0px;
+}
+
+span {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.playerName {
+    background: rgba(204, 204, 204, 0.5);
+    position: absolute;
+    left: 0px;
+    bottom: 10px;
+    padding-left: 6px;
+    padding-right: 6px;
+}

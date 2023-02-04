@@ -7,13 +7,7 @@ public class GameScenario
 {
     public GameScenario(int height, int width, int players)
     {
-        Game = new Game(new GameStartOptions
-        {
-            Height = height,
-            Width = width,
-            MapNumber = 1,
-        });
-
+        Game = Helpers.CreateGame(height, width);
         Players = new(Enumerable.Range(0, players)
                                 .Select(p => Game.Join($"Player{p}")));
     }

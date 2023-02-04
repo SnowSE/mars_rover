@@ -117,6 +117,17 @@ public class MovementTests
     }
 
     [Test]
+    public async Task MoveIngenuity()
+    {
+        var token = player1.Token;
+        var destinationRow = player1.StartingRow -1_000;
+        var destinationCol = player1.StartingColumn - 1_000;
+        var response = await client.GetFromJsonAsync<IngenuityMoveResponse>(
+            $"/game/moveingenuity?token={token}&destinationRow={destinationRow}&directionCol={destinationCol}");
+        response.Message.Should().Be(GameMessages.IngenuityTooFar);
+    }
+
+    [Test]
     public async Task P1CannotMoveWithInvalidDirection()
     {
         var token = player1.Token;

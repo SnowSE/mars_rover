@@ -1,4 +1,6 @@
-﻿namespace Mars.MissionControl.Tests;
+﻿using static Mars.MissionControl.Game;
+
+namespace Mars.MissionControl.Tests;
 
 public class StartPlayingTests
 {
@@ -115,7 +117,7 @@ public class StartPlayingTests
     [TestCase(Orientation.West, 5, 5, 4, 5)]
     public void GetCellInFront(Orientation orientation, int startRow, int startCol, int endRow, int endCol)
     {
-        var player = new Player("P1") with { Orientation = orientation, Location = new Location(startRow, startCol) };
+        var player = new Player("P1") with { Orientation = orientation, PerseveranceLocation = new Location(startRow, startCol) };
         var front = player.CellInFront();
         front.Should().Be(new Location(endRow, endCol));
     }
@@ -126,7 +128,7 @@ public class StartPlayingTests
     [TestCase(Orientation.West, 5, 5, 6, 5)]
     public void GetCellInBack(Orientation orientation, int startRow, int startCol, int endRow, int endCol)
     {
-        var player = new Player("P1") with { Orientation = orientation, Location = new Location(startRow, startCol) };
+        var player = new Player("P1") with { Orientation = orientation, PerseveranceLocation = new Location(startRow, startCol) };
         var back = player.CellInBack();
         back.Should().Be(new Location(endRow, endCol));
     }
@@ -135,9 +137,23 @@ public class StartPlayingTests
     public void IngenuityCanMove_1_space()
     {
         var game = Helpers.CreateGame(20, 20);
+        game.PlayGame();
         var playerInfo = game.Join("P1");
         var destination = new Location(playerInfo.PlayerLocation.Row + 1, playerInfo.PlayerLocation.Column + 1);
         var moveResult = game.MoveIngenuity(playerInfo.Token, destination);
         moveResult.Location.Should().Be(destination);
+    }
+
+    [Test]
+    public void IngenuityCannotMove_3_space()
+    {
+        var game = Helpers.CreateGame(20, 20);
+        game.PlayGame();
+        var playerInfo = game.Join("P1");
+        var destination = new Location(playerInfo.PlayerLocation.Row + 3, playerInfo.PlayerLocation.Column + 3);
+
+        var moveResult = game.MoveIngenuity(playerInfo.Token, destination);
+
+        moveResult.Message.Should().Be(GameMessages.IngenuityTooFar);
     }
 }
