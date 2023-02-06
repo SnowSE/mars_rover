@@ -37,14 +37,7 @@ public class GameController : ControllerBase
                     StartingColumn = joinResult.PlayerLocation.Column,
                     StartingRow = joinResult.PlayerLocation.Row,
                     Neighbors = joinResult.Neighbors.ToDto(),
-                    LowResolutionMap = joinResult.LowResolutionMap.Select(t => new LowResolutionMapTile
-                    {
-                        AverageDifficulty = t.AverageDifficulty.Value,
-                        LowerLeftRow = t.LowerLeftRow,
-                        LowerLeftColumn = t.LowerLeftColumn,
-                        UpperRightColumn = t.UpperRightColumn,
-                        UpperRightRow = t.UpperRightRow
-                    }),
+                    LowResolutionMap = joinResult.LowResolutionMap.ToDto(),
                     TargetRow = joinResult.TargetLocation.Row,
                     TargetColumn = joinResult.TargetLocation.Column,
                     Orientation = joinResult.Orientation.ToString()

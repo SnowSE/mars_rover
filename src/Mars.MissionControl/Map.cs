@@ -23,4 +23,19 @@ public class Map
     public IEnumerable<LowResolutionCell> LowResolution { get; private set; }
     public int MapNumber { get; }
     public IEnumerable<Cell> HighResolution { get; }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is Map map &&
+               Height == map.Height &&
+               Width == map.Width &&
+               EqualityComparer<IEnumerable<LowResolutionCell>>.Default.Equals(LowResolution, map.LowResolution) &&
+               MapNumber == map.MapNumber &&
+               EqualityComparer<IEnumerable<Cell>>.Default.Equals(HighResolution, map.HighResolution);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Height, Width, LowResolution, MapNumber, HighResolution);
+    }
 }

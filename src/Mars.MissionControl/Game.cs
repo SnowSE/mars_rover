@@ -202,7 +202,7 @@ public class Game : IDisposable
                 BatteryLevel = player.BatteryLevel - 1,
                 Orientation = player.Orientation.Turn(direction)
             };
-            message = "Turned OK";
+            message = GameMessages.TurnedOK;
         }
         else
         {
@@ -285,6 +285,7 @@ public class Game : IDisposable
 public static class GameMessages
 {
     public const string MovedOutOfBounds = "Looks like you tried to move beyond the borders of the game.";
+    public const string TurnedOK = "Turned OK";
     public const string MovedOK = "Moved OK";
     public const string YouMadeItToTheTarget = "You made it to the target!";
     public const string InsufficientBattery = "Insufficient battery to make move.  Wait and recharge your battery.";
@@ -293,21 +294,3 @@ public static class GameMessages
     public const string IngenuityTooFar = "Ingenuity cannot fly that far at once.";
 }
 
-public record JoinResult(PlayerToken Token, Location PlayerLocation, Orientation Orientation, int BatteryLevel, Location TargetLocation, IEnumerable<Cell> Neighbors, IEnumerable<LowResolutionCell> LowResolutionMap);
-public record MoveResult(Location Location, int BatteryLevel, Orientation Orientation, IEnumerable<Cell> Neighbors, string Message);
-public record IngenuityMoveResult(Location Location, int BatteryLevel, IEnumerable<Cell> Neighbors, string Message);
-
-public enum GameState
-{
-    Joining,
-    Playing,
-    GameOver
-}
-
-public enum Direction
-{
-    Forward,
-    Left,
-    Right,
-    Reverse
-}

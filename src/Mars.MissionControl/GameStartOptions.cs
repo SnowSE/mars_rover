@@ -50,6 +50,23 @@ public class GameStartOptions
 
     public Map Map { get; set; }
 
+    public override bool Equals(object? obj)
+    {
+        return obj is GameStartOptions options &&
+               perseveranceVisibilityRadius == options.perseveranceVisibilityRadius &&
+               ingenuityVisibilityRadius == options.ingenuityVisibilityRadius &&
+               startingBatteryLevel == options.startingBatteryLevel &&
+               StartingBatteryLevel == options.StartingBatteryLevel &&
+               PerseveranceVisibilityRadius == options.PerseveranceVisibilityRadius &&
+               IngenuityVisibilityRadius == options.IngenuityVisibilityRadius &&
+               EqualityComparer<Map>.Default.Equals(Map, options.Map);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(perseveranceVisibilityRadius, ingenuityVisibilityRadius, startingBatteryLevel, StartingBatteryLevel, PerseveranceVisibilityRadius, IngenuityVisibilityRadius, Map);
+    }
+
     public override string ToString() =>
         $"Map#={Map.MapNumber}; BatteryLevel={StartingBatteryLevel}; PerseveranceVisibility={PerseveranceVisibilityRadius}, IngenuityVisibility={IngenuityVisibilityRadius}";
 }

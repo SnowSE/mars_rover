@@ -1,73 +1,30 @@
 ﻿namespace Mars.MissionControl;
 
 public record Location(int Row, int Column);
-
 public record Cell(Location Location, Difficulty Difficulty);
+public record JoinResult(PlayerToken Token, Location PlayerLocation, Orientation Orientation, int BatteryLevel, Location TargetLocation, IEnumerable<Cell> Neighbors, IEnumerable<LowResolutionCell> LowResolutionMap);
+public record MoveResult(Location Location, int BatteryLevel, Orientation Orientation, IEnumerable<Cell> Neighbors, string Message);
+public record IngenuityMoveResult(Location Location, int BatteryLevel, IEnumerable<Cell> Neighbors, string Message);
 
-public record Difficulty
+public enum Orientation
 {
-    public Difficulty(int value)
-    {
-        if (value < 0 || value > 2048)
-        {
-            throw new ArgumentOutOfRangeException(nameof(value));
-        }
-
-        Value = value;
-    }
-
-    public int Value { get; init; }
+    North,
+    East,
+    South,
+    West
 }
 
-public record Player
+public enum GameState
 {
-    public Player(string name)
-    {
-        if (String.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentNullException(nameof(name));
-        }
-
-        Name = name;
-        Token = PlayerToken.Generate();
-        PerseveranceLocation = new Location(0, 0);
-        IngenuityLocation = new Location(0, 0);
-    }
-    public TimeSpan? WinningTime { get; set; }
-    public int BatteryLevel { get; init; }
-    public PlayerToken Token { get; private set; }
-    public string Name { get; private set; }
-    public Location PerseveranceLocation { get; init; }
-    public Location IngenuityLocation { get;init; }
-    public int IngenuityBatteryLevel { get; init; }
-    public Orientation Orientation { get; init; }
+    Joining,
+    Playing,
+    GameOver
 }
 
-public enum Orientation { North, East, South, West }
-
-public record LowResolutionCell
+public enum Direction
 {
-    public LowResolutionCell(IEnumerable<Cell> cells)
-    {
-        AverageDifficulty = new Difficulty((int)cells.Average(c => c.Difficulty.Value));
-        LowerLeftColumn = cells.Min(c => c.Location.Column);
-        LowerLeftRow = cells.Min(c => c.Location.Row);
-        UpperRightColumn = cells.Max(c => c.Location.Column);
-        UpperRightRow = cells.Max(c => c.Location.Row);
-    }
-
-    public LowResolutionCell(int averageDifficulty, int lowerLeftRow, int lowerLeftColumn, int upperRightRow, int upperRightColumn)
-    {
-        AverageDifficulty = new Difficulty(averageDifficulty);
-        LowerLeftColumn = lowerLeftColumn;
-        LowerLeftRow = lowerLeftRow;
-        UpperRightColumn = upperRightColumn;
-        UpperRightRow = upperRightRow;
-    }
-
-    public Difficulty AverageDifficulty { get; private set; }
-    public int LowerLeftRow { get; private set; }
-    public int LowerLeftColumn { get; private set; }
-    public int UpperRightRow { get; private set; }
-    public int UpperRightColumn { get; private set; }
+    Forward,
+    Left,
+    Right,
+    Reverse
 }
