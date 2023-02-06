@@ -54,18 +54,18 @@ The password required to restart a game or begin playing is `password`.  If you 
 4) Check to see if your request was successful or not.  
 
     ```c#
-    if (!r.IsSuccessStatusCode)
+    if (!response.IsSuccessStatusCode)
     {
         Console.WriteLine("Unfortunately there was a problem joining that game. :(");
         Console.WriteLine("Error details:");
-        Console.WriteLine(await r.Content.ReadAsStringAsync());
+        Console.WriteLine(await response.Content.ReadAsStringAsync());
     }    
     ```
 
 5) If it was successful, you can turn the JSON you got back in the response into a C# object for you to work with.
 
     ```c#
-    var joinResponse = await r.Content.ReadFromJsonAsync<JoinResponse>();
+    var joinResponse = await response.Content.ReadFromJsonAsync<JoinResponse>();
 
     //hang on to these for later
     int ingenuityRow = joinResponse.StartingRow;
@@ -107,7 +107,7 @@ The password required to restart a game or begin playing is `password`.  If you 
         public int AverageDifficulty { get; set; }
     }
     ```
-    
+
     </details>
 
 6) Now that you've joined the game, you need to wait for the game state to change from 'Joining' to 'Playing'.  You can check the game state at any time by submitting a GET request to /game/status passing the token you got back from you join request as a query string parameter.  For example:
