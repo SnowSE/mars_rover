@@ -77,6 +77,7 @@ The password required to restart a game or begin playing is `password`.  If you 
     <details>
     <summary>Click here for the definition of JoinResponse and its related classes</summary>
 
+    ```C#
     ///JoinResponse is a class like this:
     public class JoinResponse
     {
@@ -105,8 +106,8 @@ The password required to restart a game or begin playing is `password`.  If you 
         public int UpperRightColumn { get; set; }
         public int AverageDifficulty { get; set; }
     }
-
     ```
+    
     </details>
 
 6) Now that you've joined the game, you need to wait for the game state to change from 'Joining' to 'Playing'.  You can check the game state at any time by submitting a GET request to /game/status passing the token you got back from you join request as a query string parameter.  For example:
