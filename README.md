@@ -2,41 +2,169 @@
 
 [![Release to prod](https://github.com/SnowSE/mars_rover/actions/workflows/deploy-main-branch.yaml/badge.svg)](https://github.com/SnowSE/mars_rover/actions/workflows/deploy-main-branch.yaml)
 
-# mars_rover
+# 2023 Snow College Coding Competition: Mars Rover
 
-Another Snow College coding competition game. Get your rover to the destination before everyone else!
+Object: Get your rover to the destination before everyone else!
 
-## Object of the game
+## Summary of Game Mechanics
 
-Get your rover to the target first!
+- Join the game and get a token that represents your user.  
+- Review the low-resolution map of the surface of mars and make a guess of what route you might want to use to get to the target.  
+- Wait for the game to go from 'Joining' status to 'Playing' status so you can start moving your rover
+- Every cell on the board has a 'difficulty' value, which will reduce your battery power.  
+- You can only move onto that cell if you have enough battery.  
+- Your battery will re-charge by a certain amount every second, so if you run out of battery and cannot move you just need to wait a bit and you'll be able to start moving again.
+- The Ingenuity helicopter's battery does not recharge.  Once it runs out, it can no longer fly.  However, because it flies above the terrain, its battery is only decreased by distance it covers (not the difficulty of the terrain).
+- The Perseverance rover can see the 'difficulty' values of all the cells within <strong>two</strong> cells of itself.
+- The Ingenuity helicopter can see the 'difficulty' values of all the cells within <strong>five</strong> cells of itself.
+- The Perseverance rover can only move forward or back one cell at a time.  It can also turn right or left within its same cell (turning does not move the rover to another cell).
+- The Ingenuity helicopter can move up to two cells in any direction (including diagonally), so you can quickly scout out the terrain in front of the rover to help determine the most efficient path to the target.
+- Fly the Ingenuity helicopter by giving it a destination row/column within two cells of its current location, if you give it a destination more than two cells away it will ignore the command.
+- There is a rate-limit applied to all game players which limits how many movement commands per second you can send to both Perseverance and Ingenuity.
+- Winners are determined by the amount of time elapsed from when the game state becomes 'Playing' to when your rover makes it to the target.
 
-## Terms
+## API Documentation
 
-| Term  | Definition                                                        |
-| ----- | ----------------------------------------------------------------- |
-| Map   | Collection of cells representing the martian landscape            |
-| Rover | The Perseverance rover, the car driving around the moon           |
-| Cell  | Representation of an area of ground with a damage score from 0-50 |
+There is an [API Playground](https://snow-rover.azurewebsites.net/swagger/index.html) where you can see exactly what endpoints exist on the server, what arguments need to be passed in, and what type of data you get back.  Feel free to use that to help you get familiar with how to interact with the server.  While you *can* play the game using nothing more than the API Playground, or a commandline with `curl` in bash or `Invoke-RestMethod` in PowerShell (or even from a few different browser tabs), you will have the best success by writing a program to automate your server interactions.
 
-## Features - Perseverance Rover
+## Server Password
 
-- Map of unknown size
-- Rover has a battery level, moving over terrain will drain your battery based on the difficulty of the terrain.  If you run out of battery you cannot move and have to wait for your solar panels to charge your batteries.  Your batteries will charge at the rate of x points per second.
-- Terrain can vary from smooth to difficult, driving over more difficult terrain drains the the rover battery more.
-- A low-res map is given to each player at the beginning of the game.  From this you can learn the overall size of the board and, on average, what parts of the board are more or less difficult.
-- As your rover moves you can see high-res terrain info (its location + 2 cells in each direction, 25 cells total).
-- Rover can turn right, turn left, go forward, go backward (no diagonal movement)
-- As your rover moves over terrain, its battery level decreases by the terrain difficulty
+The password required to restart a game or begin playing is `password`.  If you go to https://snow-rover.azurewebsites.net you can even create your very own game where you can play with different settings without getting in anyone else's way.  Every game is automatically deleted after an hour, but you can continue to make new games.
 
-### Endpoints
+## Detailed Game Mechanics
 
-[Swagger API Page](https://snow-rover.azurewebsites.net/swagger/index.html)
+> There is an [console-based client](https://github.com/snow-jallen/MarsClient/blob/master/ConsoleClient/Program.cs) that you can use as a reference example.  
 
-## Future Enhancement - Ingenuity Helicopter
+1) Head over to <https://snow-rover.azurewebsites.net> and join a game - the game ID will be the last part of the URL, and it will show up in the title of the page ("Mars Rover (Game 'g')", for example).
+2) Create a HttpClient object that will let you send HTTP requests.  Unless you're hosting your own instance of the server, the server address will be "https://snow-rover.azurewebsites.net".
 
-- Ingenuity starts off with a certain amount of battery power
-- Moving over a cell costs 1 battery point
-- Ingenuity can see current location + 5 cells in each direction
-- Ingenuity can move in any direction (including diagonal) by giving it a destination within 2 cells of its current location
-- If no movement command sent within 1 second Ingenuity lands, no battery is used while landed
-- When the battery dies, you're dead.  Ingenuity does not recharge.
+   ```c#
+   var httpClient = new HttpClient { BaseAddress = new Uri("https://snow-rover.azurewebsites.net") };
+   ```
+
+3) Send a HTTP GET request to /game/join with a game ID and your name as query string parameters.  The game ID For example:
+
+    ```c#
+    var response = await httpClient.GetAsync($"/game/join?gameId={gameId}&name={name}");
+    ```
+
+4) Check to see if your request was successful or not.  
+
+    ```c#
+    if (!r.IsSuccessStatusCode)
+    {
+        Console.WriteLine("Unfortunately there was a problem joining that game. :(");
+        Console.WriteLine("Error details:");
+        Console.WriteLine(await r.Content.ReadAsStringAsync());
+    }    
+    ```
+
+5) If it was successful, you can turn the JSON you got back in the response into a C# object for you to work with.
+
+    ```c#
+    var joinResponse = await r.Content.ReadFromJsonAsync<JoinResponse>();
+
+    //hang on to these for later
+    int ingenuityRow = joinResponse.StartingRow;
+    int ingenuityCol = joinResponse.StartingColumn;
+    ```
+
+    The JoinResponse object tells you what your token is (you'll send that back to the server for every subsequent request), where your rover landed, where you want to go (the target/destination), a low-resolution map of the entire game area, and a high-resolution map of the cells around your rover.  
+
+    <details>
+    <summary>Click here for the definition of JoinResponse and its related classes</summary>
+
+    ///JoinResponse is a class like this:
+    public class JoinResponse
+    {
+        public string Token { get; set; }
+        public int StartingRow { get; set; }
+        public int StartingColumn { get; set; }
+        public int TargetRow { get; set; }
+        public int TargetColumn { get; set; }
+        public Neighbor[] Neighbors { get; set; }
+        public LowResolutionCell[] LowResolutionMap { get; set; }
+        public string Orientation { get; set; }
+    }
+
+    public class Neighbor
+    {
+        public int Row { get; set; }
+        public int Column { get; set; }
+        public int Difficulty { get; set; }
+    }
+
+    public class LowResolutionCell
+    {
+        public int LowerLeftRow { get; set; }
+        public int LowerLeftColumn { get; set; }
+        public int UpperRightRow { get; set; }
+        public int UpperRightColumn { get; set; }
+        public int AverageDifficulty { get; set; }
+    }
+
+    ```
+    </details>
+
+6) Now that you've joined the game, you need to wait for the game state to change from 'Joining' to 'Playing'.  You can check the game state at any time by submitting a GET request to /game/status passing the token you got back from you join request as a query string parameter.  For example:
+
+    ```c#
+    while (true)
+    {
+        var statusResult = await httpClient.GetFromJsonAsync<StatusResult>($"/game/status?token={joinResponse.Token}");
+        if (statusResult.status == "Playing")
+            break;
+        await Task.Delay(TimeSpan.FromSeconds(1));
+    }
+
+    public class StatusResult
+    {
+        public string status { get; set; }
+    }
+    ```
+
+1) Now that the game is ready to play, you can start moving both the Perseverance rover, as well as the Ingenuity helicopter.  You move the Perseverance rover by sending it a command to either move forward, turn right, turn left, or move in reverse.  Something like this:
+
+    ```c#
+    var response = await httpClient.GetAsync($"/game/moveperseverance?token={joinResponse.Token}&direction={direction}");
+    if (response.IsSuccessStatusCode)
+    {
+        var moveResult = await response.Content.ReadFromJsonAsync<MoveResponse>();
+        // make decisions based on what you get back in moveResult.
+    }
+
+    public class MoveResponse
+    {
+        public int Row { get; set; }
+        public int Column { get; set; }
+        public int BatteryLevel { get; set; }
+        public Neighbor[] Neighbors { get; set; }
+        public string Message { get; set; }
+        public string Orientation { get; set; }
+    }
+    ```
+
+1) Move the Ingenuity helicopter by giving it a destination to fly to (within two cells of its current location)
+
+    ```c#
+    //move up:
+    await moveHelicopter(ingenuityRow, ingenuityCol + 2);
+
+    //move right 
+    await moveHelicopter(ingenuityRow+2, ingenuityCol);
+    
+    async Task moveHelicopter(int row, int col)
+    {
+        var response = await httpClient.GetAsync($"/game/moveingenuity?token={joinResponse.Token}&destinationRow={row}&destinationColumn={col}");
+        if (response.IsSuccessStatusCode)
+        {
+            var moveResponse = await response.Content.ReadFromJsonAsync<IngenuityMoveResponse>();
+            ingenuityRow = moveResponse.Row;
+            ingenuityCol = moveResponse.Column;
+
+            //update your internal high-res map with moveResponse.Neighbors
+        }
+    }
+    ```
+
+1) Keep moving until the Perseverance row/col matches the Target row/col.  Remember, winners are based solely on elapsed time and the fastest way to get to the target is to make sure you don't have to wait for your battery to recharge, so be smart about the path you take to the target. :)
