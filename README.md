@@ -11,17 +11,20 @@ Object: Get your rover to the destination before everyone else!
 - Join the game and get a token that represents your user.  
 - Review the low-resolution map of the surface of mars and make a guess of what route you might want to use to get to the target.  
 - Wait for the game to go from 'Joining' status to 'Playing' status so you can start moving your rover
-- Every cell on the board has a 'difficulty' value, which will reduce your battery power.  
-- You can only move onto that cell if you have enough battery.  
-- Your battery will re-charge by a certain amount every second, so if you run out of battery and cannot move you just need to wait a bit and you'll be able to start moving again.
-- The Ingenuity helicopter's battery does not recharge.  Once it runs out, it can no longer fly.  However, because it flies above the terrain, its battery is only decreased by distance it covers (not the difficulty of the terrain).
-- The Perseverance rover can see the 'difficulty' values of all the cells within <strong>two</strong> cells of itself.
-- The Ingenuity helicopter can see the 'difficulty' values of all the cells within <strong>five</strong> cells of itself.
-- The Perseverance rover can only move forward or back one cell at a time.  It can also turn right or left within its same cell (turning does not move the rover to another cell).
-- The Ingenuity helicopter can move up to two cells in any direction (including diagonally), so you can quickly scout out the terrain in front of the rover to help determine the most efficient path to the target.
-- Fly the Ingenuity helicopter by giving it a destination row/column within two cells of its current location, if you give it a destination more than two cells away it will ignore the command.
+- Perseverance (the rover)
+  - Every cell on the board has a 'difficulty' value, which will reduce Perseverance's battery power.  
+  - Perseverance can only move onto that cell if it has enough battery.  
+  - Perseverance's battery will re-charge by a certain amount every second, so if you run out of battery and cannot move you just need to wait a bit and you'll be able to start moving again.
+  - The Perseverance rover can see the 'difficulty' values of all the cells within <strong>two</strong> cells of itself.
+  - The Perseverance rover can only move forward or back one cell at a time.  It can also turn right or left within its same cell (turning does not move the rover to another cell).
+- Ingenuity (the helicopter)
+  - The Ingenuity helicopter's battery does not recharge.  Once it runs out, it can no longer fly.  However, because it flies above the terrain, its battery is only decreased by distance it covers (not the difficulty of the terrain).
+  - The Ingenuity helicopter can see the 'difficulty' values of all the cells within <strong>five</strong> cells of itself.
+  - The Ingenuity helicopter can move up to two cells in any direction (including diagonally), so you can quickly scout out the terrain in front of the rover to help determine the most efficient path to the target.
+  - Fly the Ingenuity helicopter by giving it a destination row/column within two cells of its current location, if you give it a destination more than two cells away it will ignore the command.
 - There is a rate-limit applied to all game players which limits how many movement commands per second you can send to both Perseverance and Ingenuity.
 - Winners are determined by the amount of time elapsed from when the game state becomes 'Playing' to when your rover makes it to the target.
+- Tip: Make sure you use the high-resolution information you get back from Perseverance and Ingenuity about their surrounding cells to help improve your planning of how you will get to the target.
 
 ## API Documentation
 
