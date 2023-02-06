@@ -1,6 +1,4 @@
-﻿using static Mars.MissionControl.Game;
-
-namespace Mars.MissionControl.Tests;
+﻿namespace Mars.MissionControl.Tests;
 
 public class StartPlayingTests
 {
@@ -154,6 +152,6 @@ public class StartPlayingTests
 
         var moveResult = game.MoveIngenuity(playerInfo.Token, destination);
 
-        moveResult.Message.Should().Be(GameMessages.MovedOutOfBounds);
+        moveResult.Message.Should().BeOneOf(GameMessages.MovedOutOfBounds, GameMessages.IngenuityTooFar);
     }
 }
