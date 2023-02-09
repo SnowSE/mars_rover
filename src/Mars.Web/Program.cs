@@ -1,10 +1,20 @@
 using Mars.Web;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using Serilog.Exceptions;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((c, l) =>
+{
+    l.WriteTo.Console()
+    .Enrich.WithExceptionDetails()
+    .WriteTo.Seq("http://localhost:80");
+});
+
 builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();

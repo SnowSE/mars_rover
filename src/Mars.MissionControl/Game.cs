@@ -247,6 +247,7 @@ public class Game : IDisposable
 
         if (player.PerseveranceLocation == TargetLocation)//you win!
         {
+
             players.Remove(player.Token, out _);
             player = player with { WinningTime = DateTime.Now - GameStartedOn };
             winners.Enqueue(player);
