@@ -80,10 +80,10 @@ public class SerializedLowResolutionCell
         return new SerializedLowResolutionCell
         {
             AverageDifficulty = lowRes.AverageDifficulty.Value,
-            LowerLeftColumn = lowRes.LowerLeftColumn,
-            LowerLeftRow = lowRes.LowerLeftRow,
-            UpperRightColumn = lowRes.UpperRightColumn,
-            UpperRightRow = lowRes.UpperRightRow
+            LowerLeftColumn = lowRes.LowerLeftY,
+            LowerLeftRow = lowRes.LowerLeftX,
+            UpperRightColumn = lowRes.UpperRightY,
+            UpperRightRow = lowRes.UpperRightX
         };
     }
 }

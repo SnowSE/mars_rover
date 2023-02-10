@@ -5,11 +5,11 @@ public static class Helpers
     public static Map CreateMap(int height, int width)
     {
         var cells = new List<Cell>();
-        for (int row = 0; row < width; row++)
+        for (int x = 0; x < width; x++)
         {
-            for (int col = 0; col < height; col++)
+            for (int y = 0; y < height; y++)
             {
-                cells.Add(new Cell(new Location(row, col), new Difficulty(1)));
+                cells.Add(new Cell(new Location(x, y), new Difficulty(1)));
             }
         }
         var map = new Map(1, cells, BuildLowResMap(cells));
@@ -42,17 +42,17 @@ public static class Helpers
     {
         var lowResTiles = new List<LowResolutionCell>();
 
-        int height = cells.Max(c => c.Location.Column) + 1;
-        int width = cells.Max(c => c.Location.Row) + 1;
+        int height = cells.Max(c => c.Location.Y) + 1;
+        int width = cells.Max(c => c.Location.X) + 1;
         int tileSize = 10;
 
-        for (int startingRow = 0; startingRow < width; startingRow += tileSize)
+        for (int startingX = 0; startingX < width; startingX += tileSize)
         {
-            for (int startingCol = 0; startingCol < height; startingCol += tileSize)
+            for (int startingY = 0; startingY < height; startingY += tileSize)
             {
                 bool isInChunk(Location l) =>
-                    l.Row >= startingRow && l.Row < (startingRow + tileSize) &&
-                    l.Column >= startingCol && l.Column < (startingCol + tileSize);
+                    l.X >= startingX && l.X < (startingX + tileSize) &&
+                    l.Y >= startingY && l.Y < (startingY + tileSize);
 
                 var innerCells = cells
                     .Where(c => isInChunk(c.Location))

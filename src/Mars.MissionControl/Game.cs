@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using static Mars.MissionControl.Game;
 
 namespace Mars.MissionControl;
 public class Game : IDisposable
@@ -138,27 +137,27 @@ public class Game : IDisposable
         var unmodifiedPlayer = player;
         string? message;
 
-        var deltaRow = Math.Abs(destination.Row - player.IngenuityLocation.Row);
-        var deltaCol = Math.Abs(destination.Column - player.IngenuityLocation.Column);
-        var movementCost = Math.Max(deltaCol, deltaCol);
+        var deltaX = Math.Abs(destination.X - player.IngenuityLocation.X);
+        var deltaY = Math.Abs(destination.Y - player.IngenuityLocation.Y);
+        var movementCost = Math.Max(deltaY, deltaY);
 
         if (player.IngenuityBatteryLevel < movementCost)
         {
             message = GameMessages.IngenuityOutOfBattery;
         }
-        else if (destination.Row < 0 || destination.Column < 0 || destination.Row > Board.Height || destination.Column > Board.Width)
+        else if (destination.X < 0 || destination.Y < 0 || destination.X > Board.Height || destination.Y > Board.Width)
         {
             message = GameMessages.MovedOutOfBounds;
         }
-        else if(deltaRow >= 3 || deltaCol >= 3)
+        else if (deltaX >= 3 || deltaY >= 3)
         {
             message = GameMessages.IngenuityTooFar;
         }
         else
         {
-            player = player with 
+            player = player with
             {
-                IngenuityLocation = destination ,
+                IngenuityLocation = destination,
                 IngenuityBatteryLevel = player.IngenuityBatteryLevel - movementCost
             };
             message = GameMessages.IngenuityMoveOK;

@@ -17,8 +17,8 @@ public class StartPlayingTests
         scenario.Game.PlayGame();
         var direction = scenario.Players[0].PlayerLocation switch
         {
-            { Column: 0 } => Direction.Right,
-            { Row: 0 } => Direction.Forward,
+            { Y: 0 } => Direction.Right,
+            { X: 0 } => Direction.Forward,
             _ => Direction.Forward
         };
         var moveResult = scenario.Game.MovePerseverance(scenario.Players[0].Token, direction);
@@ -137,7 +137,7 @@ public class StartPlayingTests
         var game = Helpers.CreateGame(20, 20);
         game.PlayGame();
         var playerInfo = game.Join("P1");
-        var destination = new Location(playerInfo.PlayerLocation.Row + 1, playerInfo.PlayerLocation.Column + 1);
+        var destination = new Location(playerInfo.PlayerLocation.X + 1, playerInfo.PlayerLocation.Y + 1);
         var moveResult = game.MoveIngenuity(playerInfo.Token, destination);
         moveResult.Location.Should().Be(destination);
     }
@@ -148,7 +148,7 @@ public class StartPlayingTests
         var game = Helpers.CreateGame(20, 20);
         game.PlayGame();
         var playerInfo = game.Join("P1");
-        var destination = new Location(playerInfo.PlayerLocation.Row + 3, playerInfo.PlayerLocation.Column + 3);
+        var destination = new Location(playerInfo.PlayerLocation.X + 3, playerInfo.PlayerLocation.Y + 3);
 
         var moveResult = game.MoveIngenuity(playerInfo.Token, destination);
 

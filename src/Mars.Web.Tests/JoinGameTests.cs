@@ -33,10 +33,10 @@ public class JoinGameTests
             new LowResolutionMapTile
             {
                 AverageDifficulty = 1,
-                LowerLeftColumn= 0,
-                LowerLeftRow= 0,
-                UpperRightColumn = 4,
-                UpperRightRow = 4
+                LowerLeftY= 0,
+                LowerLeftX= 0,
+                UpperRightY = 4,
+                UpperRightX = 4
             }
         };
 
@@ -45,8 +45,8 @@ public class JoinGameTests
         joinResponse.Token.Length.Should().Be(13);
         joinResponse.LowResolutionMap.Should().BeEquivalentTo(expectedLowResolutionMap);
         joinResponse.Neighbors.Count().Should().BeOneOf(9, 12, 15);//9 if you're in a corner, 12 if you're one away from a corner, 15 if you're 2 away from a corner.
-        joinResponse.TargetRow.Should().BeGreaterThan(0);
-        joinResponse.TargetColumn.Should().BeGreaterThan(0);
+        joinResponse.TargetX.Should().BeGreaterThan(0);
+        joinResponse.TargetY.Should().BeGreaterThan(0);
     }
 
     [Test]

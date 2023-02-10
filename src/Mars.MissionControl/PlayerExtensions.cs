@@ -6,10 +6,10 @@ public static class PlayerExtensions
     {
         return p.Orientation switch
         {
-            Orientation.North => p.PerseveranceLocation with { Column = p.PerseveranceLocation.Column + 1 },
-            Orientation.East => p.PerseveranceLocation with { Row = p.PerseveranceLocation.Row + 1 },
-            Orientation.South => p.PerseveranceLocation with { Column = p.PerseveranceLocation.Column - 1 },
-            Orientation.West => p.PerseveranceLocation with { Row = p.PerseveranceLocation.Row - 1 },
+            Orientation.North => p.PerseveranceLocation with { Y = p.PerseveranceLocation.Y + 1 },
+            Orientation.East => p.PerseveranceLocation with { X = p.PerseveranceLocation.X + 1 },
+            Orientation.South => p.PerseveranceLocation with { Y = p.PerseveranceLocation.Y - 1 },
+            Orientation.West => p.PerseveranceLocation with { X = p.PerseveranceLocation.X - 1 },
             _ => throw new Exception("Invalid orientation")
         };
     }
@@ -18,10 +18,10 @@ public static class PlayerExtensions
     {
         return p.Orientation switch
         {
-            Orientation.North => p.PerseveranceLocation with { Column = p.PerseveranceLocation.Column - 1 },
-            Orientation.East => p.PerseveranceLocation with { Row = p.PerseveranceLocation.Row - 1 },
-            Orientation.South => p.PerseveranceLocation with { Column = p.PerseveranceLocation.Column + 1 },
-            Orientation.West => p.PerseveranceLocation with { Row = p.PerseveranceLocation.Row + 1 },
+            Orientation.North => p.PerseveranceLocation with { Y = p.PerseveranceLocation.Y - 1 },
+            Orientation.East => p.PerseveranceLocation with { X = p.PerseveranceLocation.X - 1 },
+            Orientation.South => p.PerseveranceLocation with { Y = p.PerseveranceLocation.Y + 1 },
+            Orientation.West => p.PerseveranceLocation with { X = p.PerseveranceLocation.X + 1 },
             _ => throw new Exception("Invalid orientation")
         };
     }

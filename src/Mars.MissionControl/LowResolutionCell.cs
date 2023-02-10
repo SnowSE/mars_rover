@@ -5,24 +5,24 @@ public record LowResolutionCell
     public LowResolutionCell(IEnumerable<Cell> cells)
     {
         AverageDifficulty = new Difficulty((int)cells.Average(c => c.Difficulty.Value));
-        LowerLeftColumn = cells.Min(c => c.Location.Column);
-        LowerLeftRow = cells.Min(c => c.Location.Row);
-        UpperRightColumn = cells.Max(c => c.Location.Column);
-        UpperRightRow = cells.Max(c => c.Location.Row);
+        LowerLeftY = cells.Min(c => c.Location.Y);
+        LowerLeftX = cells.Min(c => c.Location.X);
+        UpperRightY = cells.Max(c => c.Location.Y);
+        UpperRightX = cells.Max(c => c.Location.X);
     }
 
     public LowResolutionCell(int averageDifficulty, int lowerLeftRow, int lowerLeftColumn, int upperRightRow, int upperRightColumn)
     {
         AverageDifficulty = new Difficulty(averageDifficulty);
-        LowerLeftColumn = lowerLeftColumn;
-        LowerLeftRow = lowerLeftRow;
-        UpperRightColumn = upperRightColumn;
-        UpperRightRow = upperRightRow;
+        LowerLeftY = lowerLeftColumn;
+        LowerLeftX = lowerLeftRow;
+        UpperRightY = upperRightColumn;
+        UpperRightX = upperRightRow;
     }
 
     public Difficulty AverageDifficulty { get; private set; }
-    public int LowerLeftRow { get; private set; }
-    public int LowerLeftColumn { get; private set; }
-    public int UpperRightRow { get; private set; }
-    public int UpperRightColumn { get; private set; }
+    public int LowerLeftX { get; private set; }
+    public int LowerLeftY { get; private set; }
+    public int UpperRightX { get; private set; }
+    public int UpperRightY { get; private set; }
 }

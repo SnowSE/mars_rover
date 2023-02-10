@@ -3,10 +3,10 @@
 public class JoinResponse
 {
     public string Token { get; set; }
-    public int StartingRow { get; set; }
-    public int StartingColumn { get; set; }
-    public int TargetRow { get; set; }
-    public int TargetColumn { get; set; }
+    public int StartingX { get; set; }
+    public int StartingY { get; set; }
+    public int TargetX { get; set; }
+    public int TargetY { get; set; }
     public IEnumerable<Cell> Neighbors { get; set; }
     public IEnumerable<LowResolutionMapTile> LowResolutionMap { get; set; }
     public string Orientation { get; set; }

@@ -67,8 +67,8 @@
     void refreshMap()
     {
         var target = gameManager!.Game.TargetLocation;
-        pinBottom = target.Row * 100.0 / gameManager.Game.Board.Height;
-        pinLeft = target.Column * 100.0 / gameManager.Game.Board.Width;
+        pinBottom = target.X * 100.0 / gameManager.Game.Board.Height;
+        pinLeft = target.Y * 100.0 / gameManager.Game.Board.Width;
 
         backgroundStyle = $"background-image: url('/images/terrain_{gameManager.Game.MapNumber:00}.png'); ";
     }

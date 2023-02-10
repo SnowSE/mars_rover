@@ -1,6 +1,6 @@
 ﻿namespace Mars.MissionControl;
 
-public record Location(int Row, int Column);
+public record Location(int X, int Y);
 public record Cell(Location Location, Difficulty Difficulty);
 public record JoinResult(PlayerToken Token, Location PlayerLocation, Orientation Orientation, int BatteryLevel, Location TargetLocation, IEnumerable<Cell> Neighbors, IEnumerable<LowResolutionCell> LowResolutionMap);
 public record MoveResult(Location Location, int BatteryLevel, Orientation Orientation, IEnumerable<Cell> Neighbors, string Message);
