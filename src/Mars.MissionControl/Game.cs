@@ -174,7 +174,7 @@ public class Game : IDisposable
         return new IngenuityMoveResult(
             player.IngenuityLocation,
             player.IngenuityBatteryLevel,
-            Board.GetNeighbors(player.PerseveranceLocation, IngenuityVisibilityRadius),
+            Board.GetNeighbors(player.IngenuityLocation, IngenuityVisibilityRadius),
             message ?? throw new Exception("Game message not set?!")
         );
     }
