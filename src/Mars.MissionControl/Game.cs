@@ -139,7 +139,7 @@ public class Game : IDisposable
 
         var deltaX = Math.Abs(destination.X - player.IngenuityLocation.X);
         var deltaY = Math.Abs(destination.Y - player.IngenuityLocation.Y);
-        var movementCost = Math.Max(deltaY, deltaY);
+        var movementCost = Math.Max(deltaX, deltaY);
 
         if (player.IngenuityBatteryLevel < movementCost)
         {
