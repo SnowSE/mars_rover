@@ -5,6 +5,8 @@
 @inject MultiGameHoster multiGameHoster
 @inject NavigationManager navManager
 
+<PageTitle>@Id (Mars Rover)</PageTitle>
+
 <CascadingValue Name="GameManager" Value="@GameManager">
     <div class="row mt-1 mx-1 border-bottom">
         <span class="h3 col" style="font-family:'Cascadia Code', Consolas"><a href="/">Mars Rover</a> (Game '@Id')</span>
@@ -32,6 +34,7 @@
         if (multiGameHoster.Games.ContainsKey(Id))
         {
             GameManager = multiGameHoster.Games[Id];
+
         }
         else
         {
