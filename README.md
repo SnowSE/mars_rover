@@ -21,7 +21,7 @@ Object: Get your rover to the destination before everyone else!
   - The Ingenuity helicopter's battery does not recharge.  Once it runs out, it can no longer fly.  However, because it flies above the terrain, its battery is only decreased by distance it covers (not the difficulty of the terrain).
   - The Ingenuity helicopter can see the 'difficulty' values of all the cells within <strong>five</strong> cells of itself.
   - The Ingenuity helicopter can move up to two cells in any direction (including diagonally), so you can quickly scout out the terrain in front of the rover to help determine the most efficient path to the target.
-  - Fly the Ingenuity helicopter by giving it a destination row/column within two cells of its current location, if you give it a destination more than two cells away it will ignore the command.
+  - Fly the Ingenuity helicopter by giving it a destination x/y within two cells of its current location, if you give it a destination more than two cells away it will ignore the command.
 - There is a rate-limit applied to all game players which limits how many movement commands per second you can send to both Perseverance and Ingenuity.
 - Winners are determined by the amount of time elapsed from when the game state becomes 'Playing' to when your rover makes it to the target.
 - Tip: Make sure you use the high-resolution information you get back from Perseverance and Ingenuity about their surrounding cells to help improve your planning of how you will get to the target.
@@ -68,8 +68,8 @@ The password required to restart a game or begin playing is `password`.  If you 
     var joinResponse = await response.Content.ReadFromJsonAsync<JoinResponse>();
 
     //hang on to these for later
-    int ingenuityRow = joinResponse.StartingRow;
-    int ingenuityCol = joinResponse.StartingColumn;
+    int ingenuityRow = joinResponse.StartingX;
+    int ingenuityCol = joinResponse.StartingY;
     ```
 
     The JoinResponse object tells you what your token is (you'll send that back to the server for every subsequent request), where your rover landed, where you want to go (the target/destination), a low-resolution map of the entire game area, and a high-resolution map of the cells around your rover.  
@@ -82,10 +82,10 @@ The password required to restart a game or begin playing is `password`.  If you 
     public class JoinResponse
     {
         public string Token { get; set; }
-        public int StartingRow { get; set; }
-        public int StartingColumn { get; set; }
-        public int TargetRow { get; set; }
-        public int TargetColumn { get; set; }
+        public int StartingX { get; set; }
+        public int StartingY { get; set; }
+        public int TargetX { get; set; }
+        public int TargetY { get; set; }
         public Neighbor[] Neighbors { get; set; }
         public LowResolutionCell[] LowResolutionMap { get; set; }
         public string Orientation { get; set; }
@@ -93,17 +93,17 @@ The password required to restart a game or begin playing is `password`.  If you 
 
     public class Neighbor
     {
-        public int Row { get; set; }
-        public int Column { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
         public int Difficulty { get; set; }
     }
 
     public class LowResolutionCell
     {
-        public int LowerLeftRow { get; set; }
-        public int LowerLeftColumn { get; set; }
-        public int UpperRightRow { get; set; }
-        public int UpperRightColumn { get; set; }
+        public int LowerLeftX { get; set; }
+        public int LowerLeftY { get; set; }
+        public int UpperRightX { get; set; }
+        public int UpperRightY { get; set; }
         public int AverageDifficulty { get; set; }
     }
     ```
@@ -139,8 +139,8 @@ The password required to restart a game or begin playing is `password`.  If you 
 
     public class MoveResponse
     {
-        public int Row { get; set; }
-        public int Column { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
         public int BatteryLevel { get; set; }
         public Neighbor[] Neighbors { get; set; }
         public string Message { get; set; }
@@ -152,23 +152,23 @@ The password required to restart a game or begin playing is `password`.  If you 
 
     ```c#
     //move up:
-    await moveHelicopter(ingenuityRow, ingenuityCol + 2);
+    await moveHelicopter(ingenuityX, ingenuityY + 2);
 
     //move right 
-    await moveHelicopter(ingenuityRow+2, ingenuityCol);
+    await moveHelicopter(ingenuityX+2, ingenuityY);
     
-    async Task moveHelicopter(int row, int col)
+    async Task moveHelicopter(int x, int y)
     {
-        var response = await httpClient.GetAsync($"/game/moveingenuity?token={joinResponse.Token}&destinationRow={row}&destinationColumn={col}");
+        var response = await httpClient.GetAsync($"/game/moveingenuity?token={joinResponse.Token}&destinationX={x}&destinationY={y}");
         if (response.IsSuccessStatusCode)
         {
             var moveResponse = await response.Content.ReadFromJsonAsync<IngenuityMoveResponse>();
-            ingenuityRow = moveResponse.Row;
-            ingenuityCol = moveResponse.Column;
+            ingenuityX = moveResponse.X;
+            ingenuityY = moveResponse.Y;
 
             //update your internal high-res map with moveResponse.Neighbors
         }
     }
     ```
 
-1) Keep moving until the Perseverance row/col matches the Target row/col.  Remember, winners are based solely on elapsed time and the fastest way to get to the target is to make sure you don't have to wait for your battery to recharge, so be smart about the path you take to the target. :)
+1) Keep moving until the Perseverance x/y matches the Target x/y.  Remember, winners are based solely on elapsed time and the fastest way to get to the target is to make sure you don't have to wait for your battery to recharge, so be smart about the path you take to the target. :)
