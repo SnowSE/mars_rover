@@ -1,4 +1,6 @@
-﻿namespace Mars.MissionControl;
+﻿using System.Text;
+
+namespace Mars.MissionControl;
 
 /// <summary>
 /// Originally from https://github.com/dotnet/aspnetcore/blob/main/src/Servers/Kestrel/shared/CorrelationIdGenerator.cs
@@ -7,20 +9,31 @@
 internal static class IdGenerator
 {
     // Base32 encoding - in ascii sort order for easy text based sorting
-    private static readonly char[] s_encode32Chars = "0123456789ABCDEFGHIJKLMNOPQRSTUV".ToCharArray();
+    private static readonly char[] chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".ToCharArray();
 
     // Seed the _lastConnectionId for this application instance with
     // the number of 100-nanosecond intervals that have elapsed since 12:00:00 midnight, January 1, 0001
     // for a roughly increasing _lastId over restarts
     private static long _lastId = DateTime.UtcNow.Ticks;
 
-    public static string GetNextId() => GenerateId(Interlocked.Increment(ref _lastId));
+    public static string GetNextId() => GenerateRandomId();// GenerateId(Interlocked.Increment(ref _lastId));
+
+
+    private static string GenerateRandomId(int length = 16)
+    {
+        StringBuilder id = new();
+        for (int i = 0; i < length; i++)
+        {
+            id.Append(chars[Random.Shared.Next(chars.Length)]);
+        }
+        return id.ToString();
+    }
 
     private static string GenerateId(long id)
     {
         return string.Create(13, id, (buffer, value) =>
         {
-            char[] encode32Chars = s_encode32Chars;
+            char[] encode32Chars = chars;
 
             buffer[12] = encode32Chars[value & 31];
             buffer[11] = encode32Chars[(value >> 5) & 31];
