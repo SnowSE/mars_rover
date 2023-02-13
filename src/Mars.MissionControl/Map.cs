@@ -8,8 +8,8 @@ public class Map
         HighResolution = highResMap;
         LowResolution = lowResMap;
 
-        Height = highResMap.Max(c => c.Location.Column) + 1;
-        Width = highResMap.Max(c => c.Location.Row) + 1;
+        Height = highResMap.Max(c => c.Location.Y) + 1;
+        Width = highResMap.Max(c => c.Location.X) + 1;
 
         if (Width < 3 || Height < 3)
         {

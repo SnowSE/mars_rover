@@ -24,7 +24,7 @@
             return;
 
         batteryPercent = (int)(Player.IngenuityBatteryLevel * 100.0 / gameManager.Game.StartingBatteryLevel);
-        leftPercent = ((double)Player.IngenuityLocation.Row) / gameManager.Game.Board.Width * 100;
-        bottomPercent = ((double)Player.IngenuityLocation.Column) / gameManager.Game.Board.Height * 100;
+        leftPercent = ((double)Player.IngenuityLocation.X) / gameManager.Game.Board.Width * 100;
+        bottomPercent = ((double)Player.IngenuityLocation.Y) / gameManager.Game.Board.Height * 100;
     }
 }

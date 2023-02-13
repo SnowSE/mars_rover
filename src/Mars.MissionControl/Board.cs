@@ -75,14 +75,14 @@ public class Board
     public IEnumerable<Cell> GetNeighbors(Location location, int numberOfCellsOnEachSide)
     {
         var width = numberOfCellsOnEachSide;
-        var minRow = location.Row - width;
-        var maxRow = location.Row + width;
-        var minCol = location.Column - width;
-        var maxCol = location.Column + width;
+        var minRow = location.X - width;
+        var maxRow = location.X + width;
+        var minCol = location.Y - width;
+        var maxCol = location.Y + width;
 
         var neighbors = from c in Cells
                         let l = c.Value.Location
-                        where (l.Row >= minRow && l.Row <= maxRow && l.Column >= minCol && l.Column <= maxCol)
+                        where (l.X >= minRow && l.X <= maxRow && l.Y >= minCol && l.Y <= maxCol)
                         select c.Value;
         return neighbors;
     }

@@ -2,8 +2,8 @@
 
 public class MoveResponse
 {
-    public int Row { get; set; }
-    public int Column { get; set; }
+    public int X { get; set; }
+    public int Y { get; set; }
     public int BatteryLevel { get; set; }
     public IEnumerable<Cell> Neighbors { get; set; }
     public string Message { get; set; }
@@ -12,8 +12,8 @@ public class MoveResponse
 
 public class IngenuityMoveResponse
 {
-    public int Row { get; set; }
-    public int Column { get; set; }
+    public int X { get; set; }
+    public int Y { get; set; }
     public int BatteryLevel { get; set; }
     public IEnumerable<Cell> Neighbors { get; set; }
     public string Message { get; set; }

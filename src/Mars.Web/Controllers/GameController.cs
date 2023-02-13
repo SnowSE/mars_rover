@@ -34,12 +34,12 @@ public class GameController : ControllerBase
                 return new JoinResponse
                 {
                     Token = joinResult.Token.Value,
-                    StartingColumn = joinResult.PlayerLocation.Column,
-                    StartingRow = joinResult.PlayerLocation.Row,
+                    StartingY = joinResult.PlayerLocation.Y,
+                    StartingX = joinResult.PlayerLocation.X,
                     Neighbors = joinResult.Neighbors.ToDto(),
                     LowResolutionMap = joinResult.LowResolutionMap.ToDto(),
-                    TargetRow = joinResult.TargetLocation.Row,
-                    TargetColumn = joinResult.TargetLocation.Column,
+                    TargetX = joinResult.TargetLocation.X,
+                    TargetY = joinResult.TargetLocation.Y,
                     Orientation = joinResult.Orientation.ToString()
                 };
             }
@@ -102,8 +102,8 @@ public class GameController : ControllerBase
                     var moveResult = gameManager.Game.MovePerseverance(playerToken!, direction);
                     return new MoveResponse
                     {
-                        Row = moveResult.Location.Row,
-                        Column = moveResult.Location.Column,
+                        X = moveResult.Location.X,
+                        Y = moveResult.Location.Y,
                         BatteryLevel = moveResult.BatteryLevel,
                         Neighbors = moveResult.Neighbors.ToDto(),
                         Message = moveResult.Message,
@@ -151,8 +151,8 @@ public class GameController : ControllerBase
                     var moveResult = gameManager.Game.MoveIngenuity(playerToken!, new Location(destinationRow, destinationColumn));
                     return new IngenuityMoveResponse
                     {
-                        Row = moveResult.Location.Row,
-                        Column = moveResult.Location.Column,
+                        X = moveResult.Location.X,
+                        Y = moveResult.Location.Y,
                         Neighbors = moveResult.Neighbors.ToDto(),
                         Message = moveResult.Message,
                         BatteryLevel = moveResult.BatteryLevel
