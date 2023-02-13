@@ -68,8 +68,8 @@ The password required to restart a game or begin playing is `password`.  If you 
     var joinResponse = await response.Content.ReadFromJsonAsync<JoinResponse>();
 
     //hang on to these for later
-    int ingenuityRow = joinResponse.StartingX;
-    int ingenuityCol = joinResponse.StartingY;
+    int ingenuityX = joinResponse.StartingX;
+    int ingenuityY = joinResponse.StartingY;
     ```
 
     The JoinResponse object tells you what your token is (you'll send that back to the server for every subsequent request), where your rover landed, where you want to go (the target/destination), a low-resolution map of the entire game area, and a high-resolution map of the cells around your rover.  
