@@ -4,7 +4,7 @@
 
 # 2023 Snow College Coding Competition: Mars Rover
 
-Object: Get your rover to the destination before everyone else!
+Object: Get your rover to the destination before everyone else! 
 
 ## Summary of Game Mechanics
 
