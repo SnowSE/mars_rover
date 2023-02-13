@@ -4,6 +4,8 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Hellang.Middleware.ProblemDetails;
+using Serilog;
+using Serilog.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplicationInsightsTelemetry();
@@ -14,6 +16,15 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Host.UseSerilog( (context, loggerConfig) =>
+    {
+        loggerConfig.WriteTo.Console()
+        .Enrich.WithExceptionDetails()
+        .WriteTo.Seq("http://localhost:5340");
+    }
+
+    );
 
 builder.Services.AddProblemDetails(opts =>  
 {
