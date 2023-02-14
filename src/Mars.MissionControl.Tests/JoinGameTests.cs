@@ -9,8 +9,8 @@ internal class JoinGameTests
     public void GameHasTarget()
     {
         var game = Helpers.CreateGame(5, 5);
-        game.TargetLocation.Row.Should().BeGreaterThan(0);
-        game.TargetLocation.Column.Should().BeGreaterThan(0);
+        game.TargetLocation.X.Should().BeGreaterThan(0);
+        game.TargetLocation.Y.Should().BeGreaterThan(0);
     }
 
     [Test]

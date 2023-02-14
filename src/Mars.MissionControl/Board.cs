@@ -48,12 +48,12 @@ public class Board
         }
     }
 
-    public Cell this[int row, int col]
+    public Cell this[int x, int y]
     {
-        get => Cells[new Location(row, col)];
+        get => Cells[new Location(x, y)];
         set
         {
-            var location = new Location(row, col);
+            var location = new Location(x, y);
             if (!Cells.TryUpdate(location, value, Cells[location]))
             {
                 throw new UnableToUpdateBoardException();
@@ -75,15 +75,15 @@ public class Board
     public IEnumerable<Cell> GetNeighbors(Location location, int numberOfCellsOnEachSide)
     {
         var width = numberOfCellsOnEachSide;
-        var minRow = location.Row - width;
-        var maxRow = location.Row + width;
-        var minCol = location.Column - width;
-        var maxCol = location.Column + width;
+        var minX = location.X - width;
+        var maxX = location.X + width;
+        var minY = location.Y - width;
+        var maxY = location.Y + width;
 
         var neighbors = from c in Cells
-                        let l = c.Value.Location
-                        where (l.Row >= minRow && l.Row <= maxRow && l.Column >= minCol && l.Column <= maxCol)
+                        where (c.Value.Location.X >= minX && c.Value.Location.X <= maxX && c.Value.Location.Y >= minY && c.Value.Location.Y <= maxY)
                         select c.Value;
+
         return neighbors;
     }
 }

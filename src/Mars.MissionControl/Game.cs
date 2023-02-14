@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using static Mars.MissionControl.Game;
 
 namespace Mars.MissionControl;
 public class Game : IDisposable
@@ -26,7 +25,13 @@ public class Game : IDisposable
     public Map Map { get; private set; }
     private ConcurrentDictionary<PlayerToken, Player> players = new();
     private ConcurrentDictionary<string, PlayerToken> playerTokenCache = new();
-
+    public bool TryTranslateToken(string tokenString, out PlayerToken? token) => playerTokenCache.TryGetValue(tokenString, out token);
+    private static Orientation getRandomOrientation() => (Orientation)Random.Shared.Next(0, 4);
+    public GamePlayOptions? GamePlayOptions { get; private set; }
+    public GameState GameState { get; set; }
+    public Board Board { get; private set; }
+    private Timer? rechargeTimer;
+    public DateTime GameStartedOn { get; private set; }
     public ReadOnlyCollection<Player> Players =>
         new ReadOnlyCollection<Player>(players.Values.ToList());
     private ConcurrentQueue<Player> winners = new();
@@ -82,17 +87,6 @@ public class Game : IDisposable
         );
     }
 
-    private static Orientation getRandomOrientation()
-    {
-        return (Orientation)Random.Shared.Next(0, 4);
-    }
-
-    public GamePlayOptions? GamePlayOptions { get; private set; }
-    public GameState GameState { get; set; }
-    public Board Board { get; private set; }
-    private Timer? rechargeTimer;
-    public DateTime GameStartedOn { get; private set; }
-
     public void PlayGame() => PlayGame(new GamePlayOptions());
 
     public void PlayGame(GamePlayOptions gamePlayOptions)
@@ -105,10 +99,10 @@ public class Game : IDisposable
         GamePlayOptions = gamePlayOptions;
         GameState = GameState.Playing;
         GameStartedOn = DateTime.Now;
-        rechargeTimer = new Timer(timer_Callback, null, 1_000, 1_000);
+        rechargeTimer = new Timer(rechargeTimer_Callback, null, 1_000, 1_000);
     }
 
-    private void timer_Callback(object? _)
+    private void rechargeTimer_Callback(object? _)
     {
         foreach (var playerToken in players.Keys)
         {
@@ -119,6 +113,7 @@ public class Game : IDisposable
                 players.TryUpdate(playerToken, newPlayer, origPlayer);
             }
         }
+
         raiseStateChange();
     }
 
@@ -138,35 +133,35 @@ public class Game : IDisposable
         var unmodifiedPlayer = player;
         string? message;
 
-        var deltaRow = Math.Abs(destination.Row - player.IngenuityLocation.Row);
-        var deltaCol = Math.Abs(destination.Column - player.IngenuityLocation.Column);
-        var movementCost = Math.Max(deltaCol, deltaCol);
+        var deltaX = Math.Abs(destination.X - player.IngenuityLocation.X);
+        var deltaY = Math.Abs(destination.Y - player.IngenuityLocation.Y);
+        var movementCost = Math.Max(deltaX, deltaY);
 
         if (player.IngenuityBatteryLevel < movementCost)
         {
             message = GameMessages.IngenuityOutOfBattery;
         }
-        else if (destination.Row < 0 || destination.Column < 0 || destination.Row > Board.Height || destination.Column > Board.Width)
+        else if (destination.X < 0 || destination.Y < 0 || destination.X > Board.Height || destination.Y > Board.Width)
         {
             message = GameMessages.MovedOutOfBounds;
         }
-        else if(deltaRow >= 3 || deltaCol >= 3)
+        else if (deltaX >= 3 || deltaY >= 3)
         {
             message = GameMessages.IngenuityTooFar;
         }
         else
         {
-            player = player with 
+            player = player with
             {
-                IngenuityLocation = destination ,
+                IngenuityLocation = destination,
                 IngenuityBatteryLevel = player.IngenuityBatteryLevel - movementCost
             };
-            message = GameMessages.IngenuityMoveOK;
-        }
 
-        if (!players.TryUpdate(token, player, unmodifiedPlayer))
-        {
-            throw new UnableToUpdatePlayerException();
+            if (!players.TryUpdate(token, player, unmodifiedPlayer))
+            {
+                throw new UnableToUpdatePlayerException();
+            }
+            message = GameMessages.IngenuityMoveOK;
         }
 
         raiseStateChange();
@@ -174,7 +169,7 @@ public class Game : IDisposable
         return new IngenuityMoveResult(
             player.IngenuityLocation,
             player.IngenuityBatteryLevel,
-            Board.GetNeighbors(player.PerseveranceLocation, IngenuityVisibilityRadius),
+            Board.GetNeighbors(player.IngenuityLocation, IngenuityVisibilityRadius),
             message ?? throw new Exception("Game message not set?!")
         );
     }
@@ -266,16 +261,6 @@ public class Game : IDisposable
     }
 
     public Location GetPlayerLocation(PlayerToken token) => players[token].PerseveranceLocation;
-    public bool TryTranslateToken(string tokenString, out PlayerToken? token)
-    {
-        token = null;
-        if (playerTokenCache.ContainsKey(tokenString))
-        {
-            token = playerTokenCache[tokenString];
-            return true;
-        }
-        return false;
-    }
 
     public void Dispose()
     {
@@ -294,4 +279,3 @@ public static class GameMessages
     public const string IngenuityMoveOK = "Ingenuity moved OK.";
     public const string IngenuityTooFar = "Ingenuity cannot fly that far at once.";
 }
-

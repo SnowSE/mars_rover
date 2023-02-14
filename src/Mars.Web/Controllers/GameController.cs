@@ -26,7 +26,7 @@ public class GameController : ControllerBase
     /// <param name="name">What your player name should be</param>
     /// <returns></returns>
     [HttpGet("[action]")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(JoinResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<JoinResponse> Join(string gameId, string name)
     {
@@ -70,10 +70,13 @@ public class GameController : ControllerBase
     }
 
     [HttpGet("[action]")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StatusResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<StatusResponse> Status(string token)
     {
-        if (tokenMap.TryGetValue(token, out string? gameId))
+        if (tokenMap.TryGetValue(token, out string? gameId) &&
+            games.TryGetValue(gameId, out var gameManager) &&
+            gameManager.Game.TryTranslateToken(token, out _))
         {
             if (games.TryGetValue(gameId, out var gameManager))
             {
@@ -94,6 +97,7 @@ public class GameController : ControllerBase
     /// <param name="direction">If left out, a default direction of Forward will be assumed.</param>
     /// <returns></returns>
     [HttpGet("[action]")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PerseveranceMoveResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<MoveResponse> MovePerseverance(string token, Direction direction)
     {
@@ -150,6 +154,7 @@ public class GameController : ControllerBase
     /// <param name="destinationRow"></param>
     /// <returns></returns>
     [HttpGet("[action]")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IngenuityMoveResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<IngenuityMoveResponse> MoveIngenuity(string token, int destinationRow, int destinationColumn)
     {
