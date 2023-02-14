@@ -124,6 +124,7 @@ public class GameController : ControllerBase
                 }
                 catch (Exception ex)
                 {
+                    logger.LogInformation($"User {token} tried to move, but failed");
                     return Problem("Unable to move", statusCode: 400, title: ex.Message);
                 }
             }
