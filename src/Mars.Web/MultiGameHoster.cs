@@ -4,9 +4,10 @@ using System.Text.Json;
 
 public class MultiGameHoster
 {
-    public MultiGameHoster(IMapProvider mapProvider)
+    public MultiGameHoster(IMapProvider mapProvider, ILogger<Game> log)
     {
         ParsedMaps = new List<Map>(mapProvider.LoadMaps());
+        this.log = log;
     }
 
     public void RaiseOldGamesPurged() => OldGamesPurged?.Invoke(this, EventArgs.Empty);
@@ -18,13 +19,15 @@ public class MultiGameHoster
     private string nextGame = "a";
     private object lockObject = new();
     private readonly IWebHostEnvironment hostEnvironment;
+    private readonly ILogger<Game> log;
 
     public string MakeNewGame()
     {
+        
         lock (lockObject)
         {
             var gameId = nextGame;
-            Games.TryAdd(gameId, new GameManager(ParsedMaps));
+            Games.TryAdd(gameId, new GameManager(ParsedMaps, log));
 
             nextGame = IncrementGameId(nextGame);
             return gameId;

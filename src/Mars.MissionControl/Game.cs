@@ -1,9 +1,10 @@
-﻿using System.Collections.ObjectModel;
+﻿using Microsoft.Extensions.Logging;
+using System.Collections.ObjectModel;
 
 namespace Mars.MissionControl;
 public class Game : IDisposable
 {
-    public Game(GameStartOptions startOptions)
+    public Game(GameStartOptions startOptions, ILogger<Game> logger)
     {
         GameState = GameState.Joining;
         Board = new Board(startOptions.Map);
@@ -13,7 +14,11 @@ public class Game : IDisposable
         IngenuityVisibilityRadius = startOptions.IngenuityVisibilityRadius;
         StartingBatteryLevel = startOptions.StartingBatteryLevel;
         IngenuityStartingBatteryLevel = Board.Width * 2 + Board.Height * 2;
+        this.logger= logger;
+        
     }
+
+    
 
     public int MapNumber => Board.MapNumber;
 
@@ -49,11 +54,13 @@ public class Game : IDisposable
     {
         if (GameState != GameState.Joining && GameState != GameState.Playing)
         {
+            logger.LogError("Game wasn't detected");
             throw new InvalidGameStateException();
         }
 
         var player = new Player(playerName);
         var startingLocation = Board.PlaceNewPlayer(player);
+        logger.LogInformation("New player came into existance and started at location ({x}, {y}) ", startingLocation.X, startingLocation.Y);
         player = player with
         {
             BatteryLevel = StartingBatteryLevel,
@@ -65,6 +72,7 @@ public class Game : IDisposable
         if (!players.TryAdd(player.Token, player) ||
            !playerTokenCache.TryAdd(player.Token.Value, player.Token))
         {
+            logger.LogError($"Player {player.Token.Value} couldn't be added");
             throw new Exception("Unable to add new player...that token already exists?!");
         }
 
@@ -90,6 +98,8 @@ public class Game : IDisposable
     public GameState GameState { get; set; }
     public Board Board { get; private set; }
     private Timer? rechargeTimer;
+    private readonly ILogger<Game> logger;
+
     public DateTime GameStartedOn { get; private set; }
 
     public void PlayGame() => PlayGame(new GamePlayOptions());
@@ -169,6 +179,7 @@ public class Game : IDisposable
         }
 
         raiseStateChange();
+        logger.LogInformation("player: {name} moved helicopter correctly and moved to location: {loc}", player.Name, player.IngenuityLocation);
 
         return new IngenuityMoveResult(
             player.IngenuityLocation,
@@ -176,6 +187,7 @@ public class Game : IDisposable
             Board.GetNeighbors(player.IngenuityLocation, IngenuityVisibilityRadius),
             message ?? throw new Exception("Game message not set?!")
         );
+
     }
 
     public MoveResult MovePerseverance(PlayerToken token, Direction direction)
@@ -253,6 +265,7 @@ public class Game : IDisposable
         }
 
         raiseStateChange();
+        logger.LogInformation("player: {0} moved rover correctly", player.Name);
 
         return new MoveResult(
             player.PerseveranceLocation,
