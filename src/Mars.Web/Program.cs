@@ -1,13 +1,42 @@
 using Mars.Web;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using Serilog.Exceptions;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
+using Microsoft.Extensions.Logging;
+using Serilog;
+
+
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Seq("http://localhost:5341")
+    .CreateLogger();
+
+ILoggerFactory loggerFactory = new LoggerFactory()
+    .AddSerilog();
+
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddApplicationInsightsTelemetry();
+//builder.Services.AddApplicationInsightsTelemetry();
+
+builder.Host.UseSerilog((context, loggerConfig) =>
+{
+    loggerConfig
+    .WriteTo.Console()
+    .Enrich.WithExceptionDetails()
+    .WriteTo.Seq("http://localhost:5341");
+});
+
+
+
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddHealthChecks();
+
+
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -59,6 +88,7 @@ app.UseSwaggerUI(c =>
 });
 
 app.MapBlazorHub().DisableRateLimiting();
+app.MapHealthChecks("health").AllowAnonymous();
 
 #if !DEBUG
 app.UseRateLimiter();

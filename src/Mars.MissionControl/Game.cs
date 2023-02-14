@@ -250,6 +250,7 @@ public class Game : IDisposable
             player = player with { WinningTime = DateTime.Now - GameStartedOn };
             winners.Enqueue(player);
             message = GameMessages.YouMadeItToTheTarget;
+
         }
 
         raiseStateChange();

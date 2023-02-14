@@ -4,13 +4,15 @@
 [Route("[controller]")]
 public class GameController : ControllerBase
 {
+    ILogger<GameController> logger;
     ConcurrentDictionary<string, GameManager> games;
     private readonly ConcurrentDictionary<string, string> tokenMap;
 
-    public GameController(MultiGameHoster multiGameHoster)
+    public GameController(MultiGameHoster multiGameHoster, ILogger<GameController> logger)
     {
         this.games = multiGameHoster.Games;
         this.tokenMap = multiGameHoster.TokenMap;
+        this.logger = logger;
     }
 
     /// <summary>
@@ -30,7 +32,7 @@ public class GameController : ControllerBase
             {
                 var joinResult = gameManager.Game.Join(name);
                 tokenMap.TryAdd(joinResult.Token.Value, gameId);
-
+                logger.LogInformation($"User joined game {gameId} with name {name} and token {joinResult.Token} at {DateTime.Now}");
                 return new JoinResponse
                 {
                     Token = joinResult.Token.Value,
@@ -45,11 +47,13 @@ public class GameController : ControllerBase
             }
             catch (TooManyPlayersException)
             {
+                logger.LogError($"User {name} was prevented from joining game {gameId} due to too many players");
                 return Problem("Cannot join game, too many players.", statusCode: 400, title: "Too many players");
             }
         }
         else
         {
+            logger.LogWarning($"User {name} tried to join game {gameId}, which does not exist");
             return Problem("Unrecognized game id.", statusCode: 400, title: "Bad Game ID");
         }
     }
@@ -64,11 +68,12 @@ public class GameController : ControllerBase
             {
                 if (gameManager.Game.TryTranslateToken(token, out _))
                 {
+                    logger.LogInformation($"User {token} requested status");
                     return new StatusResponse { Status = gameManager.Game.GameState.ToString() };
                 }
             }
         }
-
+        logger.LogWarning($"User requested status using invalid token {token}");
         return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
     }
 
@@ -89,17 +94,24 @@ public class GameController : ControllerBase
                 PlayerToken? playerToken;
                 if (!gameManager.Game.TryTranslateToken(token, out playerToken))
                 {
+                    logger.LogWarning($"User tried moving rover using invalid token {token}");
                     return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
                 }
 
                 if (gameManager.Game.GameState != GameState.Playing)
                 {
+                    logger.LogInformation($"User {token} tried moving rover before game started");
                     return Problem("Unable to move, invalid game state.", statusCode: 400, title: "Game not in the Playing state.");
                 }
 
                 try
                 {
+
                     var moveResult = gameManager.Game.MovePerseverance(playerToken!, direction);
+                    if(moveResult.Message == "You made it to the target!")
+                    {
+                        logger.LogInformation($"User {token} won at {DateTime.Now}");
+                    }
                     return new MoveResponse
                     {
                         X = moveResult.Location.X,
@@ -116,7 +128,7 @@ public class GameController : ControllerBase
                 }
             }
         }
-
+        logger.LogWarning($"User tried moving rover using invalid token {token}");
         return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
     }
 
@@ -138,11 +150,13 @@ public class GameController : ControllerBase
                 PlayerToken? playerToken;
                 if (!gameManager.Game.TryTranslateToken(token, out playerToken))
                 {
+                    logger.LogWarning($"User tried moving drone using invalid token {token}");
                     return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
                 }
 
                 if (gameManager.Game.GameState != GameState.Playing)
                 {
+                    logger.LogInformation($"User {token} tried moving drone when the game wasn't ready");
                     return Problem("Unable to move, invalid game state.", statusCode: 400, title: "Game not in the Playing state.");
                 }
 
@@ -164,7 +178,7 @@ public class GameController : ControllerBase
                 }
             }
         }
-
+        logger.LogWarning($"User tried moving drone using invalid token {token}");
         return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
     }
 }
