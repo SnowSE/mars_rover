@@ -11,13 +11,13 @@ public record LowResolutionCell
         UpperRightX = cells.Max(c => c.Location.X);
     }
 
-    public LowResolutionCell(int averageDifficulty, int lowerLeftRow, int lowerLeftColumn, int upperRightRow, int upperRightColumn)
+    public LowResolutionCell(int averageDifficulty, int lowerLeftX, int lowerLeftY, int upperRightX, int upperRightY)
     {
         AverageDifficulty = new Difficulty(averageDifficulty);
-        LowerLeftY = lowerLeftColumn;
-        LowerLeftX = lowerLeftRow;
-        UpperRightY = upperRightColumn;
-        UpperRightX = upperRightRow;
+        LowerLeftY = lowerLeftY;
+        LowerLeftX = lowerLeftX;
+        UpperRightY = upperRightY;
+        UpperRightX = upperRightX;
     }
 
     public Difficulty AverageDifficulty { get; private set; }

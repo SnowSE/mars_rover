@@ -35,7 +35,7 @@ public class MovementTests
         lastLocation = currentLocation = new Location(player1.StartingX, player1.StartingY);
         iWon = false;
 
-        gameManager.PlayGame(new GamePlayOptions { MaxPlayerMessagesPerSecond = 1, RechargePointsPerSecond = 1 });
+        gameManager.PlayGame(new GamePlayOptions { RechargePointsPerSecond = 1 });
     }
 
     [Test]
@@ -85,7 +85,7 @@ public class MovementTests
         do
         {
             lastLocation = currentLocation;
-            var response = await client.GetFromJsonAsync<MoveResponse>($"/game/moveperseverance?token={player1.Token}&direction=Forward");
+            var response = await client.GetFromJsonAsync<PerseveranceMoveResponse>($"/game/moveperseverance?token={player1.Token}&direction=Forward");
             currentLocation = new Location(response.X, response.Y);
             spacesMoved++;
 
@@ -102,7 +102,7 @@ public class MovementTests
     {
         while (currentOrientation != desiredOrientation)
         {
-            var response = await client.GetFromJsonAsync<MoveResponse>($"/game/moveperseverance?token={player1.Token}&direction=Left");
+            var response = await client.GetFromJsonAsync<PerseveranceMoveResponse>($"/game/moveperseverance?token={player1.Token}&direction=Left");
             currentOrientation = Enum.Parse<Orientation>(response.Orientation);
         }
     }
@@ -112,7 +112,7 @@ public class MovementTests
     {
         var token = player1.Token;
         var direction = Direction.Forward;
-        var response = await client.GetFromJsonAsync<MoveResponse>($"/game/moveperseverance?token={token}&direction={direction}");
+        var response = await client.GetFromJsonAsync<PerseveranceMoveResponse>($"/game/moveperseverance?token={token}&direction={direction}");
         response.Should().NotBeNull();
     }
 
@@ -120,7 +120,7 @@ public class MovementTests
     public async Task MoveIngenuity()
     {
         var token = player1.Token;
-        var destinationRow = player1.StartingX -1_000;
+        var destinationRow = player1.StartingX - 1_000;
         var destinationCol = player1.StartingY - 1_000;
         var response = await client.GetFromJsonAsync<IngenuityMoveResponse>(
             $"/game/moveingenuity?token={token}&destinationRow={destinationRow}&directionCol={destinationCol}");
