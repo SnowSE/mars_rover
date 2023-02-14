@@ -12,7 +12,7 @@ builder.Host.UseSerilog((c, l) =>
 {
     l.WriteTo.Console()
     .Enrich.WithExceptionDetails()
-    .WriteTo.Seq("http://localhost:80");
+    .WriteTo.Seq("http://seq");
 });
 
 builder.Services.AddApplicationInsightsTelemetry();
