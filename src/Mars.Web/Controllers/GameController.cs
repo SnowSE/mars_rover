@@ -33,7 +33,7 @@ public class GameController : ControllerBase
 
                 var joinResult = gameManager.Game.Join(name);
                 tokenMap.TryAdd(joinResult.Token.Value, gameId);
-                using (logger.BeginScope("User: {ScopeUser} GameId: {ScopeGameId} ", joinResult.Token.Value, gameId))
+                using (logger.BeginScope("ScopeUserToken: {ScopeUser} GameId: {ScopeGameId} ", joinResult.Token.Value, gameId))
                 {
                     logger.LogInformation($"Player {name} joined game {gameId}");
                 }
@@ -66,18 +66,19 @@ public class GameController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<StatusResponse> Status(string token)
     {
-        if (tokenMap.TryGetValue(token, out string? gameId))
+        var tokenHasGame = tokenMap.TryGetValue(token, out string? gameId);
+        using (logger.BeginScope("ScopeUserToken: {ScopeUser} GameId: {ScopeGameId} ", token, gameId))
         {
-            if (games.TryGetValue(gameId, out var gameManager))
+            if (tokenHasGame)
             {
-                if (gameManager.Game.TryTranslateToken(token, out _))
+                if (games.TryGetValue(gameId, out var gameManager))
                 {
-                    return new StatusResponse { Status = gameManager.Game.GameState.ToString() };
+                    if (gameManager.Game.TryTranslateToken(token, out _))
+                    {
+                        return new StatusResponse { Status = gameManager.Game.GameState.ToString() };
+                    }
                 }
             }
-        }
-        using (logger.BeginScope("User: {ScopeUser} GameId: {ScopeGameId} ", token, gameId))
-        {
             logger.LogError($"Unrecogized token {token}");
             return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
         }
@@ -93,9 +94,11 @@ public class GameController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<MoveResponse> MovePerseverance(string token, Direction direction)
     {
-        if (tokenMap.TryGetValue(token, out string? gameId))
+        var tokenHasGame = tokenMap.TryGetValue(token, out string? gameId);
+
+        using (logger.BeginScope("ScopeUserToken: {ScopeUser} GameId: {ScopeGameId} ", token, gameId))
         {
-            using (logger.BeginScope("User: {ScopeUser} GameId: {ScopeGameId} ", token, gameId))
+            if (tokenHasGame)
             {
                 if (games.TryGetValue(gameId, out var gameManager))
                 {
@@ -133,9 +136,9 @@ public class GameController : ControllerBase
                 }
 
             }
+            logger.LogError($"Unrecogized token {token}");
+            return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
         }
-        logger.LogError($"Unrecogized token {token}");
-        return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
     }
 
     /// <summary>
@@ -149,9 +152,10 @@ public class GameController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<IngenuityMoveResponse> MoveIngenuity(string token, int destinationRow, int destinationColumn)
     {
-        if (tokenMap.TryGetValue(token, out string? gameId))
+        var tokenHasGame = tokenMap.TryGetValue(token, out string? gameId);
+        using (logger.BeginScope("ScopeUserToken: {ScopeUser} GameId: {ScopeGameId} ", token, gameId))
         {
-            using (logger.BeginScope("User: {ScopeUser} GameId: {ScopeGameId} ", token, gameId))
+            if (tokenHasGame)
             {
                 if (games.TryGetValue(gameId, out var gameManager))
                 {
@@ -187,8 +191,8 @@ public class GameController : ControllerBase
                     }
                 }
             }
+            logger.LogError($"Unrecogized token {token}");
+            return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
         }
-        logger.LogError($"Unrecogized token {token}");
-        return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
     }
 }
