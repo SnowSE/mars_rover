@@ -32,9 +32,9 @@ public class GameController : ControllerBase
             {
 
                 var joinResult = gameManager.Game.Join(name);
-                tokenMap.TryAdd(joinResult.Token.Value, gameId);
                 using (logger.BeginScope("ScopeUserToken: {ScopeUser} GameId: {ScopeGameId} ", joinResult.Token.Value, gameId))
                 {
+                    tokenMap.TryAdd(joinResult.Token.Value, gameId);
                     logger.LogInformation($"Player {name} joined game {gameId}");
                 }
                 return new JoinResponse
