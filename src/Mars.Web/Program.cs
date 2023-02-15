@@ -17,16 +17,14 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Host.UseSerilog( (context, loggerConfig) =>
-    {
-        loggerConfig.WriteTo.Console()
-        .Enrich.WithExceptionDetails()
-        .WriteTo.Seq("http://localhost:5340");
-    }
+builder.Host.UseSerilog((context, loggerConfig) =>
+{
+    loggerConfig.WriteTo.Console()
+    .Enrich.WithExceptionDetails()
+    .WriteTo.Seq("http://seq");
+});
 
-    );
-
-builder.Services.AddProblemDetails(opts =>  
+builder.Services.AddProblemDetails(opts =>
 {
     opts.IncludeExceptionDetails = (ctx, ex) => false;
 }

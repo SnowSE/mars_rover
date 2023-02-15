@@ -1,0 +1,18 @@
+version: '3.4'
+
+services:
+  mars.web:
+    image: ${DOCKER_REGISTRY-}marsweb
+    build:
+      context: .
+      dockerfile: Mars.Web/Dockerfile
+
+  seq:
+    image: datalust/seq:latest
+    container_name: seq
+    ports:
+      - "8888:80"
+    volumes:
+      - /datadrive:/data
+    environment:
+      - ACCEPT_EULA=Y
