@@ -1,9 +1,10 @@
-﻿using System.Collections.ObjectModel;
+﻿using Microsoft.Extensions.Logging;
+using System.Collections.ObjectModel;
 
 namespace Mars.MissionControl;
 public class Game : IDisposable
 {
-    public Game(GameStartOptions startOptions)
+    public Game(GameStartOptions startOptions, ILoggerFactory loggerFactory = null)
     {
         GameState = GameState.Joining;
         Board = new Board(startOptions.Map);
@@ -13,6 +14,7 @@ public class Game : IDisposable
         IngenuityVisibilityRadius = startOptions.IngenuityVisibilityRadius;
         StartingBatteryLevel = startOptions.StartingBatteryLevel;
         IngenuityStartingBatteryLevel = Board.Width * 2 + Board.Height * 2;
+        this.logger = loggerFactory.CreateLogger<Game>();
     }
 
     public int MapNumber => Board.MapNumber;
@@ -41,6 +43,8 @@ public class Game : IDisposable
     public event EventHandler? GameStateChanged;
     public DateTime lastStateChange;
     public TimeSpan stateChangeFrequency;// = TimeSpan.FromSeconds(1);
+    private readonly ILogger<Game> logger;
+
     private void raiseStateChange()
     {
         if (lastStateChange + stateChangeFrequency < DateTime.Now)
@@ -242,7 +246,7 @@ public class Game : IDisposable
 
         if (player.PerseveranceLocation == TargetLocation)//you win!
         {
-
+            logger.LogInformation("Player {0} has won!", player.Name);
             players.Remove(player.Token, out _);
             player = player with { WinningTime = DateTime.Now - GameStartedOn };
             winners.Enqueue(player);
