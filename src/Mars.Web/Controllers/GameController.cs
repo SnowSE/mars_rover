@@ -125,7 +125,7 @@ public class GameController : ControllerBase
     [HttpGet("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IngenuityMoveResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult<IngenuityMoveResponse> MoveIngenuity(string token, int destinationRow, int destinationColumn)
+    public ActionResult<IngenuityMoveResponse> MoveIngenuity(string token, int destinationRow, int destinationColumn) //TODO: Rename these paramaters to just x,y after the coding competition
     {
         if (tokenMap.TryGetValue(token, out string? gameId) && games.TryGetValue(gameId, out var gameManager))
         {
