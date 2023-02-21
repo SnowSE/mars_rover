@@ -94,7 +94,7 @@ public class GameController : ControllerBase
     [HttpGet("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PerseveranceMoveResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult<MoveResponse> MovePerseverance(string token, Direction direction)
+    public ActionResult<PerseveranceMoveResponse> MovePerseverance(string token, Direction direction)
     {
         var tokenHasGame = tokenMap.TryGetValue(token, out string? gameId);
 
@@ -120,7 +120,7 @@ public class GameController : ControllerBase
                     try
                     {
                         var moveResult = gameManager.Game.MovePerseverance(playerToken!, direction);
-                        return new MoveResponse
+                        return new PerseveranceMoveResponse
                         {
                             X = moveResult.Location.X,
                             Y = moveResult.Location.Y,

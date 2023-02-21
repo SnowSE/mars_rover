@@ -6,14 +6,15 @@ services:
     build:
       context: .
       dockerfile: Mars.Web/Dockerfile
+    environment:
+      - SeqServer=http://seq
 
-  seq:
-    image: datalust/seq:latest
+  seq: 
     container_name: seq
-    image: datalust/seq:latest
-    ports:
+    image: datalust/seq:latest 
+    ports: 
       - "8888:80"
-    volumes:
-      - /datadrive:/data
+    volumes: 
+      - /datadrive:/data 
     environment:
       - ACCEPT_EULA=Y

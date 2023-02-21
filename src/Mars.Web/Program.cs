@@ -1,6 +1,9 @@
 using Mars.Web;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using Serilog.Exceptions;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Hellang.Middleware.ProblemDetails;
@@ -21,7 +24,7 @@ builder.Host.UseSerilog((context, loggerConfig) =>
 {
     loggerConfig.WriteTo.Console()
     .Enrich.WithExceptionDetails()
-    .WriteTo.Seq("http://seq");
+    .WriteTo.Seq(builder.Configuration["SeqServer"] ?? throw new ApplicationException("Unable to locate key SeqServer in configuration"));
 });
 
 builder.Services.AddProblemDetails(opts =>
