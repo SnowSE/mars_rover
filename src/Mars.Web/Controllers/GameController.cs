@@ -6,11 +6,13 @@ public class GameController : ControllerBase
 {
     ConcurrentDictionary<string, GameManager> games;
     private readonly ConcurrentDictionary<string, string> tokenMap;
+    private readonly ILogger<GameController> logger;
 
-    public GameController(MultiGameHoster multiGameHoster)
+    public GameController(MultiGameHoster multiGameHoster, ILogger<GameController> logger)
     {
         this.games = multiGameHoster.Games;
         this.tokenMap = multiGameHoster.TokenMap;
+        this.logger = logger;
     }
 
     /// <summary>
@@ -28,9 +30,13 @@ public class GameController : ControllerBase
         {
             try
             {
-                var joinResult = gameManager.Game.Join(name);
-                tokenMap.TryAdd(joinResult.Token.Value, gameId);
 
+                var joinResult = gameManager.Game.Join(name);
+                using (logger.BeginScope("ScopeUserToken: {ScopeUser} GameId: {ScopeGameId} ", joinResult.Token.Value, gameId))
+                {
+                    tokenMap.TryAdd(joinResult.Token.Value, gameId);
+                    logger.LogInformation($"Player {name} joined game {gameId}");
+                }
                 return new JoinResponse
                 {
                     Token = joinResult.Token.Value,
@@ -45,11 +51,13 @@ public class GameController : ControllerBase
             }
             catch (TooManyPlayersException)
             {
+                logger.LogError($"Player {name} failed to join game {gameId}. Too many players");
                 return Problem("Cannot join game, too many players.", statusCode: 400, title: "Too many players");
             }
         }
         else
         {
+            logger.LogError($"Player {name} failed to join game {gameId}. Game id not found");
             return Problem("Unrecognized game id.", statusCode: 400, title: "Bad Game ID");
         }
     }
@@ -59,14 +67,22 @@ public class GameController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<StatusResponse> Status(string token)
     {
-        if (tokenMap.TryGetValue(token, out string? gameId) &&
-            games.TryGetValue(gameId, out var gameManager) &&
-            gameManager.Game.TryTranslateToken(token, out _))
+        var tokenHasGame = tokenMap.TryGetValue(token, out string? gameId);
+        using (logger.BeginScope("ScopeUserToken: {ScopeUser} GameId: {ScopeGameId} ", token, gameId))
         {
-            return new StatusResponse { Status = gameManager.Game.GameState.ToString() };
+            if (tokenHasGame)
+            {
+                if (games.TryGetValue(gameId, out var gameManager))
+                {
+                    if (gameManager.Game.TryTranslateToken(token, out _))
+                    {
+                        return new StatusResponse { Status = gameManager.Game.GameState.ToString() };
+                    }
+                }
+            }
+            logger.LogError($"Unrecogized token {token}");
+            return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
         }
-
-        return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
     }
 
     /// <summary>
@@ -78,41 +94,53 @@ public class GameController : ControllerBase
     [HttpGet("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PerseveranceMoveResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult<PerseveranceMoveResponse> MovePerseverance(string token, Direction direction)
+    public ActionResult<MoveResponse> MovePerseverance(string token, Direction direction)
     {
-        if (tokenMap.TryGetValue(token, out string? gameId) && games.TryGetValue(gameId, out var gameManager))
+        var tokenHasGame = tokenMap.TryGetValue(token, out string? gameId);
+
+        using (logger.BeginScope("ScopeUserToken: {ScopeUser} GameId: {ScopeGameId} ", token, gameId))
         {
-            PlayerToken? playerToken;
-            if (!gameManager.Game.TryTranslateToken(token, out playerToken))
+            if (tokenHasGame)
             {
-                return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
-            }
-
-            if (gameManager.Game.GameState != GameState.Playing)
-            {
-                return Problem("Unable to move, invalid game state.", statusCode: 400, title: "Game not in the Playing state.");
-            }
-
-            try
-            {
-                var moveResult = gameManager.Game.MovePerseverance(playerToken!, direction);
-                return new PerseveranceMoveResponse
+                if (games.TryGetValue(gameId, out var gameManager))
                 {
-                    X = moveResult.Location.X,
-                    Y = moveResult.Location.Y,
-                    BatteryLevel = moveResult.BatteryLevel,
-                    Neighbors = moveResult.Neighbors.ToDto(),
-                    Message = moveResult.Message,
-                    Orientation = moveResult.Orientation.ToString()
-                };
-            }
-            catch (Exception ex)
-            {
-                return Problem("Unable to move", statusCode: 400, title: ex.Message);
-            }
-        }
+                    PlayerToken? playerToken;
+                    if (!gameManager.Game.TryTranslateToken(token, out playerToken))
+                    {
+                        logger.LogError($"Unrecogized token {token}");
+                        return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
+                    }
 
-        return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
+                    if (gameManager.Game.GameState != GameState.Playing)
+                    {
+                        logger.LogError($"Could not move: Game not in Playing state.");
+                        return Problem("Unable to move", statusCode: 400, title: "Game not in Playing state.");
+                    }
+
+                    try
+                    {
+                        var moveResult = gameManager.Game.MovePerseverance(playerToken!, direction);
+                        return new MoveResponse
+                        {
+                            X = moveResult.Location.X,
+                            Y = moveResult.Location.Y,
+                            BatteryLevel = moveResult.BatteryLevel,
+                            Neighbors = moveResult.Neighbors.ToDto(),
+                            Message = moveResult.Message,
+                            Orientation = moveResult.Orientation.ToString()
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError($"Could not move: {ex.Message}");
+                        return Problem("Unable to move", statusCode: 400, title: ex.Message);
+                    }
+                }
+
+            }
+            logger.LogError($"Unrecogized token {token}");
+            return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
+        }
     }
 
     /// <summary>
@@ -125,39 +153,49 @@ public class GameController : ControllerBase
     [HttpGet("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IngenuityMoveResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult<IngenuityMoveResponse> MoveIngenuity(string token, int destinationRow, int destinationColumn) //TODO: Rename these paramaters to just x,y after the coding competition
+    public ActionResult<IngenuityMoveResponse> MoveIngenuity(string token, int destinationRow, int destinationColumn)
     {
-        if (tokenMap.TryGetValue(token, out string? gameId) && games.TryGetValue(gameId, out var gameManager))
+        var tokenHasGame = tokenMap.TryGetValue(token, out string? gameId);
+        using (logger.BeginScope("ScopeUserToken: {ScopeUser} GameId: {ScopeGameId} ", token, gameId))
         {
-            PlayerToken? playerToken;
-            if (!gameManager.Game.TryTranslateToken(token, out playerToken))
+            if (tokenHasGame)
             {
-                return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
-            }
-
-            if (gameManager.Game.GameState != GameState.Playing)
-            {
-                return Problem("Unable to move, invalid game state.", statusCode: 400, title: "Game not in the Playing state.");
-            }
-
-            try
-            {
-                var moveResult = gameManager.Game.MoveIngenuity(playerToken!, new Location(destinationRow, destinationColumn));
-                return new IngenuityMoveResponse
+                if (games.TryGetValue(gameId, out var gameManager))
                 {
-                    X = moveResult.Location.X,
-                    Y = moveResult.Location.Y,
-                    Neighbors = moveResult.Neighbors.ToDto(),
-                    Message = moveResult.Message,
-                    BatteryLevel = moveResult.BatteryLevel
-                };
-            }
-            catch (Exception ex)
-            {
-                return Problem("Unable to move", statusCode: 400, title: ex.Message);
-            }
-        }
+                    PlayerToken? playerToken;
+                    if (!gameManager.Game.TryTranslateToken(token, out playerToken))
+                    {
+                        logger.LogError($"Unrecogized token {token}");
+                        return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
+                    }
 
-        return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
+                    if (gameManager.Game.GameState != GameState.Playing)
+                    {
+                        logger.LogError($"Could not move: Game not in Playing state.");
+                        return Problem("Unable to move", statusCode: 400, title: "Game not in Playing state.");
+                    }
+
+                    try
+                    {
+                        var moveResult = gameManager.Game.MoveIngenuity(playerToken!, new Location(destinationRow, destinationColumn));
+                        return new IngenuityMoveResponse
+                        {
+                            X = moveResult.Location.X,
+                            Y = moveResult.Location.Y,
+                            Neighbors = moveResult.Neighbors.ToDto(),
+                            Message = moveResult.Message,
+                            BatteryLevel = moveResult.BatteryLevel
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError($"Could not move: {ex.Message}");
+                        return Problem("Unable to move", statusCode: 400, title: ex.Message);
+                    }
+                }
+            }
+            logger.LogError($"Unrecogized token {token}");
+            return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
+        }
     }
 }

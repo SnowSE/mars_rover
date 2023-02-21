@@ -8,13 +8,11 @@ services:
       dockerfile: Mars.Web/Dockerfile
 
   seq:
+    image: datalust/seq:latest
     container_name: seq
     image: datalust/seq:latest
     ports:
-     # Host Port : Container Port
-      - "8888:5341"
-      - "8085:80"
-      - "45341:45341"
+      - "8888:80"
     volumes:
       - /datadrive:/data
     environment:
