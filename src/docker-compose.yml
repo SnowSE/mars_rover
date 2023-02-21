@@ -9,12 +9,12 @@ services:
     environment:
       - SeqServer=http://seq
 
-  seq: 
+  seq:
     container_name: seq
-    image: datalust/seq:latest 
-    ports: 
+    image: datalust/seq:latest
+    ports:
       - "8888:80"
-    volumes: 
-      - /datadrive:/data 
+    volumes:
+      - /datadrive:/data
     environment:
       - ACCEPT_EULA=Y

@@ -51,17 +51,15 @@ public class GameManager
         //unsubscribe from old event
         if (Game != null)
         {
-            Game.GameStateChanged -= Game_GameStateChanged;
-            var playoptions = Game.GamePlayOptions;
+            Game.GameStateChanged -= Game_GameStateChanged;            
             Game.Dispose();
-            logger.LogWarning("Game ending {0}", playoptions);
-            
+            logger.LogWarning("Ending previously running game");            
         }
 
         NewGameStarted?.Invoke(this, new EventArgs());
 
-        Game = new Game(startOptions, logger);
-        logger.LogInformation("New game created");
+        logger.LogInformation("Starting new game with {options}", startOptions);
+        Game = new Game(startOptions, logger);        
         GameStateChanged?.Invoke(this, EventArgs.Empty);
 
         //subscribe to new event

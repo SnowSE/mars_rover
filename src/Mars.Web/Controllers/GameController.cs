@@ -1,4 +1,8 @@
-﻿namespace Mars.Web.Controllers;
+﻿using Mars.MissionControl;
+using Mars.Web.Pages;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Mars.Web.Controllers;
 
 [ApiController]
 [Route("[controller]")]
@@ -35,7 +39,7 @@ public class GameController : ControllerBase
                 using (logger.BeginScope("ScopeUserToken: {ScopeUser} GameId: {ScopeGameId} ", joinResult.Token.Value, gameId))
                 {
                     tokenMap.TryAdd(joinResult.Token.Value, gameId);
-                    logger.LogInformation($"Player {name} joined game {gameId}");
+                    logger.LogInformation("Player {name} joined game {gameId}", name, gameId);
                 }
                 return new JoinResponse
                 {
@@ -51,13 +55,13 @@ public class GameController : ControllerBase
             }
             catch (TooManyPlayersException)
             {
-                logger.LogError($"Player {name} failed to join game {gameId}. Too many players");
+                logger.LogError("Player {name} failed to join game {gameId}. Too many players", name, gameId);
                 return Problem("Cannot join game, too many players.", statusCode: 400, title: "Too many players");
             }
         }
         else
         {
-            logger.LogError($"Player {name} failed to join game {gameId}. Game id not found");
+            logger.LogError("Player {name} failed to join game {gameId}. Game id not found", name, gameId);
             return Problem("Unrecognized game id.", statusCode: 400, title: "Bad Game ID");
         }
     }
@@ -80,7 +84,7 @@ public class GameController : ControllerBase
                     }
                 }
             }
-            logger.LogError($"Unrecogized token {token}");
+            logger.LogError("Unrecogized token {token}", token);
             return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
         }
     }
@@ -107,7 +111,7 @@ public class GameController : ControllerBase
                     PlayerToken? playerToken;
                     if (!gameManager.Game.TryTranslateToken(token, out playerToken))
                     {
-                        logger.LogError($"Unrecogized token {token}");
+                        logger.LogError("Unrecogized token {token}", token);
                         return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
                     }
 
@@ -132,13 +136,13 @@ public class GameController : ControllerBase
                     }
                     catch (Exception ex)
                     {
-                        logger.LogError($"Could not move: {ex.Message}");
+                        logger.LogError("Could not move: {message}", ex.Message);
                         return Problem("Unable to move", statusCode: 400, title: ex.Message);
                     }
                 }
 
             }
-            logger.LogError($"Unrecogized token {token}");
+            logger.LogError("Unrecogized token {token}", token);
             return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
         }
     }
@@ -165,13 +169,13 @@ public class GameController : ControllerBase
                     PlayerToken? playerToken;
                     if (!gameManager.Game.TryTranslateToken(token, out playerToken))
                     {
-                        logger.LogError($"Unrecogized token {token}");
+                        logger.LogError("Unrecogized token {token}", token);
                         return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
                     }
 
                     if (gameManager.Game.GameState != GameState.Playing)
                     {
-                        logger.LogError($"Could not move: Game not in Playing state.");
+                        logger.LogError("Could not move: Game not in Playing state.");
                         return Problem("Unable to move", statusCode: 400, title: "Game not in Playing state.");
                     }
 
@@ -189,12 +193,12 @@ public class GameController : ControllerBase
                     }
                     catch (Exception ex)
                     {
-                        logger.LogError($"Could not move: {ex.Message}");
+                        logger.LogError("Could not move: {exceptionMessage}", ex.Message);
                         return Problem("Unable to move", statusCode: 400, title: ex.Message);
                     }
                 }
             }
-            logger.LogError($"Unrecogized token {token}");
+            logger.LogError("Unrecogized token {token}", token);
             return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
         }
     }

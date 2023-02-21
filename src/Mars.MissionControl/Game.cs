@@ -28,7 +28,7 @@ public class Game : IDisposable
     public int StartingBatteryLevel { get; }
     public int IngenuityStartingBatteryLevel { get; }
 
-    private ILogger<Game> logger;
+    private readonly ILogger<Game> logger;
 
     public Map Map { get; private set; }
     private ConcurrentDictionary<PlayerToken, Player> players = new();
@@ -255,6 +255,7 @@ public class Game : IDisposable
 
         if (player.PerseveranceLocation == TargetLocation)//you win!
         {
+            logger.LogInformation("Player {0} has won!", player.Name);
             players.Remove(player.Token, out _);
             player = player with { WinningTime = DateTime.Now - GameStartedOn };
             winners.Enqueue(player);
