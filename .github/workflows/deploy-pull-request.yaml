@@ -33,7 +33,7 @@ jobs:
 
       - name: Run Tests
         working-directory: src
-        run: dotnet test
+        run: dotnet test MarsRover.sln
 
       - name: dotnet publish
         working-directory: src/Mars.Web
