@@ -14,11 +14,8 @@ public class Game : IDisposable
         IngenuityVisibilityRadius = startOptions.IngenuityVisibilityRadius;
         StartingBatteryLevel = startOptions.StartingBatteryLevel;
         IngenuityStartingBatteryLevel = Board.Width * 2 + Board.Height * 2;
-        this.logger= logger;
-        
+        this.logger= logger;        
     }
-
-    
 
     public int MapNumber => Board.MapNumber;
 
@@ -45,27 +42,26 @@ public class Game : IDisposable
     private ConcurrentQueue<Player> winners = new();
     public IEnumerable<Player> Winners => winners.ToArray();
 
-    #region State Changed
-    public event EventHandler? GameStateChanged;
-    public DateTime lastStateChange;
-    public TimeSpan stateChangeFrequency;// = TimeSpan.FromSeconds(1);
-    private void raiseStateChange()
+  #region State Changed
+  public event EventHandler? GameStateChanged;
+  public DateTime lastStateChange;
+  public TimeSpan stateChangeFrequency;// = TimeSpan.FromSeconds(1);
+  private void raiseStateChange()
+  {
+    if (lastStateChange + stateChangeFrequency < DateTime.Now)
     {
-        if (lastStateChange + stateChangeFrequency < DateTime.Now)
-        {
-            GameStateChanged?.Invoke(this, EventArgs.Empty);
-            lastStateChange = DateTime.Now;
-        }
+      GameStateChanged?.Invoke(this, EventArgs.Empty);
+      lastStateChange = DateTime.Now;
     }
-    #endregion
+  }
+  #endregion
 
-    public JoinResult Join(string playerName)
+  public JoinResult Join(string playerName)
+  {
+    if (GameState != GameState.Joining && GameState != GameState.Playing)
     {
-        if (GameState != GameState.Joining && GameState != GameState.Playing)
-        {
-            logger.LogError("Game wasn't detected");
-            throw new InvalidGameStateException();
-        }
+      throw new InvalidGameStateException();
+    }
 
         var player = new Player(playerName);
         var startingLocation = Board.PlaceNewPlayer(player);
@@ -85,173 +81,186 @@ public class Game : IDisposable
             throw new Exception("Unable to add new player...that token already exists?!");
         }
 
-        raiseStateChange();
+    raiseStateChange();
 
-        return new JoinResult(
-            player.Token,
-            player.PerseveranceLocation,
-            player.Orientation,
-            player.BatteryLevel,
-            TargetLocation,
-            Board.GetNeighbors(player.PerseveranceLocation, PerseveranceVisibilityRadius),
-            Map.LowResolution
-        );
+    return new JoinResult(
+        player.Token,
+        player.PerseveranceLocation,
+        player.Orientation,
+        player.BatteryLevel,
+        TargetLocation,
+        Board.GetNeighbors(player.PerseveranceLocation, PerseveranceVisibilityRadius),
+        Map.LowResolution
+    );
+  }
+
+  public void PlayGame() => PlayGame(new GamePlayOptions());
+
+  public void PlayGame(GamePlayOptions gamePlayOptions)
+  {
+    if (GameState != GameState.Joining)
+    {
+      throw new InvalidGameStateException($"Cannot play game if currently {GameState}");
     }
 
-    public void PlayGame() => PlayGame(new GamePlayOptions());
+    GamePlayOptions = gamePlayOptions;
+    GameState = GameState.Playing;
+    GameStartedOn = DateTime.Now;
+    rechargeTimer = new Timer(rechargeTimer_Callback, null, 1_000, 1_000);
+  }
 
-    public void PlayGame(GamePlayOptions gamePlayOptions)
+  private void rechargeTimer_Callback(object? _)
+  {
+    foreach (var playerToken in players.Keys)
     {
-        if (GameState != GameState.Joining)
-        {
-            throw new InvalidGameStateException($"Cannot play game if currently {GameState}");
-        }
-
-        GamePlayOptions = gamePlayOptions;
-        GameState = GameState.Playing;
-        GameStartedOn = DateTime.Now;
-        rechargeTimer = new Timer(rechargeTimer_Callback, null, 1_000, 1_000);
+      var origPlayer = players[playerToken];
+      if (origPlayer.BatteryLevel < StartingBatteryLevel)
+      {
+        var newPlayer = origPlayer with { BatteryLevel = Math.Min(StartingBatteryLevel, origPlayer.BatteryLevel + GamePlayOptions!.RechargePointsPerSecond) };
+        players.TryUpdate(playerToken, newPlayer, origPlayer);
+      }
     }
 
-    private void rechargeTimer_Callback(object? _)
-    {
-        foreach (var playerToken in players.Keys)
-        {
-            var origPlayer = players[playerToken];
-            if (origPlayer.BatteryLevel < StartingBatteryLevel)
-            {
-                var newPlayer = origPlayer with { BatteryLevel = Math.Min(StartingBatteryLevel, origPlayer.BatteryLevel + GamePlayOptions!.RechargePointsPerSecond) };
-                players.TryUpdate(playerToken, newPlayer, origPlayer);
-            }
-        }
+    raiseStateChange();
+  }
 
-        raiseStateChange();
+  public IngenuityMoveResult MoveIngenuity(PlayerToken token, Location destination, int updatePlayerTryAgainCount = 0)
+  {
+    if (updatePlayerTryAgainCount > 9)
+    {
+      throw new UnableToUpdatePlayerException();
+    }
+    if (GameState != GameState.Playing)
+    {
+      throw new InvalidGameStateException();
     }
 
-    public IngenuityMoveResult MoveIngenuity(PlayerToken token, Location destination)
+    if (players.ContainsKey(token) is false)
     {
-        if (GameState != GameState.Playing)
-        {
-            throw new InvalidGameStateException();
-        }
+      throw new UnrecognizedTokenException();
+    }
 
-        if (players.ContainsKey(token) is false)
-        {
-            throw new UnrecognizedTokenException();
-        }
+    var player = players[token];
+    var unmodifiedPlayer = player;
+    string? message;
 
-        var player = players[token];
-        var unmodifiedPlayer = player;
-        string? message;
+    var deltaX = Math.Abs(destination.X - player.IngenuityLocation.X);
+    var deltaY = Math.Abs(destination.Y - player.IngenuityLocation.Y);
+    var movementCost = Math.Max(deltaX, deltaY);
 
-        var deltaX = Math.Abs(destination.X - player.IngenuityLocation.X);
-        var deltaY = Math.Abs(destination.Y - player.IngenuityLocation.Y);
-        var movementCost = Math.Max(deltaX, deltaY);
+    if (player.IngenuityBatteryLevel < movementCost)
+    {
+      message = GameMessages.IngenuityOutOfBattery;
+    }
+    else if (destination.X < 0 || destination.Y < 0 || destination.X > Board.Height || destination.Y > Board.Width)
+    {
+      message = GameMessages.MovedOutOfBounds;
+    }
+    else if (deltaX >= 3 || deltaY >= 3)
+    {
+      message = GameMessages.IngenuityTooFar;
+    }
+    else
+    {
+      player = player with
+      {
+        IngenuityLocation = destination,
+        IngenuityBatteryLevel = player.IngenuityBatteryLevel - movementCost
+      };
 
-        if (player.IngenuityBatteryLevel < movementCost)
-        {
-            message = GameMessages.IngenuityOutOfBattery;
-        }
-        else if (destination.X < 0 || destination.Y < 0 || destination.X > Board.Height || destination.Y > Board.Width)
-        {
-            message = GameMessages.MovedOutOfBounds;
-        }
-        else if (deltaX >= 3 || deltaY >= 3)
-        {
-            message = GameMessages.IngenuityTooFar;
-        }
-        else
-        {
-            player = player with
-            {
-                IngenuityLocation = destination,
-                IngenuityBatteryLevel = player.IngenuityBatteryLevel - movementCost
-            };
-
-            if (!players.TryUpdate(token, player, unmodifiedPlayer))
-            {
-                throw new UnableToUpdatePlayerException();
-            }
-            message = GameMessages.IngenuityMoveOK;
-        }
+      if (!players.TryUpdate(token, player, unmodifiedPlayer))
+      {
+        // if we are here because perserverence and ingenuity are 
+        // moving at the same time we should be able to retry the move
+        System.Console.WriteLine("Recursing MoveIngenuity to avoid UnableToUpdatePlayerException");
+        return MoveIngenuity(token, destination, updatePlayerTryAgainCount + 1);
+      }
+      message = GameMessages.IngenuityMoveOK;
+    }
 
         raiseStateChange();
         logger.LogInformation("player: {name} moved helicopter correctly and moved to location: {loc}", player.Name, player.IngenuityLocation);
 
-        return new IngenuityMoveResult(
-            player.IngenuityLocation,
-            player.IngenuityBatteryLevel,
-            Board.GetNeighbors(player.IngenuityLocation, IngenuityVisibilityRadius),
-            message ?? throw new Exception("Game message not set?!")
-        );
+    return new IngenuityMoveResult(
+        player.IngenuityLocation,
+        player.IngenuityBatteryLevel,
+        Board.GetNeighbors(player.IngenuityLocation, IngenuityVisibilityRadius),
+        message ?? throw new Exception("Game message not set?!")
+    );
+  }
 
+  public MoveResult MovePerseverance(PlayerToken token, Direction direction, int updatePlayerTryAgainCount = 0)
+  {
+    if (updatePlayerTryAgainCount > 9)
+    {
+      throw new UnableToUpdatePlayerException();
+    }
+    if (GameState != GameState.Playing)
+    {
+      throw new InvalidGameStateException();
     }
 
-    public MoveResult MovePerseverance(PlayerToken token, Direction direction)
+    if (players.ContainsKey(token) is false)
     {
-        if (GameState != GameState.Playing)
-        {
-            throw new InvalidGameStateException();
-        }
+      throw new UnrecognizedTokenException();
+    }
 
-        if (players.ContainsKey(token) is false)
-        {
-            throw new UnrecognizedTokenException();
-        }
+    var player = players[token];
+    var unmodifiedPlayer = player;
+    string? message;
 
-        var player = players[token];
-        var unmodifiedPlayer = player;
-        string? message;
+    if (direction == Direction.Right || direction == Direction.Left)
+    {
+      player = player with
+      {
+        BatteryLevel = player.BatteryLevel - 1,
+        Orientation = player.Orientation.Turn(direction)
+      };
+      message = GameMessages.TurnedOK;
+    }
+    else
+    {
+      var desiredLocation = direction switch
+      {
+        Direction.Forward => player.CellInFront(),
+        Direction.Reverse => player.CellInBack(),
+        _ => throw new Exception("What direction do you think you're going?")
+      };
 
-        if (direction == Direction.Right || direction == Direction.Left)
+      if (Board.Cells.ContainsKey(desiredLocation) is false)
+      {
+        player = player with
         {
-            player = player with
-            {
-                BatteryLevel = player.BatteryLevel - 1,
-                Orientation = player.Orientation.Turn(direction)
-            };
-            message = GameMessages.TurnedOK;
+          BatteryLevel = player.BatteryLevel - 1
+        };
+        message = GameMessages.MovedOutOfBounds;
+      }
+      else
+      {
+        int newBatteryLevel = player.BatteryLevel - Board[desiredLocation].Difficulty.Value;
+        if (newBatteryLevel >= 0)
+        {
+          player = player with
+          {
+            BatteryLevel = newBatteryLevel,
+            PerseveranceLocation = desiredLocation
+          };
+          message = GameMessages.MovedOK;
         }
         else
         {
-            var desiredLocation = direction switch
-            {
-                Direction.Forward => player.CellInFront(),
-                Direction.Reverse => player.CellInBack(),
-                _ => throw new Exception("What direction do you think you're going?")
-            };
-
-            if (Board.Cells.ContainsKey(desiredLocation) is false)
-            {
-                player = player with
-                {
-                    BatteryLevel = player.BatteryLevel - 1
-                };
-                message = GameMessages.MovedOutOfBounds;
-            }
-            else
-            {
-                int newBatteryLevel = player.BatteryLevel - Board[desiredLocation].Difficulty.Value;
-                if (newBatteryLevel >= 0)
-                {
-                    player = player with
-                    {
-                        BatteryLevel = newBatteryLevel,
-                        PerseveranceLocation = desiredLocation
-                    };
-                    message = GameMessages.MovedOK;
-                }
-                else
-                {
-                    message = GameMessages.InsufficientBattery;
-                }
-            }
+          message = GameMessages.InsufficientBattery;
         }
+      }
+    }
 
-        if (!players.TryUpdate(token, player, unmodifiedPlayer))
-        {
-            throw new UnableToUpdatePlayerException();
-        }
+    if (!players.TryUpdate(token, player, unmodifiedPlayer))
+    {
+      // if we are here because perserverence and ingenuity are 
+      // moving at the same time we should be able to retry the move
+      System.Console.WriteLine("Recursing MoveIngenuity to avoid UnableToUpdatePlayerException");
+      return MovePerseverance(token, direction, updatePlayerTryAgainCount + 1);
+    }
 
         if (player.PerseveranceLocation == TargetLocation)//you win!
         {
@@ -265,31 +274,31 @@ public class Game : IDisposable
         raiseStateChange();
         logger.LogInformation("player: {0} moved rover correctly", player.Name);
 
-        return new MoveResult(
-            player.PerseveranceLocation,
-            player.BatteryLevel,
-            player.Orientation,
-            Board.GetNeighbors(player.PerseveranceLocation, PerseveranceVisibilityRadius),
-            message ?? throw new Exception("Game message not set?!")
-        );
-    }
+    return new MoveResult(
+        player.PerseveranceLocation,
+        player.BatteryLevel,
+        player.Orientation,
+        Board.GetNeighbors(player.PerseveranceLocation, PerseveranceVisibilityRadius),
+        message ?? throw new Exception("Game message not set?!")
+    );
+  }
 
-    public Location GetPlayerLocation(PlayerToken token) => players[token].PerseveranceLocation;
+  public Location GetPlayerLocation(PlayerToken token) => players[token].PerseveranceLocation;
 
-    public void Dispose()
-    {
-        rechargeTimer?.Dispose();
-    }
+  public void Dispose()
+  {
+    rechargeTimer?.Dispose();
+  }
 }
 
 public static class GameMessages
 {
-    public const string MovedOutOfBounds = "Looks like you tried to move beyond the borders of the game.";
-    public const string TurnedOK = "Turned OK";
-    public const string MovedOK = "Moved OK";
-    public const string YouMadeItToTheTarget = "You made it to the target!";
-    public const string InsufficientBattery = "Insufficient battery to make move.  Wait and recharge your battery.";
-    public const string IngenuityOutOfBattery = "Ingenuity does not have sufficient battery.";
-    public const string IngenuityMoveOK = "Ingenuity moved OK.";
-    public const string IngenuityTooFar = "Ingenuity cannot fly that far at once.";
+  public const string MovedOutOfBounds = "Looks like you tried to move beyond the borders of the game.";
+  public const string TurnedOK = "Turned OK";
+  public const string MovedOK = "Moved OK";
+  public const string YouMadeItToTheTarget = "You made it to the target!";
+  public const string InsufficientBattery = "Insufficient battery to make move.  Wait and recharge your battery.";
+  public const string IngenuityOutOfBattery = "Ingenuity does not have sufficient battery.";
+  public const string IngenuityMoveOK = "Ingenuity moved OK.";
+  public const string IngenuityTooFar = "Ingenuity cannot fly that far at once.";
 }
