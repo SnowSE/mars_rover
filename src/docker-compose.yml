@@ -8,6 +8,8 @@ services:
       dockerfile: Mars.Web/Dockerfile
     environment:
       - SeqServer=http://seq
+    networks:
+      - jaegernet
 
   seq:
     container_name: seq
@@ -18,3 +20,20 @@ services:
       - /datadrive:/data
     environment:
       - ACCEPT_EULA=Y
+
+  jaeger:
+    container_name: jaeger
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - LOG_LEVEL=debug
+    networks:
+      - jaegernet
+    depends_on:
+      - mars.web
+
+networks:
+  jaegernet:

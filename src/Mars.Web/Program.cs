@@ -1,16 +1,29 @@
+using Hellang.Middleware.ProblemDetails;
 using Mars.Web;
+using Mars.Web.Controllers;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Exceptions;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
-using Hellang.Middleware.ProblemDetails;
-using Serilog;
-using Serilog.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+using var traceProvider = Sdk.CreateTracerProviderBuilder()
+    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Mars.Web"))
+    .AddSource(GameActivitySource.Instance.Name)
+    .AddJaegerExporter(o =>
+    {
+        o.Protocol = OpenTelemetry.Exporter.JaegerExportProtocol.HttpBinaryThrift;
+        o.Endpoint = new Uri("http://jaeger:14268/api/traces");
+    })
+    .AddHttpClientInstrumentation()
+    .AddAspNetCoreInstrumentation()
+    .Build();
 
 builder.Host.UseSerilog((c, l) =>
 {
