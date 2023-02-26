@@ -1,41 +1,46 @@
-﻿using System.Collections.ObjectModel;
+﻿using Microsoft.Extensions.Logging;
+using System.Collections.ObjectModel;
 
 namespace Mars.MissionControl;
 public class Game : IDisposable
 {
-  public Game(GameStartOptions startOptions)
-  {
-    GameState = GameState.Joining;
-    Board = new Board(startOptions.Map);
-    Map = startOptions.Map;
-    TargetLocation = new Location(Map.Width / 2, Map.Height / 2);
-    PerseveranceVisibilityRadius = startOptions.PerseveranceVisibilityRadius;
-    IngenuityVisibilityRadius = startOptions.IngenuityVisibilityRadius;
-    StartingBatteryLevel = startOptions.StartingBatteryLevel;
-    IngenuityStartingBatteryLevel = Board.Width * 2 + Board.Height * 2;
-  }
+    public Game(GameStartOptions startOptions, ILogger<Game> logger)
+    {
+        GameState = GameState.Joining;
+        Board = new Board(startOptions.Map);
+        Map = startOptions.Map;
+        TargetLocation = new Location(Map.Width / 2, Map.Height / 2);
+        PerseveranceVisibilityRadius = startOptions.PerseveranceVisibilityRadius;
+        IngenuityVisibilityRadius = startOptions.IngenuityVisibilityRadius;
+        StartingBatteryLevel = startOptions.StartingBatteryLevel;
+        IngenuityStartingBatteryLevel = Board.Width * 2 + Board.Height * 2;
+        this.logger= logger;        
+    }
 
-  public int MapNumber => Board.MapNumber;
+    public int MapNumber => Board.MapNumber;
 
-  public Location TargetLocation { get; private set; }
-  public int PerseveranceVisibilityRadius { get; }
-  public int IngenuityVisibilityRadius { get; }
-  public int StartingBatteryLevel { get; }
-  public int IngenuityStartingBatteryLevel { get; }
-  public Map Map { get; private set; }
-  private ConcurrentDictionary<PlayerToken, Player> players = new();
-  private ConcurrentDictionary<string, PlayerToken> playerTokenCache = new();
-  public bool TryTranslateToken(string tokenString, out PlayerToken? token) => playerTokenCache.TryGetValue(tokenString, out token);
-  private static Orientation getRandomOrientation() => (Orientation)Random.Shared.Next(0, 4);
-  public GamePlayOptions? GamePlayOptions { get; private set; }
-  public GameState GameState { get; set; }
-  public Board Board { get; private set; }
-  private Timer? rechargeTimer;
-  public DateTime GameStartedOn { get; private set; }
-  public ReadOnlyCollection<Player> Players =>
-      new ReadOnlyCollection<Player>(players.Values.ToList());
-  private ConcurrentQueue<Player> winners = new();
-  public IEnumerable<Player> Winners => winners.ToArray();
+    public Location TargetLocation { get; private set; }
+    public int PerseveranceVisibilityRadius { get; }
+    public int IngenuityVisibilityRadius { get; }
+    public int StartingBatteryLevel { get; }
+    public int IngenuityStartingBatteryLevel { get; }
+
+    private readonly ILogger<Game> logger;
+
+    public Map Map { get; private set; }
+    private ConcurrentDictionary<PlayerToken, Player> players = new();
+    private ConcurrentDictionary<string, PlayerToken> playerTokenCache = new();
+    public bool TryTranslateToken(string tokenString, out PlayerToken? token) => playerTokenCache.TryGetValue(tokenString, out token);
+    private static Orientation getRandomOrientation() => (Orientation)Random.Shared.Next(0, 4);
+    public GamePlayOptions? GamePlayOptions { get; private set; }
+    public GameState GameState { get; set; }
+    public Board Board { get; private set; }
+    private Timer? rechargeTimer;
+    public DateTime GameStartedOn { get; private set; }
+    public ReadOnlyCollection<Player> Players =>
+        new ReadOnlyCollection<Player>(players.Values.ToList());
+    private ConcurrentQueue<Player> winners = new();
+    public IEnumerable<Player> Winners => winners.ToArray();
 
   #region State Changed
   public event EventHandler? GameStateChanged;
@@ -58,21 +63,23 @@ public class Game : IDisposable
       throw new InvalidGameStateException();
     }
 
-    var player = new Player(playerName);
-    var startingLocation = Board.PlaceNewPlayer(player);
-    player = player with
-    {
-      BatteryLevel = StartingBatteryLevel,
-      PerseveranceLocation = startingLocation,
-      IngenuityLocation = startingLocation,
-      IngenuityBatteryLevel = StartingBatteryLevel,
-      Orientation = getRandomOrientation()
-    };
-    if (!players.TryAdd(player.Token, player) ||
-       !playerTokenCache.TryAdd(player.Token.Value, player.Token))
-    {
-      throw new Exception("Unable to add new player...that token already exists?!");
-    }
+        var player = new Player(playerName);
+        var startingLocation = Board.PlaceNewPlayer(player);
+        logger.LogInformation("New player came into existance and started at location ({x}, {y}) ", startingLocation.X, startingLocation.Y);
+        player = player with
+        {
+            BatteryLevel = StartingBatteryLevel,
+            PerseveranceLocation = startingLocation,
+            IngenuityLocation = startingLocation,
+            IngenuityBatteryLevel = StartingBatteryLevel,
+            Orientation = getRandomOrientation()
+        };
+        if (!players.TryAdd(player.Token, player) ||
+           !playerTokenCache.TryAdd(player.Token.Value, player.Token))
+        {
+            logger.LogError($"Player {player.Token.Value} couldn't be added");
+            throw new Exception("Unable to add new player...that token already exists?!");
+        }
 
     raiseStateChange();
 
@@ -171,7 +178,8 @@ public class Game : IDisposable
       message = GameMessages.IngenuityMoveOK;
     }
 
-    raiseStateChange();
+        raiseStateChange();
+        logger.LogInformation("player: {name} moved helicopter correctly and moved to location: {loc}", player.Name, player.IngenuityLocation);
 
     return new IngenuityMoveResult(
         player.IngenuityLocation,
@@ -254,15 +262,17 @@ public class Game : IDisposable
       return MovePerseverance(token, direction, updatePlayerTryAgainCount + 1);
     }
 
-    if (player.PerseveranceLocation == TargetLocation)//you win!
-    {
-      players.Remove(player.Token, out _);
-      player = player with { WinningTime = DateTime.Now - GameStartedOn };
-      winners.Enqueue(player);
-      message = GameMessages.YouMadeItToTheTarget;
-    }
+        if (player.PerseveranceLocation == TargetLocation)//you win!
+        {
+            logger.LogInformation("Player {0} has won!", player.Name);
+            players.Remove(player.Token, out _);
+            player = player with { WinningTime = DateTime.Now - GameStartedOn };
+            winners.Enqueue(player);
+            message = GameMessages.YouMadeItToTheTarget;
+        }
 
-    raiseStateChange();
+        raiseStateChange();
+        logger.LogInformation("player: {0} moved rover correctly", player.Name);
 
     return new MoveResult(
         player.PerseveranceLocation,

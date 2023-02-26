@@ -1,9 +1,16 @@
-﻿namespace Mars.MissionControl;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using System.Runtime.CompilerServices;
+
+namespace Mars.MissionControl;
 
 public static class Helpers
 {
+    private static ILogger<Game> logger = NullLoggerFactory.Instance.CreateLogger<Game>();
+
     public static Map CreateMap(int height, int width)
     {
+       
         var cells = new List<Cell>();
         for (int x = 0; x < width; x++)
         {
@@ -30,11 +37,12 @@ public static class Helpers
 
     public static Game CreateGame(Map map)
     {
+        
         var startOptions = new GameStartOptions
         {
             Map = map
         };
-        var game = new Game(startOptions);
+        var game = new Game(startOptions, logger);
         return game;
     }
 
