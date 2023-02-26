@@ -26,6 +26,21 @@ Object: Get your rover to the destination before everyone else!
 - Winners are determined by the amount of time elapsed from when the game state becomes 'Playing' to when your rover makes it to the target.
 - Tip: Make sure you use the high-resolution information you get back from Perseverance and Ingenuity about their surrounding cells to help improve your planning of how you will get to the target.
 
+## Proposed Changes for the March 2022 Competition
+
+- Change spawning locations
+  - circle spawn (equidistant from target)
+  - fair spawn (possibly different distances but equal best-path to target)
+  - weighted spawn
+- Edge wrapping
+- Unpassable barriers / cliffs (require pathfinding)
+- Weather/storms changes difficulty values (so your previous map becomes invalidated, requiring constant scanning and re-evaluation)
+- closing ring, as time passes boot players outside of a certain radius
+- Multiple waypoints
+- Unbounded battery (you can charge beyond your initial battery level)
+- Change scoring: most efficient wins (battery used / time taken), within 60 seconds of first to target
+- Return battery level on join
+
 ## API Documentation
 
 There is an [API Playground](https://snow-rover.azurewebsites.net/swagger/index.html) where you can see exactly what endpoints exist on the server, what arguments need to be passed in, and what type of data you get back.  Feel free to use that to help you get familiar with how to interact with the server.  While you *can* play the game using nothing more than the API Playground, or a commandline with `curl` in bash or `Invoke-RestMethod` in PowerShell (or even from a few different browser tabs), you will have the best success by writing a program to automate your server interactions.
