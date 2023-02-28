@@ -11,6 +11,16 @@ services:
     networks:
       - jaegernet
 
+  mars.extraapi:
+    image: ${DOCKER_REGISTRY-}marsextraapi
+    build:
+        context: .
+        dockerfile: Mars.ExtraApi/Dockerfile
+    environment:
+        - SeqServer=http://seq
+    networks:
+        - jaegernet
+
   seq:
     container_name: seq
     image: datalust/seq:latest

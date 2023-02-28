@@ -14,12 +14,14 @@ public class GameController : ControllerBase
     ConcurrentDictionary<string, GameManager> games;
     private readonly ConcurrentDictionary<string, string> tokenMap;
     private readonly ILogger<GameController> logger;
+    private readonly ExtraApiClient httpClient;
 
-    public GameController(MultiGameHoster multiGameHoster, ILogger<GameController> logger)
+    public GameController(MultiGameHoster multiGameHoster, ILogger<GameController> logger, ExtraApiClient httpClient)
     {
         this.games = multiGameHoster.Games;
         this.tokenMap = multiGameHoster.TokenMap;
         this.logger = logger;
+        this.httpClient = httpClient;
     }
 
     /// <summary>
@@ -31,18 +33,22 @@ public class GameController : ControllerBase
     [HttpGet("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(JoinResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult<JoinResponse> Join(string gameId, string name)
+    public async Task<ActionResult<JoinResponse>> Join(string gameId, string name)
     {
         if (games.TryGetValue(gameId, out GameManager? gameManager))
         {
             try
             {
                 using var activity = GameActivitySource.Instance.StartActivity("Join Game");
+                activity?.AddTag("gameid", gameId);
+                activity?.AddTag("name", name);
                 var joinResult = gameManager.Game.Join(name);
                 using (logger.BeginScope("ScopeUserToken: {ScopeUser} GameId: {ScopeGameId} ", joinResult.Token.Value, gameId))
                 {
                     tokenMap.TryAdd(joinResult.Token.Value, gameId);
                     logger.LogWarning("Player {name} joined game {gameId}", name, gameId);
+
+                    var weather = await httpClient.GetWeatherAsync();
                 }
                 return new JoinResponse
                 {

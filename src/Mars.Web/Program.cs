@@ -33,6 +33,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHttpClient<ExtraApiClient>();
 
 builder.Host.UseSerilog((context, loggerConfig) =>
 {
@@ -105,3 +106,19 @@ app.MapFallbackToPage("/_Host").DisableRateLimiting();
 app.Run();
 
 public partial class Program { }
+
+public class ExtraApiClient
+{
+    private readonly HttpClient client;
+
+    public ExtraApiClient(HttpClient client)
+    {
+        this.client = client;
+        client.BaseAddress = new Uri("http://mars.extraapi");
+    }
+
+    public async Task<string> GetWeatherAsync()
+    {
+        return await client.GetStringAsync("/weatherforecast");
+    }
+}
