@@ -1,8 +1,6 @@
 using Hellang.Middleware.ProblemDetails;
 using Mars.Web;
-using Mars.Web.Controllers;
 using Microsoft.OpenApi.Models;
-using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -14,17 +12,52 @@ using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-using var traceProvider = Sdk.CreateTracerProviderBuilder()
-    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Mars.Web"))
-    .AddSource(GameActivitySource.Instance.Name)
-    .AddJaegerExporter(o =>
+//using var traceProvider = Sdk.CreateTracerProviderBuilder()
+//    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Mars.Web"))
+//    .AddSource(GameActivitySource.Instance.Name)
+//    .AddJaegerExporter(o =>
+//    {
+//        o.Protocol = OpenTelemetry.Exporter.JaegerExportProtocol.HttpBinaryThrift;
+//        o.Endpoint = new Uri("http://jaeger:14268/api/traces");
+//    })
+//    .AddHttpClientInstrumentation()
+//    .AddAspNetCoreInstrumentation()
+//    .Build();
+
+builder.Services.AddOpenTelemetry()
+    .WithTracing(builder =>
     {
-        o.Protocol = OpenTelemetry.Exporter.JaegerExportProtocol.HttpBinaryThrift;
-        o.Endpoint = new Uri("http://jaeger:14268/api/traces");
+        builder.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Mars.Web"));
+        builder.AddSource(ActivitySources.MarsWeb.Name);
+        builder.AddSource(ActivitySources.Demo.Name);
+        builder.AddJaegerExporter(o =>
+        {
+            o.Protocol = OpenTelemetry.Exporter.JaegerExportProtocol.HttpBinaryThrift;
+            o.Endpoint = new Uri("http://jaeger:14268/api/traces");
+        });
+        builder.AddHttpClientInstrumentation();
+        builder.AddAspNetCoreInstrumentation(o =>
+        {
+            o.EnrichWithException = (activity, exception) =>
+            {
+                activity.SetTag("exceptionType", exception.GetType().ToString());
+            };
+        });
     })
-    .AddHttpClientInstrumentation()
-    .AddAspNetCoreInstrumentation()
-    .Build();
+    .WithMetrics(builder =>
+    {
+        builder.AddAspNetCoreInstrumentation();
+        builder.AddHttpClientInstrumentation();
+        builder.AddProcessInstrumentation();
+        //builder.AddPrometheusExporter(config =>
+        //{
+        //    config.StartHttpListener = true;
+        //    config.HttpListenerPrefixes = new[]
+        //    {
+        //        "http://prometheus:9464"
+        //    };
+        //});
+    });
 
 //using var meterProvider = Sdk.CreateMeterProviderBuilder()
 //    .AddRuntimeInstrumentation()

@@ -1,6 +1,7 @@
 ﻿@inject ILogger<NewGame> logger
 @inject IConfiguration config
 @inject MultiGameHoster multiGameHoster
+@inject ExtraApiClient extraApi
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.Extensions.DependencyInjection.Extensions
 
@@ -8,7 +9,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">New Game</h3>
+                <h3 class="modal-title">Restart Game</h3>
             </div>
             <div class="modal-body">
                 <div class="row">
@@ -78,8 +79,11 @@
         }
     }
 
-    void makeNewGame()
+    async Task makeNewGame()
     {
+        using var activity = ActivitySources.MarsWeb.StartActivity("Restart Game");
+        activity?.AddTag("mapNumber", mapNumber);
+        activity?.AddTag("startingBatteryLevel", startOptions.StartingBatteryLevel);
         if (gameManager == null)
             return;
 
@@ -92,6 +96,8 @@
         startOptions.Map = multiGameHoster.ParsedMaps.Single(m => m.MapNumber == mapNumber);
         logger.LogInformation("Starting new game with {options}", startOptions);
         gameManager.StartNewGame(startOptions);
+
+        await extraApi.GetWeatherAsync();
     }
 
 }

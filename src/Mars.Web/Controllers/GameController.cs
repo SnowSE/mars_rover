@@ -2,11 +2,6 @@
 
 namespace Mars.Web.Controllers;
 
-public static class GameActivitySource
-{
-    public static ActivitySource Instance { get; } = new ActivitySource("Mars.Web", "1.0");
-}
-
 [ApiController]
 [Route("[controller]")]
 public class GameController : ControllerBase
@@ -39,9 +34,11 @@ public class GameController : ControllerBase
         {
             try
             {
-                using var activity = GameActivitySource.Instance.StartActivity("Join Game");
+                using var activity = ActivitySources.MarsWeb.StartActivity("Join Game", kind: ActivityKind.Consumer);
                 activity?.AddTag("gameid", gameId);
                 activity?.AddTag("name", name);
+                activity?.AddEvent(new ActivityEvent("joined game event"));
+
                 var joinResult = gameManager.Game.Join(name);
                 using (logger.BeginScope("ScopeUserToken: {ScopeUser} GameId: {ScopeGameId} ", joinResult.Token.Value, gameId))
                 {

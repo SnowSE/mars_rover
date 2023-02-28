@@ -52,6 +52,7 @@
 
     void startPlaying()
     {
+        using var activity = ActivitySources.MarsWeb.StartActivity("Start Playing");
         if (gameManager == null)
             return;
 

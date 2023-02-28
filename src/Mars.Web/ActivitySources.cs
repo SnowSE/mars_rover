@@ -2,17 +2,8 @@
 
 namespace Mars.Web;
 
-public static class GameActivitySources
+public static class ActivitySources
 {
-    public static ActivitySource Instance { get; } = new("Game");
-}
-
-public static class JoinActivitySources
-{
-    public static ActivitySource Instance { get; } = new("Join");
-}
-
-public static class StatusActivitySources
-{
-    public static ActivitySource Instance { get; } = new("Status");
+    public static ActivitySource MarsWeb { get; } = new ActivitySource("Mars.Web", "1.0");
+    public static ActivitySource Demo { get; } = new ActivitySource("Demo");
 }
