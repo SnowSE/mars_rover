@@ -3,6 +3,7 @@ using Mars.Web;
 using Mars.Web.Controllers;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
@@ -24,6 +25,19 @@ using var traceProvider = Sdk.CreateTracerProviderBuilder()
     .AddHttpClientInstrumentation()
     .AddAspNetCoreInstrumentation()
     .Build();
+
+//using var meterProvider = Sdk.CreateMeterProviderBuilder()
+//    .AddRuntimeInstrumentation()
+//    .AddProcessInstrumentation()
+//    .AddPrometheusExporter(o =>
+//    {
+//        o.StartHttpListener = true;
+//        o.HttpListenerPrefixes = new[]
+//        {
+//            "http://prometheus:9184"
+//        };
+//    })
+//    .Build();
 
 builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.AddRazorPages();
