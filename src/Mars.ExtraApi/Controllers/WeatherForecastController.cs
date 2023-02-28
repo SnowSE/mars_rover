@@ -19,10 +19,15 @@ namespace Mars.ExtraApi.Controllers
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        public async Task<IEnumerable<WeatherForecast>> Get()
         {
             using var activity = ExtraApiActivitySources.Default.StartActivity("Get Weather");
             activity?.AddTag("machineName", Environment.MachineName);
+
+            _logger.LogWarning("Will this show up anywhere?");
+            await Task.Delay(TimeSpan.FromSeconds(.5));
+
+            using var weatherActivity = ExtraApiActivitySources.Weather.StartActivity("Do weathery stuff");
 
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {

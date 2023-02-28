@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 using var traceProvider = Sdk.CreateTracerProviderBuilder()
     .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Mars.ExtraApi"))
     .AddSource(ExtraApiActivitySources.Default.Name)
+    .AddSource(ExtraApiActivitySources.Weather.Name)
     .AddJaegerExporter(o =>
     {
         o.Protocol = OpenTelemetry.Exporter.JaegerExportProtocol.HttpBinaryThrift;
@@ -43,4 +44,5 @@ app.Run();
 public static class ExtraApiActivitySources
 {
     public static ActivitySource Default { get; } = new ActivitySource("Mars.ExtraApi", "1.0");
+    public static ActivitySource Weather { get; } = new ActivitySource("Mars.ExtraApi Weather", "1.0");
 }
