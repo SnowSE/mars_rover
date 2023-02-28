@@ -1,0 +1,39 @@
+version: '3.4'
+
+services:
+  mars.web:
+    image: ${DOCKER_REGISTRY-}marsweb
+    build:
+      context: .
+      dockerfile: Mars.Web/Dockerfile
+    environment:
+      - SeqServer=http://seq
+    networks:
+      - jaegernet
+
+  seq:
+    container_name: seq
+    image: datalust/seq:latest
+    ports:
+      - "8888:80"
+    volumes:
+      - /datadrive:/data
+    environment:
+      - ACCEPT_EULA=Y
+
+  jaeger:
+    container_name: jaeger
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - LOG_LEVEL=debug
+    networks:
+      - jaegernet
+    depends_on:
+      - mars.web
+
+networks:
+  jaegernet:

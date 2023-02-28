@@ -4,7 +4,11 @@
 
 # 2023 Snow College Coding Competition: Mars Rover
 
-Object: Get your rover to the destination before everyone else!
+> **Next competition date:** Friday, March 31st 2023 @ 4PM  
+> **Final competition date:** Friday, April 21st 2023 @ 4PM   
+> Location: [Snow College Science Building, Room GRSC 124](https://goo.gl/maps/zKw4X9gioeNCKutZ9)
+
+***Object: Get your rover to the destination(s) before everyone else!***
 
 ## Summary of Game Mechanics
 
@@ -25,6 +29,21 @@ Object: Get your rover to the destination before everyone else!
 - There is a rate-limit applied to all game players which limits how many movement commands per second you can send to both Perseverance and Ingenuity.
 - Winners are determined by the amount of time elapsed from when the game state becomes 'Playing' to when your rover makes it to the target.
 - Tip: Make sure you use the high-resolution information you get back from Perseverance and Ingenuity about their surrounding cells to help improve your planning of how you will get to the target.
+
+## Proposed Changes for the March 2022 Competition
+
+- Change spawning locations
+  - circle spawn (equidistant from target)
+  - fair spawn (possibly different distances but equal best-path to target)
+  - weighted spawn
+- Edge wrapping
+- Unpassable barriers / cliffs (require pathfinding)
+- Weather/storms changes difficulty values (so your previous map becomes invalidated, requiring constant scanning and re-evaluation)
+- closing ring, as time passes boot players outside of a certain radius
+- ***Multiple waypoints***
+- ***Unbounded battery (you can charge beyond your initial battery level)***
+- ***Change scoring: most efficient wins (battery used / time taken), within 60 seconds of first to target***
+- ***Return battery level on join***
 
 ## API Documentation
 
