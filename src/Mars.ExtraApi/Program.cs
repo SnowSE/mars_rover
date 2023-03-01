@@ -1,23 +1,55 @@
-using OpenTelemetry;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using System.Diagnostics;
 
+// This is required if the collector doesn't expose an https endpoint. By default, .NET
+// only allows http2 (required for gRPC) to secure endpoints.
+AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
+var appResourceBuilder = ResourceBuilder
+    .CreateDefault()
+    .AddService("Mars.ExtraApi");
 
-using var traceProvider = Sdk.CreateTracerProviderBuilder()
-    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Mars.ExtraApi"))
-    .AddSource(ExtraApiActivitySources.Default.Name)
-    .AddSource(ExtraApiActivitySources.Weather.Name)
-    .AddJaegerExporter(o =>
+builder.Logging.AddOpenTelemetry(o =>
+{
+    o.IncludeFormattedMessage = true;
+    o.IncludeScopes = true;
+    o.SetResourceBuilder(appResourceBuilder);
+    o.ParseStateValues = true;
+    o.AddOtlpExporter(o => o.Endpoint = new Uri("http://otel-collector:4317"));
+});
+
+builder.Services.AddOpenTelemetry()
+    .WithTracing(builder =>
     {
-        o.Protocol = OpenTelemetry.Exporter.JaegerExportProtocol.HttpBinaryThrift;
-        o.Endpoint = new Uri("http://jaeger:14268/api/traces");
-    })
-    .AddHttpClientInstrumentation()
-    .AddAspNetCoreInstrumentation()
-    .Build();
+        builder.SetResourceBuilder(appResourceBuilder);
+        builder.AddSource(ExtraApiActivitySources.Default.Name);
+        builder.AddSource(ExtraApiActivitySources.Weather.Name);
+        builder.AddHttpClientInstrumentation();
+        builder.AddAspNetCoreInstrumentation(o =>
+        {
+            o.EnrichWithException = (activity, exception) =>
+            {
+                activity.SetTag("exceptionType", exception.GetType().ToString());
+            };
+        });
+        builder.AddOtlpExporter(o => o.Endpoint = new Uri("http://otel-collector:4317"));
+    });
+
+builder.Services.AddOpenTelemetry()
+    .WithMetrics(builder =>
+    {
+        builder.SetResourceBuilder(appResourceBuilder);
+        builder.AddAspNetCoreInstrumentation();
+        builder.AddHttpClientInstrumentation();
+        builder.AddRuntimeInstrumentation();
+        builder.AddProcessInstrumentation();
+        builder.AddOtlpExporter(o => o.Endpoint = new Uri("http://otel-collector:4317"));
+    });
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
