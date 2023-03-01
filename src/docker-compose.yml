@@ -10,6 +10,8 @@ services:
       - SeqServer=http://seq
     networks:
       - marsnet
+    depends_on:
+      - otel-collector
 
   mars.extraapi:
     image: ${DOCKER_REGISTRY-}marsextraapi
@@ -20,6 +22,8 @@ services:
         - SeqServer=http://seq
     networks:
       - marsnet
+    depends_on:
+      - otel-collector
 
   seq:
     container_name: seq
@@ -38,12 +42,11 @@ services:
     image: jaegertracing/all-in-one:latest
     ports:
       - "16686:16686"
-      - "14268:14268"
+      - "14268"
+      - "14250"
     environment:
       - COLLECTOR_OTLP_ENABLED=true
       - LOG_LEVEL=debug
-    depends_on:
-      - mars.web
     networks:
       - marsnet
 
@@ -73,11 +76,15 @@ services:
       - ./otel-collector/otel-collector-config.yaml:/etc/otel-collector-config.yaml
       - ./logs:/etc/output:rw # Store the logs
     ports:
+      - "1888:1888"   # pprof extension
       - "8888:8888"   # Prometheus metrics exposed by the collector
       - "8889:8889"   # Prometheus exporter metrics
+      - "13133:13133" # health_check extension
       - "4317:4317"   # OTLP gRPC receiver
+      - "55679:55679" # zpages extension
     depends_on:
       - zipkin-all-in-one
+      - jaeger
     networks:
       - marsnet
 

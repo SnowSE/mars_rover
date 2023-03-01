@@ -5,9 +5,15 @@ receivers:
   otlp:
     protocols:
       grpc:
+      http:
 
 # Configure exporters
 exporters:
+  otlp:
+    endpoint: "jaeger:4317"
+    tls:
+      insecure: true
+
   # Export prometheus endpoint
   prometheus:
     endpoint: "0.0.0.0:8889"
@@ -39,7 +45,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [logging, zipkin]
+      exporters: [logging, zipkin, otlp]
     metrics:
       receivers: [otlp]
       processors: [batch]
@@ -47,4 +53,4 @@ service:
     logs:
       receivers: [otlp]
       processors: []
-      exporters: [logging, file]
+      exporters: [logging, file, otlp]
