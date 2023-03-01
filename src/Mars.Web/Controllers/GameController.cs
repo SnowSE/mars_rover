@@ -10,13 +10,15 @@ public class GameController : ControllerBase
     private readonly ConcurrentDictionary<string, string> tokenMap;
     private readonly ILogger<GameController> logger;
     private readonly ExtraApiClient httpClient;
+    private readonly MarsCounters counters;
 
-    public GameController(MultiGameHoster multiGameHoster, ILogger<GameController> logger, ExtraApiClient httpClient)
+    public GameController(MultiGameHoster multiGameHoster, ILogger<GameController> logger, ExtraApiClient httpClient, MarsCounters counters)
     {
         this.games = multiGameHoster.Games;
         this.tokenMap = multiGameHoster.TokenMap;
         this.logger = logger;
         this.httpClient = httpClient;
+        this.counters = counters;
     }
 
     /// <summary>
@@ -46,6 +48,8 @@ public class GameController : ControllerBase
                     logger.LogWarning("Player {name} joined game {gameId}", name, gameId);
 
                     var weather = await httpClient.GetWeatherAsync();
+
+                    counters.GameJoins.Add(1);
                 }
                 return new JoinResponse
                 {

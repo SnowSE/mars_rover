@@ -6,28 +6,32 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Exceptions;
+using System.Diagnostics.Metrics;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//using var traceProvider = Sdk.CreateTracerProviderBuilder()
-//    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Mars.Web"))
-//    .AddSource(GameActivitySource.Instance.Name)
-//    .AddJaegerExporter(o =>
-//    {
-//        o.Protocol = OpenTelemetry.Exporter.JaegerExportProtocol.HttpBinaryThrift;
-//        o.Endpoint = new Uri("http://jaeger:14268/api/traces");
-//    })
-//    .AddHttpClientInstrumentation()
-//    .AddAspNetCoreInstrumentation()
-//    .Build();
+var appResourceBuilder = ResourceBuilder
+    .CreateDefault()
+    .AddService("Mars.Web");
+
+builder.Logging.AddOpenTelemetry(o =>
+{
+    o.IncludeFormattedMessage = true;
+    o.SetResourceBuilder(appResourceBuilder);
+    o.AddProcessor(new OpenTelemetry.SimpleLogRecordExportProcessor(new OpenTelemetry.Exporter.JaegerExporter(new OpenTelemetry.Exporter.JaegerExporterOptions
+    {
+        Protocol = OpenTelemetry.Exporter.JaegerExportProtocol.HttpBinaryThrift,
+        Endpoint = new Uri("http://jaeger:14268/api/traces")
+    })));
+});
 
 builder.Services.AddOpenTelemetry()
     .WithTracing(builder =>
     {
-        builder.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Mars.Web"));
+        builder.SetResourceBuilder(appResourceBuilder);
         builder.AddSource(ActivitySources.MarsWeb.Name);
         builder.AddSource(ActivitySources.Demo.Name);
         builder.AddJaegerExporter(o =>
@@ -43,11 +47,23 @@ builder.Services.AddOpenTelemetry()
                 activity.SetTag("exceptionType", exception.GetType().ToString());
             };
         });
-    })
+    });
+
+var joinMeter = new Meter("Mars.Web.Meters");
+var counter = joinMeter.CreateCounter<long>("Game Joins");
+builder.Services.AddSingleton<MarsCounters>(new MarsCounters
+{
+    GameJoins = counter,
+});
+
+builder.Services.AddOpenTelemetry()
     .WithMetrics(builder =>
     {
+        builder.AddMeter(joinMeter.Name);
+        builder.SetResourceBuilder(appResourceBuilder);
         builder.AddAspNetCoreInstrumentation();
         builder.AddHttpClientInstrumentation();
+        builder.AddRuntimeInstrumentation();
         builder.AddProcessInstrumentation();
         //builder.AddPrometheusExporter(config =>
         //{
