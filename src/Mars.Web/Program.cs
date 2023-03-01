@@ -1,6 +1,7 @@
 using Hellang.Middleware.ProblemDetails;
 using Mars.Web;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -11,6 +12,10 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 
+// This is required if the collector doesn't expose an https endpoint. By default, .NET
+// only allows http2 (required for gRPC) to secure endpoints.
+AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 var appResourceBuilder = ResourceBuilder
@@ -20,12 +25,10 @@ var appResourceBuilder = ResourceBuilder
 builder.Logging.AddOpenTelemetry(o =>
 {
     o.IncludeFormattedMessage = true;
+    o.IncludeScopes = true;
     o.SetResourceBuilder(appResourceBuilder);
-    o.AddProcessor(new OpenTelemetry.SimpleLogRecordExportProcessor(new OpenTelemetry.Exporter.JaegerExporter(new OpenTelemetry.Exporter.JaegerExporterOptions
-    {
-        Protocol = OpenTelemetry.Exporter.JaegerExportProtocol.HttpBinaryThrift,
-        Endpoint = new Uri("http://jaeger:14268/api/traces")
-    })));
+    o.ParseStateValues = true;
+    o.AddOtlpExporter(o => o.Endpoint = new Uri("http://otel-collector:4317"));
 });
 
 builder.Services.AddOpenTelemetry()
@@ -34,11 +37,6 @@ builder.Services.AddOpenTelemetry()
         builder.SetResourceBuilder(appResourceBuilder);
         builder.AddSource(ActivitySources.MarsWeb.Name);
         builder.AddSource(ActivitySources.Demo.Name);
-        builder.AddJaegerExporter(o =>
-        {
-            o.Protocol = OpenTelemetry.Exporter.JaegerExportProtocol.HttpBinaryThrift;
-            o.Endpoint = new Uri("http://jaeger:14268/api/traces");
-        });
         builder.AddHttpClientInstrumentation();
         builder.AddAspNetCoreInstrumentation(o =>
         {
@@ -47,6 +45,7 @@ builder.Services.AddOpenTelemetry()
                 activity.SetTag("exceptionType", exception.GetType().ToString());
             };
         });
+        builder.AddOtlpExporter(o => o.Endpoint = new Uri("http://otel-collector:4317"));
     });
 
 var joinMeter = new Meter("Mars.Web.Meters");
@@ -65,28 +64,8 @@ builder.Services.AddOpenTelemetry()
         builder.AddHttpClientInstrumentation();
         builder.AddRuntimeInstrumentation();
         builder.AddProcessInstrumentation();
-        //builder.AddPrometheusExporter(config =>
-        //{
-        //    config.StartHttpListener = true;
-        //    config.HttpListenerPrefixes = new[]
-        //    {
-        //        "http://prometheus:9464"
-        //    };
-        //});
+        builder.AddOtlpExporter(o => o.Endpoint = new Uri("http://otel-collector:4317"));
     });
-
-//using var meterProvider = Sdk.CreateMeterProviderBuilder()
-//    .AddRuntimeInstrumentation()
-//    .AddProcessInstrumentation()
-//    .AddPrometheusExporter(o =>
-//    {
-//        o.StartHttpListener = true;
-//        o.HttpListenerPrefixes = new[]
-//        {
-//            "http://prometheus:9184"
-//        };
-//    })
-//    .Build();
 
 builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.AddRazorPages();
@@ -108,8 +87,7 @@ builder.Host.UseSerilog((context, loggerConfig) =>
 builder.Services.AddProblemDetails(opts =>
 {
     opts.IncludeExceptionDetails = (ctx, ex) => false;
-}
-);
+});
 
 builder.Services.AddSwaggerGen(c =>
 {

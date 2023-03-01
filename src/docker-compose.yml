@@ -9,7 +9,7 @@ services:
     environment:
       - SeqServer=http://seq
     networks:
-      - jaegernet
+      - marsnet
 
   mars.extraapi:
     image: ${DOCKER_REGISTRY-}marsextraapi
@@ -19,17 +19,19 @@ services:
     environment:
         - SeqServer=http://seq
     networks:
-        - jaegernet
+      - marsnet
 
   seq:
     container_name: seq
     image: datalust/seq:latest
     ports:
-      - "8888:80"
+      - "8000:80"
     volumes:
       - /datadrive:/data
     environment:
       - ACCEPT_EULA=Y
+    networks:
+      - marsnet
 
   jaeger:
     container_name: jaeger
@@ -40,22 +42,44 @@ services:
     environment:
       - COLLECTOR_OTLP_ENABLED=true
       - LOG_LEVEL=debug
-    networks:
-      - jaegernet
     depends_on:
       - mars.web
+    networks:
+      - marsnet
+
+  zipkin-all-in-one:
+    image: openzipkin/zipkin:latest
+    ports:
+      - "9411:9411"
+    networks:
+      - marsnet
 
   prometheus:
-    image: prom/prometheus
     container_name: prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-    ports:
-      - 9090:9090
-    restart: unless-stopped
+    image: prom/prometheus:latest
     volumes:
-      - ./prometheus:/etc/prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prom_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - marsnet
+
+  # OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+      - ./logs:/etc/output:rw # Store the logs
+    ports:
+      - "8888:8888"   # Prometheus metrics exposed by the collector
+      - "8889:8889"   # Prometheus exporter metrics
+      - "4317:4317"   # OTLP gRPC receiver
+    depends_on:
+      - zipkin-all-in-one
+    networks:
+      - marsnet
 
   grafana:
     image: grafana/grafana
@@ -68,9 +92,11 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=grafana
     volumes:
       - ./grafana:/etc/grafana/provisioning/datasources
-
-networks:
-  jaegernet:
+    networks:
+      - marsnet
 
 volumes:
-  prom_data:  
+  prom_data:
+
+networks:
+  marsnet:
