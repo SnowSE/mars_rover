@@ -12,7 +12,11 @@ public class GameManager
         GameStartOptions = new GameStartOptions
         {
             Map = maps[0],
-            Targets = new[] { new MissionControl.Location(maps[0].Width / 2, maps[0].Height / 2) },
+            Targets = new[]
+            {
+                new MissionControl.Location(maps[0].Width / 2, maps[0].Height / 2),
+                new MissionControl.Location(maps[0].Width / 3, maps[0].Height / 3),
+            },
         };
         this.Maps = maps;
         this.logger = logger;
