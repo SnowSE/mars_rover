@@ -292,17 +292,13 @@ public class Game : IDisposable
         );
     }
 
-    private bool playerHasNotVisitedThisTarget(Player player)
-    {
-        return targetVisitations.Where(tv => tv.Player.Token == player.Token);
-    }
+    private bool playerHasNotVisitedThisTarget(Player player) =>
+        !targetVisitations.Any(tv => tv.Player.Token == player.Token && tv.Target == player.PerseveranceLocation);
 
     private bool isOnATarget(Player player) => Targets.Contains(player.PerseveranceLocation);
 
-    private void recordTargetVisitation(Player player)
-    {
+    private void recordTargetVisitation(Player player) =>
         targetVisitations.Add(new TargetVisitation(player.PerseveranceLocation, player, DateTime.Now));
-    }
 
     private bool hasVisitedAllTargets(Player player)
     {
