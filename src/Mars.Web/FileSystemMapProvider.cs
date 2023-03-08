@@ -32,13 +32,13 @@ public class FileSystemMapProvider : IMapProvider
             var mapNumber = int.Parse(parts[1]);
             var content = File.ReadAllText(file);
             var json = JsonSerializer.Deserialize<IEnumerable<IEnumerable<int>>>(content).ToList();
-            var cells = new List<Mars.MissionControl.Cell>();
+            var cells = new List<MissionControl.Cell>();
             for (int row = 0; row < json.Count; row++)
             {
                 var cellsInRow = json[row].ToList();
                 for (int col = 0; col < cellsInRow.Count; col++)
                 {
-                    cells.Add(new Mars.MissionControl.Cell(new Location(row, col), new Difficulty(cellsInRow[col])));
+                    cells.Add(new MissionControl.Cell(new MissionControl.Location(row, col), new Difficulty(cellsInRow[col])));
                 }
             }
 

@@ -1,6 +1,4 @@
 ﻿using Mars.Web;
-using System.Collections.Concurrent;
-using System.Text.Json;
 
 public class MultiGameHoster
 {
@@ -18,14 +16,12 @@ public class MultiGameHoster
     public ConcurrentDictionary<string, string> TokenMap { get; } = new();
 
     private string nextGame = "a";
-    private object lockObject = new();
-    private readonly IWebHostEnvironment hostEnvironment;
+    private readonly object lockObject = new();
     private readonly ILogger<MultiGameHoster> logger;
     private readonly ILogger<Game> gameLogger;
 
     public string MakeNewGame()
     {
-        
         lock (lockObject)
         {
             var gameId = nextGame;

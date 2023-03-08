@@ -19,4 +19,6 @@ public static class TypeExtensions
             UpperRightY = t.UpperRightY,
             UpperRightX = t.UpperRightX
         });
+
+    public static IEnumerable<Types.Location> ToDto(this IEnumerable<MissionControl.Location> locations) => locations.Select(l => new Types.Location(l.X, l.Y));
 }

@@ -12,6 +12,7 @@ public class GameManager
         GameStartOptions = new GameStartOptions
         {
             Map = maps[0],
+            Targets = new[] { new MissionControl.Location(maps[0].Width / 2, maps[0].Height / 2) },
         };
         this.Maps = maps;
         this.logger = logger;
@@ -51,15 +52,15 @@ public class GameManager
         //unsubscribe from old event
         if (Game != null)
         {
-            Game.GameStateChanged -= Game_GameStateChanged;            
+            Game.GameStateChanged -= Game_GameStateChanged;
             Game.Dispose();
-            logger.LogWarning("Ending previously running game");            
+            logger.LogWarning("Ending previously running game");
         }
 
         NewGameStarted?.Invoke(this, new EventArgs());
 
         logger.LogInformation("Starting new game with {options}", startOptions);
-        Game = new Game(startOptions, logger);        
+        Game = new Game(startOptions, logger);
         GameStateChanged?.Invoke(this, EventArgs.Empty);
 
         //subscribe to new event

@@ -51,8 +51,7 @@ public class GameController : ControllerBase
                     StartingX = joinResult.PlayerLocation.X,
                     Neighbors = joinResult.Neighbors.ToDto(),
                     LowResolutionMap = joinResult.LowResolutionMap.ToDto(),
-                    TargetX = joinResult.TargetLocation.X,
-                    TargetY = joinResult.TargetLocation.Y,
+                    Targets = joinResult.TargetLocations.ToDto(),
                     Orientation = joinResult.Orientation.ToString()
                 };
             }
@@ -165,43 +164,40 @@ public class GameController : ControllerBase
         var tokenHasGame = tokenMap.TryGetValue(token, out string? gameId);
         using (logger.BeginScope("ScopeUserToken: {ScopeUser} GameId: {ScopeGameId} ", token, gameId))
         {
-            if (tokenHasGame)
+            if (tokenHasGame && games.TryGetValue(gameId, out var gameManager))
             {
-                if (games.TryGetValue(gameId, out var gameManager))
+                PlayerToken? playerToken;
+                if (!gameManager.Game.TryTranslateToken(token, out playerToken))
                 {
-                    PlayerToken? playerToken;
-                    if (!gameManager.Game.TryTranslateToken(token, out playerToken))
-                    {
-                        logger.LogError("Unrecogized token {token}", token);
-                        return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
-                    }
+                    logger.LogError("Unrecognized token {token}", token);
+                    return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
+                }
 
-                    if (gameManager.Game.GameState != GameState.Playing)
-                    {
-                        logger.LogError("Could not move: Game not in Playing state.");
-                        return Problem("Unable to move", statusCode: 400, title: "Game not in Playing state.");
-                    }
+                if (gameManager.Game.GameState != GameState.Playing)
+                {
+                    logger.LogError("Could not move: Game not in Playing state.");
+                    return Problem("Unable to move", statusCode: 400, title: "Game not in Playing state.");
+                }
 
-                    try
+                try
+                {
+                    var moveResult = gameManager.Game.MoveIngenuity(playerToken!, new MissionControl.Location(destinationRow, destinationColumn));
+                    return new IngenuityMoveResponse
                     {
-                        var moveResult = gameManager.Game.MoveIngenuity(playerToken!, new Location(destinationRow, destinationColumn));
-                        return new IngenuityMoveResponse
-                        {
-                            X = moveResult.Location.X,
-                            Y = moveResult.Location.Y,
-                            Neighbors = moveResult.Neighbors.ToDto(),
-                            Message = moveResult.Message,
-                            BatteryLevel = moveResult.BatteryLevel
-                        };
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError("Could not move: {exceptionMessage}", ex.Message);
-                        return Problem("Unable to move", statusCode: 400, title: ex.Message);
-                    }
+                        X = moveResult.Location.X,
+                        Y = moveResult.Location.Y,
+                        Neighbors = moveResult.Neighbors.ToDto(),
+                        Message = moveResult.Message,
+                        BatteryLevel = moveResult.BatteryLevel
+                    };
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError("Could not move: {exceptionMessage}", ex.Message);
+                    return Problem("Unable to move", statusCode: 400, title: ex.Message);
                 }
             }
-            logger.LogError("Unrecogized token {token}", token);
+            logger.LogError("Unrecognized token {token}", token);
             return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
         }
     }

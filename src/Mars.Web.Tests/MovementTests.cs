@@ -15,7 +15,7 @@ public class MovementTests
     private HttpClient client;
     private JoinResponse player1;
     private Orientation currentOrientation;
-    private Location lastLocation, currentLocation;
+    private MissionControl.Location lastLocation, currentLocation;
     bool iWon;
 
     [SetUp]
@@ -27,12 +27,16 @@ public class MovementTests
         gameId = multiGameHoster.MakeNewGame();
         gameManager = multiGameHoster.Games[gameId];
         var map = Helpers.CreateMap(5, 5);
-        gameManager.StartNewGame(new GameStartOptions { Map = map });
+        gameManager.StartNewGame(new GameStartOptions
+        {
+            Map = map,
+            Targets = new[] { new MissionControl.Location(map.Width / 2, map.Height / 2) }
+        });
 
         client = _factory.CreateClient();
         player1 = await client.GetFromJsonAsync<JoinResponse>($"/game/join?gameId={gameId}&name=P1");
         currentOrientation = Enum.Parse<Orientation>(player1.Orientation);
-        lastLocation = currentLocation = new Location(player1.StartingX, player1.StartingY);
+        lastLocation = currentLocation = new MissionControl.Location(player1.StartingX, player1.StartingY);
         iWon = false;
 
         gameManager.PlayGame(new GamePlayOptions { RechargePointsPerSecond = 1 });
@@ -86,7 +90,7 @@ public class MovementTests
         {
             lastLocation = currentLocation;
             var response = await client.GetFromJsonAsync<PerseveranceMoveResponse>($"/game/moveperseverance?token={player1.Token}&direction=Forward");
-            currentLocation = new Location(response.X, response.Y);
+            currentLocation = new MissionControl.Location(response.X, response.Y);
             spacesMoved++;
 
             if (response.Message == GameMessages.YouMadeItToTheTarget)

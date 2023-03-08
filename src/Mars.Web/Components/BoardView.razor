@@ -1,12 +1,15 @@
 ﻿@using System.Text
 
 <div class="background" style=@(backgroundStyle)>
-    <img src="/images/pin_100.png" width="40" style=@($"position: absolute; bottom: {pinBottom}%; left: {pinLeft}%; z-index: 80;") alt="Destination target location" />
     <div style="position: absolute; top: 120px; bottom: 0; right: 110px; width: 95%; background-color: transparent;">
         @foreach (var player in gameManager!.Game.Players)
         {
             <RoverView Player="player" />
             <IngenuityView Player="player" />
+        }
+        @foreach(var target in gameManager!.Game.Targets)
+        {
+            <TargetView Location="target" />
         }
     </div>
 
@@ -44,9 +47,6 @@
     [CascadingParameter(Name = "GameManager")]
     public GameManager? gameManager { get; set; }
 
-    double pinBottom;
-    double pinLeft;
-
     protected override void OnParametersSet()
     {
         gameManager.GameStateChanged += (_, _) => InvokeAsync(() =>
@@ -66,10 +66,6 @@
 
     void refreshMap()
     {
-        var target = gameManager!.Game.TargetLocation;
-        pinBottom = target.X * 100.0 / gameManager.Game.Board.Height;
-        pinLeft = target.Y * 100.0 / gameManager.Game.Board.Width;
-
         backgroundStyle = $"background-image: url('/images/terrain_{gameManager.Game.MapNumber:00}.png'); ";
     }
 }

@@ -17,15 +17,20 @@
                     </div>
                 </div>
                 <div class="row mb-2">
-                <InputRadioGroup Name="mapNumber" @bind-Value=mapNumber>
-                    @foreach (var map in multiGameHoster.ParsedMaps.Take(MaxMaps))
-                    {
-                        <div class="form-check mx-3">
-                            <InputRadio Value="@map.MapNumber" class="form-check-input" id=@($"map{map.MapNumber}") />
-                            <label class="form-check-label float-start" for=@($"map{map.MapNumber}")>Map #@map.MapNumber</label>
-                        </div>
-                    }
-                </InputRadioGroup>
+                    <InputRadioGroup Name="mapNumber" @bind-Value=mapNumber>
+                        @foreach (var map in multiGameHoster.ParsedMaps.Take(MaxMaps))
+                        {
+                            <div class="form-check mx-3">
+                                <InputRadio Value="@map.MapNumber" class="form-check-input" id=@($"map{map.MapNumber}") />
+                                <label class="form-check-label float-start" for=@($"map{map.MapNumber}")>Map #@map.MapNumber</label>
+                            </div>
+                        }
+                    </InputRadioGroup>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="targets" placeholder="Target Locations" @bind=targetLocations />
+                        <label for="targets">Targets</label>
+                    </div>
                 </div>
                 <div class="form-floating mb-3">
                     <input class="form-control" type="number" id="startingBatteryLevel" placeholder="width" @bind=startOptions.StartingBatteryLevel />
@@ -57,6 +62,7 @@
 
     bool startGameButtonHidden = true;
     int mapNumber;
+    string targetLocations;
 
     protected override void OnParametersSet()
     {
@@ -64,6 +70,22 @@
 
         if (!int.TryParse(config["MaxMaps"], out MaxMaps))
             MaxMaps = 3;
+
+        targetLocations = targetsToString(startOptions.Targets);
+    }
+
+    private string targetsToString(IEnumerable<Location> targets)
+    {
+        return string.Join("; ", targets.Select(t => $"({t.X}, {t.Y})"));
+    }
+
+    private IEnumerable<Location> parseTargets(string text)
+    {
+        return from word in text.Split(';', StringSplitOptions.RemoveEmptyEntries)
+               let parts = word.Split(new[] { '(', ',', ')', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+               let x = int.Parse(parts[0])
+               let y = int.Parse(parts[1])
+               select new Location(x, y);
     }
 
     private string? password;
@@ -90,6 +112,7 @@
         }
 
         startOptions.Map = multiGameHoster.ParsedMaps.Single(m => m.MapNumber == mapNumber);
+        startOptions.Targets = parseTargets(targetLocations);
         logger.LogInformation("Starting new game with {options}", startOptions);
         gameManager.StartNewGame(startOptions);
     }

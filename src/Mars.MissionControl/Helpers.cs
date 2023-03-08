@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using System.Runtime.CompilerServices;
 
 namespace Mars.MissionControl;
 
@@ -10,7 +9,7 @@ public static class Helpers
 
     public static Map CreateMap(int height, int width)
     {
-       
+
         var cells = new List<Cell>();
         for (int x = 0; x < width; x++)
         {
@@ -23,24 +22,29 @@ public static class Helpers
         return map;
     }
 
-    public static Board CreateBoard(int height, int width)
+    public static Board CreateBoard(int height, int width, IEnumerable<Location> targets = null)
     {
         var map = CreateMap(height, width);
         return new Board(map);
     }
 
-    public static Game CreateGame(int height, int width)
+    public static Game CreateGame(int height, int width, IEnumerable<Location> targets = null)
     {
         var map = Helpers.CreateMap(5, 5);
-        return CreateGame(map);
+        return CreateGame(map, targets);
     }
 
-    public static Game CreateGame(Map map)
+    public static Game CreateGame(Map map, IEnumerable<Location> targets = null)
     {
-        
+        if (targets == null)
+        {
+            targets = new[] { new Location(map.Width / 2, map.Height / 2) };
+        }
+
         var startOptions = new GameStartOptions
         {
-            Map = map
+            Map = map,
+            Targets = targets
         };
         var game = new Game(startOptions, logger);
         return game;

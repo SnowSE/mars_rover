@@ -26,7 +26,11 @@ public class JoinGameTests
     public async Task JoinGame()
     {
         var map = Helpers.CreateMap(5, 5);
-        gameManager.StartNewGame(new GameStartOptions { Map = map });
+        gameManager.StartNewGame(new GameStartOptions
+        {
+            Map = map,
+            Targets = new[] { new MissionControl.Location(map.Width / 2, map.Height / 2) }
+        });
         var client = _factory.CreateClient();
         var expectedLowResolutionMap = new[]
         {
@@ -45,8 +49,8 @@ public class JoinGameTests
         joinResponse.Token.Length.Should().Be(16);
         joinResponse.LowResolutionMap.Should().BeEquivalentTo(expectedLowResolutionMap);
         joinResponse.Neighbors.Count().Should().BeOneOf(9, 12, 15);//9 if you're in a corner, 12 if you're one away from a corner, 15 if you're 2 away from a corner.
-        joinResponse.TargetX.Should().BeGreaterThan(0);
-        joinResponse.TargetY.Should().BeGreaterThan(0);
+        joinResponse.Targets.First().X.Should().BeGreaterThan(0);
+        joinResponse.Targets.First().Y.Should().BeGreaterThan(0);
     }
 
     [Test]

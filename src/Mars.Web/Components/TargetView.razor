@@ -1,0 +1,20 @@
+﻿
+<img src="/images/pin_100.png" width="40" style=@($"position: absolute; bottom: {pinBottom}%; left: {pinLeft}%; z-index: 80;") alt="Destination target location" />
+
+
+@code {
+    double pinBottom;
+    double pinLeft;
+
+    [Parameter]
+    public Location? Location{ get; set; }
+
+    [CascadingParameter(Name = "GameManager")]
+    public GameManager? gameManager { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        pinBottom = Location.X * 100.0 / gameManager.Game.Board.Height;
+        pinLeft = Location.Y * 100.0 / gameManager.Game.Board.Width;
+    }
+}

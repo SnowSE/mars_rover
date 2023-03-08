@@ -8,9 +8,9 @@ internal class JoinGameTests
     [Test]
     public void GameHasTarget()
     {
-        var game = Helpers.CreateGame(5, 5);
-        game.TargetLocation.X.Should().BeGreaterThan(0);
-        game.TargetLocation.Y.Should().BeGreaterThan(0);
+        var targets = new[] { new Location(100, 100), new Location(200, 200), new Location(300, 200), new Location(150, 150) };
+        var game = Helpers.CreateGame(5, 5, targets);
+        game.Targets.Should().BeEquivalentTo(targets);
     }
 
     [Test]
