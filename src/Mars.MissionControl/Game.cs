@@ -121,11 +121,8 @@ public class Game : IDisposable
         foreach (var playerToken in players.Keys)
         {
             var origPlayer = players[playerToken];
-            if (origPlayer.BatteryLevel < StartingBatteryLevel)
-            {
-                var newPlayer = origPlayer with { BatteryLevel = Math.Min(StartingBatteryLevel, origPlayer.BatteryLevel + GamePlayOptions!.RechargePointsPerSecond) };
-                players.TryUpdate(playerToken, newPlayer, origPlayer);
-            }
+            var newPlayer = origPlayer with { BatteryLevel = origPlayer.BatteryLevel + GamePlayOptions!.RechargePointsPerSecond };
+            players.TryUpdate(playerToken, newPlayer, origPlayer);
         }
 
         raiseStateChange();
@@ -244,7 +241,7 @@ public class Game : IDisposable
             }
             else
             {
-                int newBatteryLevel = player.BatteryLevel - Board[desiredLocation].Difficulty.Value;
+                var newBatteryLevel = player.BatteryLevel - Board[desiredLocation].Difficulty.Value;
                 if (newBatteryLevel >= 0)
                 {
                     player = player with

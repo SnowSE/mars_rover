@@ -9,6 +9,7 @@ public class JoinResponse
     public IEnumerable<Cell> Neighbors { get; set; }
     public IEnumerable<LowResolutionMapTile> LowResolutionMap { get; set; }
     public string Orientation { get; set; }
+    public long BatteryLevel { get; set; }
 }
 
 public record Location(int X, int Y);

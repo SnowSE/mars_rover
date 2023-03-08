@@ -16,7 +16,7 @@ public record Player
     }
 
     public TimeSpan? WinningTime { get; set; }
-    public int BatteryLevel { get; init; }
+    public long BatteryLevel { get; init; }
     public PlayerToken Token { get; private set; }
     public string Name { get; private set; }
     public Location PerseveranceLocation { get; init; }

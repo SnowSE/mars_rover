@@ -52,7 +52,8 @@ public class GameController : ControllerBase
                     Neighbors = joinResult.Neighbors.ToDto(),
                     LowResolutionMap = joinResult.LowResolutionMap.ToDto(),
                     Targets = joinResult.TargetLocations.ToDto(),
-                    Orientation = joinResult.Orientation.ToString()
+                    Orientation = joinResult.Orientation.ToString(),
+                    BatteryLevel = joinResult.BatteryLevel
                 };
             }
             catch (TooManyPlayersException)

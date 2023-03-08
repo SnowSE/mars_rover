@@ -12,6 +12,6 @@ public class BatteryTests
         scenario.Game.MovePerseverance(scenario.Players[0].Token, Direction.Right);
         scenario.Game.Players[0].BatteryLevel.Should().Be(scenario.Game.StartingBatteryLevel - 1);
         await Task.Delay(TimeSpan.FromMilliseconds(1_100));
-        scenario.Game.Players[0].BatteryLevel.Should().Be(scenario.Game.StartingBatteryLevel);
+        scenario.Game.Players[0].BatteryLevel.Should().Be(scenario.Game.StartingBatteryLevel + 9);
     }
 }
