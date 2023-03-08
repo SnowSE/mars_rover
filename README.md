@@ -13,7 +13,7 @@
 ## Summary of Game Mechanics
 
 - Join the game and get a token that represents your user.  
-- Review the low-resolution map of the surface of mars and make a guess of what route you might want to use to get to the target.  
+- Review the low-resolution map of the surface of mars and make a guess of what route you might want to use to get to the target(s).  
 - Wait for the game to go from 'Joining' status to 'Playing' status so you can start moving your rover
 - Perseverance (the rover)
   - Every cell on the board has a 'difficulty' value, which will reduce Perseverance's battery power.  
@@ -27,23 +27,23 @@
   - The Ingenuity helicopter can move up to two cells in any direction (including diagonally), so you can quickly scout out the terrain in front of the rover to help determine the most efficient path to the target.
   - Fly the Ingenuity helicopter by giving it a destination x/y within two cells of its current location, if you give it a destination more than two cells away it will ignore the command.
 - There is a rate-limit applied to all game players which limits how many movement commands per second you can send to both Perseverance and Ingenuity.
-- Winners are determined by the amount of time elapsed from when the game state becomes 'Playing' to when your rover makes it to the target.
+- Winners are determined by the amount of time elapsed from when the game state becomes 'Playing' to when your rover makes it to *all* of the targets (if more than one).
 - Tip: Make sure you use the high-resolution information you get back from Perseverance and Ingenuity about their surrounding cells to help improve your planning of how you will get to the target.
 
-## Proposed Changes for the March 2022 Competition
+## Proposed changes for upcoming competitions
 
-- Change spawning locations
+* [ ] Change spawning locations
   - circle spawn (equidistant from target)
   - fair spawn (possibly different distances but equal best-path to target)
   - weighted spawn
-- Edge wrapping
-- Unpassable barriers / cliffs (require pathfinding)
-- Weather/storms changes difficulty values (so your previous map becomes invalidated, requiring constant scanning and re-evaluation)
-- closing ring, as time passes boot players outside of a certain radius
-- ***Multiple waypoints***
-- ***Unbounded battery (you can charge beyond your initial battery level)***
-- ***Change scoring: most efficient wins (battery used / time taken), within 60 seconds of first to target***
-- ***Return battery level on join***
+* [ ] Edge wrapping
+* [ ] Unpassable barriers / cliffs (require pathfinding)
+* [ ] Weather/storms changes difficulty values (so your previous map becomes invalidated, requiring constant scanning and re-evaluation)
+* [ ] closing ring, as time passes boot players outside of a certain radius
+* [ ] ***Change scoring: most efficient wins (battery used / time taken), within 60 seconds of first to target***
+* [x] Multiple waypoints ***(March 2023)***
+* [x] Unbounded battery (you can charge beyond your initial battery level) ***(March 2023)***
+* [x] Return battery level on join ***(March 2023)***
 
 ## API Documentation
 
@@ -103,11 +103,17 @@ The password required to restart a game or begin playing is `password`.  If you 
         public string Token { get; set; }
         public int StartingX { get; set; }
         public int StartingY { get; set; }
-        public int TargetX { get; set; }
-        public int TargetY { get; set; }
+        public Location[] Targets { get; set; }
         public Neighbor[] Neighbors { get; set; }
-        public LowResolutionCell[] LowResolutionMap { get; set; }
+        public Lowresolutionmap[] LowResolutionMap { get; set; }
         public string Orientation { get; set; }
+        public long BatteryLevel{ get; set; }
+    }
+
+    public class Location
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
     }
 
     public class Neighbor
@@ -160,7 +166,7 @@ The password required to restart a game or begin playing is `password`.  If you 
     {
         public int X { get; set; }
         public int Y { get; set; }
-        public int BatteryLevel { get; set; }
+        public long BatteryLevel { get; set; }
         public Neighbor[] Neighbors { get; set; }
         public string Message { get; set; }
         public string Orientation { get; set; }
