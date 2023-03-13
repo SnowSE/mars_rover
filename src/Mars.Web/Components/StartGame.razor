@@ -33,7 +33,7 @@
     [CascadingParameter(Name = "GameManager")]
     public GameManager? gameManager { get; set; }
 
-    private GameStartOptions startOptions => gameManager!.GameStartOptions;
+    private GameCreationOptions startOptions => gameManager!.GameStartOptions;
 
     bool startGameButtonHidden = true;
     GamePlayOptions gamePlayOptions = new();

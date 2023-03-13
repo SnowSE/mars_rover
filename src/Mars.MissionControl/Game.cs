@@ -4,17 +4,17 @@ using System.Collections.ObjectModel;
 namespace Mars.MissionControl;
 public class Game : IDisposable
 {
-    public Game(GameStartOptions startOptions, ILogger<Game> logger)
+    public Game(GameCreationOptions startOptions, ILogger<Game> logger)
     {
-        if (!(startOptions.Targets?.Any() ?? false))
+        if (!(startOptions.MapWithTargets.Targets?.Any() ?? false))
         {
             throw new CannotStartGameWithoutTargetsException();
         }
 
         GameState = GameState.Joining;
-        Board = new Board(startOptions.Map);
-        Map = startOptions.Map;
-        Targets = new ReadOnlyCollection<Location>(startOptions.Targets.ToList());
+        Board = new Board(startOptions.MapWithTargets.Map);
+        Map = startOptions.MapWithTargets.Map;
+        Targets = new ReadOnlyCollection<Location>(startOptions.MapWithTargets.Targets.ToList());
         PerseveranceVisibilityRadius = startOptions.PerseveranceVisibilityRadius;
         IngenuityVisibilityRadius = startOptions.IngenuityVisibilityRadius;
         StartingBatteryLevel = startOptions.StartingBatteryLevel;

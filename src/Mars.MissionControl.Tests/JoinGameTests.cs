@@ -19,7 +19,7 @@ internal class JoinGameTests
         var game = Helpers.CreateGame(5, 5);
         var joinResult = game.Join("Jonathan");
         joinResult.Should().NotBeNull();
-        joinResult.BatteryLevel.Should().Be(new GameStartOptions().StartingBatteryLevel);
+        joinResult.BatteryLevel.Should().Be(new GameCreationOptions().StartingBatteryLevel);
     }
 
     [Test]

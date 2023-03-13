@@ -9,14 +9,13 @@ public class GameManager
     public GameManager(List<Map> maps, ILogger<Game> logger)
     {
         CreatedOn = DateTime.Now;
-        GameStartOptions = new GameStartOptions
+        GameStartOptions = new GameCreationOptions
         {
-            Map = maps[0],
-            Targets = new[]
+            MapWithTargets = new MapWithTargets(maps[0], new[]
             {
                 new MissionControl.Location(maps[0].Width / 2, maps[0].Height / 2),
                 new MissionControl.Location(maps[0].Width / 3, maps[0].Height / 3),
-            },
+            })
         };
         this.Maps = maps;
         this.logger = logger;
@@ -27,7 +26,7 @@ public class GameManager
     /// <summary>
     /// If you were to restart this game instance, what options would you use?
     /// </summary>
-    public GameStartOptions GameStartOptions { get; }
+    public GameCreationOptions GameStartOptions { get; }
 
     /// <summary>
     /// When this instance of the Mars Rover game was instantiated
@@ -51,7 +50,7 @@ public class GameManager
     /// </summary>
     /// <param name="startOptions"></param>
     [MemberNotNull(nameof(Game))]
-    public void StartNewGame(GameStartOptions startOptions)
+    public void StartNewGame(GameCreationOptions startOptions)
     {
         //unsubscribe from old event
         if (Game != null)

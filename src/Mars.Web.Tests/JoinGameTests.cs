@@ -26,10 +26,9 @@ public class JoinGameTests
     public async Task JoinGame()
     {
         var map = Helpers.CreateMap(5, 5);
-        gameManager.StartNewGame(new GameStartOptions
+        gameManager.StartNewGame(new GameCreationOptions
         {
-            Map = map,
-            Targets = new[] { new MissionControl.Location(map.Width / 2, map.Height / 2) }
+            MapWithTargets = new MapWithTargets(map, new[] { new MissionControl.Location(map.Width / 2, map.Height / 2) })
         });
         var client = _factory.CreateClient();
         var expectedLowResolutionMap = new[]

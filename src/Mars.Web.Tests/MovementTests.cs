@@ -27,10 +27,9 @@ public class MovementTests
         gameId = multiGameHoster.MakeNewGame();
         gameManager = multiGameHoster.Games[gameId];
         var map = Helpers.CreateMap(5, 5);
-        gameManager.StartNewGame(new GameStartOptions
+        gameManager.StartNewGame(new GameCreationOptions
         {
-            Map = map,
-            Targets = new[] { new MissionControl.Location(map.Width / 2, map.Height / 2) }
+            MapWithTargets = new MapWithTargets(map, new[] { new MissionControl.Location(map.Width / 2, map.Height / 2) })
         });
 
         client = _factory.CreateClient();

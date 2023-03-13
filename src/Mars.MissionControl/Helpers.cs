@@ -41,10 +41,9 @@ public static class Helpers
             targets = new[] { new Location(map.Width / 2, map.Height / 2) };
         }
 
-        var startOptions = new GameStartOptions
+        var startOptions = new GameCreationOptions
         {
-            Map = map,
-            Targets = targets
+            MapWithTargets = new MapWithTargets(map, targets)
         };
         var game = new Game(startOptions, logger);
         return game;

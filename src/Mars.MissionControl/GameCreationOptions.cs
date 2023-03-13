@@ -1,12 +1,10 @@
 ﻿namespace Mars.MissionControl;
 
-public class GameStartOptions
+public class GameCreationOptions
 {
     private int perseveranceVisibilityRadius = 2;
     private int ingenuityVisibilityRadius = 5;
     private int startingBatteryLevel = 18_000;
-
-    public IEnumerable<Location> Targets { get; set; }
 
     public int StartingBatteryLevel
     {
@@ -50,8 +48,8 @@ public class GameStartOptions
         }
     }
 
-    public Map Map { get; set; }
+    public MapWithTargets MapWithTargets { get; set; }
 
     public override string ToString() =>
-        $"Map#={Map.MapNumber}; BatteryLevel={StartingBatteryLevel}; PerseveranceVisibility={PerseveranceVisibilityRadius}, IngenuityVisibility={IngenuityVisibilityRadius}";
+        $"Map#={MapWithTargets.Map.MapNumber}; BatteryLevel={StartingBatteryLevel}; PerseveranceVisibility={PerseveranceVisibilityRadius}, IngenuityVisibility={IngenuityVisibilityRadius}";
 }
