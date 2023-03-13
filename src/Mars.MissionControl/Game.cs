@@ -267,14 +267,15 @@ public class Game : IDisposable
         if (isOnATarget(player) && playerHasNotVisitedThisTarget(player))
         {
             recordTargetVisitation(player);
+            message = GameMessages.YouMadeItToTheTarget;
             if (hasVisitedAllTargets(player))
             {
                 logger.LogInformation("Player {playerName} has won!", player.Name);
                 players.Remove(player.Token, out _);
                 player = player with { WinningTime = DateTime.Now - GameStartedOn };
                 winners.Enqueue(player);
+                message = GameMessages.YouMadeItToAllTheTargets;
             }
-            message = GameMessages.YouMadeItToTheTarget;
         }
 
         raiseStateChange();
@@ -318,6 +319,7 @@ public static class GameMessages
     public const string TurnedOK = "Turned OK";
     public const string MovedOK = "Moved OK";
     public const string YouMadeItToTheTarget = "You made it to the target!";
+    public const string YouMadeItToAllTheTargets = "You made it to all the targets!";
     public const string InsufficientBattery = "Insufficient battery to make move.  Wait and recharge your battery.";
     public const string IngenuityOutOfBattery = "Ingenuity does not have sufficient battery.";
     public const string IngenuityMoveOK = "Ingenuity moved OK.";
