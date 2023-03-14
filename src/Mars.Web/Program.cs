@@ -92,15 +92,15 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Mars Rover v1");
 });
 
-app.MapBlazorHub().DisableRateLimiting();
+app.MapBlazorHub()
+   .DisableRateLimiting();
 
-#if !DEBUG
 app.UseRateLimiter();
-#endif
 
 app.MapControllers();
 
-app.MapFallbackToPage("/_Host").DisableRateLimiting();
+app.MapFallbackToPage("/_Host")
+   .DisableRateLimiting();
 
 app.Run();
 
