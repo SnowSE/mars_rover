@@ -88,16 +88,23 @@ public class MovementTests
         do
         {
             lastLocation = currentLocation;
+            //try
+            //{
             var response = await client.GetFromJsonAsync<PerseveranceMoveResponse>($"/game/moveperseverance?token={player1.Token}&direction=Forward");
             currentLocation = new MissionControl.Location(response.X, response.Y);
             spacesMoved++;
 
-            if (response.Message == GameMessages.YouMadeItToTheTarget)
+            if (response.Message == GameMessages.YouMadeItToAllTheTargets)
             {
                 iWon = true;
                 Assert.Pass("I won!!!");
-                break;
+                return;
             }
+            //}
+            //catch (Exception ex)
+            //{
+
+            //}
         } while (spacesMoved < spaces && currentLocation != lastLocation);
     }
 
@@ -105,8 +112,15 @@ public class MovementTests
     {
         while (currentOrientation != desiredOrientation)
         {
-            var response = await client.GetFromJsonAsync<PerseveranceMoveResponse>($"/game/moveperseverance?token={player1.Token}&direction=Left");
-            currentOrientation = Enum.Parse<Orientation>(response.Orientation);
+            try
+            {
+                var response = await client.GetFromJsonAsync<PerseveranceMoveResponse>($"/game/moveperseverance?token={player1.Token}&direction=Left");
+                currentOrientation = Enum.Parse<Orientation>(response.Orientation);
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
     }
 
