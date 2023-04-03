@@ -30,20 +30,31 @@
 - Winners are determined by the amount of time elapsed from when the game state becomes 'Playing' to when your rover makes it to *all* of the targets (if more than one).
 - Tip: Make sure you use the high-resolution information you get back from Perseverance and Ingenuity about their surrounding cells to help improve your planning of how you will get to the target.
 
-## Proposed changes for upcoming competitions
+## Changes for the April 2023 Competetion
+
+* [ ] Each contestant is only allowed a single rover, but each rover has 10 helicopters
+* [ ] Unpassable barriers / cliffs (require pathfinding)
+* [ ] Allow players to move along the border before gameplay begins
+* [ ] When all batteries get to 0, bump everyone's battery (to keep the game moving)
+* [ ] Hide the maps
+* [ ] Enforce the order of the targets
+
+## Changes for the March 2023 Competition
+
+* [x] Multiple waypoints ***(March 2023)***
+* [x] Unbounded battery (you can charge beyond your initial battery level) ***(March 2023)***
+* [x] Return battery level on join ***(March 2023)***
+
+## Proposed changes for future competitions
 
 * [ ] Change spawning locations
   - circle spawn (equidistant from target)
   - fair spawn (possibly different distances but equal best-path to target)
   - weighted spawn
 * [ ] Edge wrapping
-* [ ] Unpassable barriers / cliffs (require pathfinding)
 * [ ] Weather/storms changes difficulty values (so your previous map becomes invalidated, requiring constant scanning and re-evaluation)
 * [ ] closing ring, as time passes boot players outside of a certain radius
 * [ ] ***Change scoring: most efficient wins (battery used / time taken), within 60 seconds of first to target***
-* [x] Multiple waypoints ***(March 2023)***
-* [x] Unbounded battery (you can charge beyond your initial battery level) ***(March 2023)***
-* [x] Return battery level on join ***(March 2023)***
 
 ## API Documentation
 
@@ -176,15 +187,18 @@ The password required to restart a game or begin playing is `password`.  If you 
 1) Move the Ingenuity helicopter by giving it a destination to fly to (within two cells of its current location)
 
     ```c#
+    //You have 10 helicopters you can fly, so you need to specify which one you're telling to move.
+    int ingenuityId = 0;
+
     //move up:
-    await moveHelicopter(ingenuityX, ingenuityY + 2);
+    await moveHelicopter(ingenuityId, ingenuityX, ingenuityY + 2);
 
     //move right 
-    await moveHelicopter(ingenuityX+2, ingenuityY);
+    await moveHelicopter(ingenuityId, ingenuityX+2, ingenuityY);
     
-    async Task moveHelicopter(int x, int y)
+    async Task moveHelicopter(int id, int x, int y)
     {
-        var response = await httpClient.GetAsync($"/game/moveingenuity?token={joinResponse.Token}&destinationX={x}&destinationY={y}");
+        var response = await httpClient.GetAsync($"/game/moveingenuity?token={joinResponse.Token}&id={id}&destinationX={x}&destinationY={y}");
         if (response.IsSuccessStatusCode)
         {
             var moveResponse = await response.Content.ReadFromJsonAsync<IngenuityMoveResponse>();

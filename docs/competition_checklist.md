@@ -15,7 +15,10 @@
   - Place csv and json files in `src/Mars.Web/data`
   - Increase local appsettings.json `MaxMaps` value to include new images
   - Run app locally to generate new lowres json files
-  - Commit & push **just before competition**
+  - Upload files to web server using 
+    ```bash
+    az webapp deploy --resource-group mars_rover --name snow-rover --src-path ./local/path/to/file.xaml --type static --target-path data/terrain_XX.json
+    ```
 - [] Review app service configuration values
   - ApiLimitPerSecond
   - MaxMaps
@@ -38,3 +41,4 @@
 
 - [] Scale down the app service
 - [] Put the password back to 'password'
+- [] Include the new terrain files in the repo, commit & push
