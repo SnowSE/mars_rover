@@ -154,13 +154,14 @@ public class GameController : ControllerBase
     /// Move the Ingenuity helicopter.
     /// </summary>
     /// <param name="token"></param>
+    /// <param name="id">Which ingenuity helicopter you're moving</param>
     /// <param name="destinationColumn"></param>
     /// <param name="destinationRow"></param>
     /// <returns></returns>
     [HttpGet("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IngenuityMoveResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult<IngenuityMoveResponse> MoveIngenuity(string token, int destinationRow, int destinationColumn)
+    public ActionResult<IngenuityMoveResponse> MoveIngenuity(string token, int id, int destinationRow, int destinationColumn)
     {
         var tokenHasGame = tokenMap.TryGetValue(token, out string? gameId);
         using (logger.BeginScope("ScopeUserToken: {ScopeUser} GameId: {ScopeGameId} ", token, gameId))
@@ -182,7 +183,7 @@ public class GameController : ControllerBase
 
                 try
                 {
-                    var moveResult = gameManager.Game.MoveIngenuity(playerToken!, new MissionControl.Location(destinationRow, destinationColumn));
+                    var moveResult = gameManager.Game.MoveIngenuity(playerToken!, id, new MissionControl.Location(destinationRow, destinationColumn));
                     return new IngenuityMoveResponse
                     {
                         X = moveResult.Location.X,

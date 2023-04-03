@@ -5,7 +5,10 @@
         @foreach (var player in gameManager!.Game.Players)
         {
             <RoverView Player="player" />
-            <IngenuityView Player="player" />
+        }
+        @foreach (var ingenuity in gameManager!.Game.Ingenuities)
+        {
+            <IngenuityView Ingenuity=@ingenuity />
         }
         @foreach(var target in gameManager!.Game.Targets)
         {

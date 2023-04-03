@@ -18,6 +18,7 @@ public class Game : IDisposable
         PerseveranceVisibilityRadius = startOptions.PerseveranceVisibilityRadius;
         IngenuityVisibilityRadius = startOptions.IngenuityVisibilityRadius;
         StartingBatteryLevel = startOptions.StartingBatteryLevel;
+        IngenuitiesPerPlayer = startOptions.NumberOfIngenuitiesPerPlayer;
         IngenuityStartingBatteryLevel = Board.Width * 2 + Board.Height * 2;
         this.logger = logger;
     }
@@ -29,11 +30,13 @@ public class Game : IDisposable
     public int IngenuityVisibilityRadius { get; }
     public int StartingBatteryLevel { get; }
     public int IngenuityStartingBatteryLevel { get; }
+    public int IngenuitiesPerPlayer { get; }
 
     private readonly ILogger<Game> logger;
 
     public Map Map { get; private set; }
     private ConcurrentDictionary<PlayerToken, Player> players = new();
+    private ConcurrentDictionary<(PlayerToken, int), Ingenuity> ingenuities = new();
     private ConcurrentDictionary<string, PlayerToken> playerTokenCache = new();
     public bool TryTranslateToken(string tokenString, out PlayerToken? token) => playerTokenCache.TryGetValue(tokenString, out token);
     private static Orientation getRandomOrientation() => (Orientation)Random.Shared.Next(0, 4);
@@ -44,6 +47,8 @@ public class Game : IDisposable
     public DateTime GameStartedOn { get; private set; }
     public ReadOnlyCollection<Player> Players =>
         new ReadOnlyCollection<Player>(players.Values.ToList());
+    public ReadOnlyCollection<Ingenuity> Ingenuities =>
+        new ReadOnlyCollection<Ingenuity>(ingenuities.Values.ToList());
     private ConcurrentQueue<Player> winners = new();
     private readonly ConcurrentBag<TargetVisitation> targetVisitations = new();
 
@@ -73,16 +78,17 @@ public class Game : IDisposable
         var player = new Player(playerName);
         var startingLocation = Board.PlaceNewPlayer(player);
         logger.LogInformation("New player came into existence and started at location ({x}, {y}) ", startingLocation.X, startingLocation.Y);
+
+        addIngenuitiesForPlayer(player, startingLocation);
+
         player = player with
         {
             BatteryLevel = StartingBatteryLevel,
             PerseveranceLocation = startingLocation,
-            IngenuityLocation = startingLocation,
-            IngenuityBatteryLevel = StartingBatteryLevel,
             Orientation = getRandomOrientation()
         };
-        if (!players.TryAdd(player.Token, player) ||
-           !playerTokenCache.TryAdd(player.Token.Value, player.Token))
+
+        if (!players.TryAdd(player.Token, player) || !playerTokenCache.TryAdd(player.Token.Value, player.Token))
         {
             logger.LogError($"Player {player.Token.Value} couldn't be added");
             throw new PlayerAlreadyExistsException("Unable to add new player...that token already exists?!");
@@ -99,6 +105,14 @@ public class Game : IDisposable
             Board.GetNeighbors(player.PerseveranceLocation, PerseveranceVisibilityRadius),
             Map.LowResolution
         );
+    }
+
+    private void addIngenuitiesForPlayer(Player player, Location startingLocation)
+    {
+        for (int i = 0; i < IngenuitiesPerPlayer; i++)
+        {
+            ingenuities.TryAdd((player.Token, i), new Ingenuity(i, player.Name, startingLocation, IngenuityStartingBatteryLevel));
+        }
     }
 
     public void PlayGame() => PlayGame(new GamePlayOptions());
@@ -128,10 +142,11 @@ public class Game : IDisposable
         raiseStateChange();
     }
 
-    public IngenuityMoveResult MoveIngenuity(PlayerToken token, Location destination, int updatePlayerTryAgainCount = 0)
+    public IngenuityMoveResult MoveIngenuity(PlayerToken token, int id, Location destination, int updatePlayerTryAgainCount = 0)
     {
         if (updatePlayerTryAgainCount > 9)
         {
+            logger.LogError("Unable to update ingenuities, tried too many times.");
             throw new UnableToUpdatePlayerException();
         }
         if (GameState != GameState.Playing)
@@ -145,14 +160,18 @@ public class Game : IDisposable
         }
 
         var player = players[token];
-        var unmodifiedPlayer = player;
+        if (id < 0 || id >= IngenuitiesPerPlayer)
+        {
+            throw new InvalidIngenuityIdException();
+        }
+        var ingenuity = ingenuities[(player.Token, id)];
         string? message;
 
-        var deltaX = Math.Abs(destination.X - player.IngenuityLocation.X);
-        var deltaY = Math.Abs(destination.Y - player.IngenuityLocation.Y);
+        var deltaX = Math.Abs(destination.X - ingenuity.Location.X);
+        var deltaY = Math.Abs(destination.Y - ingenuity.Location.Y);
         var movementCost = Math.Max(deltaX, deltaY);
 
-        if (player.IngenuityBatteryLevel < movementCost)
+        if (ingenuity.BatteryLevel < movementCost)
         {
             message = GameMessages.IngenuityOutOfBattery;
         }
@@ -166,29 +185,25 @@ public class Game : IDisposable
         }
         else
         {
-            player = player with
-            {
-                IngenuityLocation = destination,
-                IngenuityBatteryLevel = player.IngenuityBatteryLevel - movementCost
-            };
-
-            if (!players.TryUpdate(token, player, unmodifiedPlayer))
+            var unmodifiedIngenuity = ingenuity;
+            ingenuity = ingenuity with { Location = destination, BatteryLevel = ingenuity.BatteryLevel - movementCost };
+            if (!ingenuities.TryUpdate((token, id), ingenuity, unmodifiedIngenuity))
             {
                 // if we are here because perserverence and ingenuity are
                 // moving at the same time we should be able to retry the move
-                System.Console.WriteLine("Recursing MoveIngenuity to avoid UnableToUpdatePlayerException");
-                return MoveIngenuity(token, destination, updatePlayerTryAgainCount + 1);
+                logger.LogWarning("Recursing MoveIngenuity to avoid UnableToUpdateIngenuityException.  Try {updatePlayerTryAgainCount}", updatePlayerTryAgainCount);
+                return MoveIngenuity(token, id, destination, updatePlayerTryAgainCount + 1);
             }
             message = GameMessages.IngenuityMoveOK;
         }
 
         raiseStateChange();
-        logger.LogInformation("player: {name} moved helicopter correctly and moved to location: {loc}", player.Name, player.IngenuityLocation);
+        logger.LogInformation("player: {name} moved ingenuity {id} correctly and moved to location: {loc}", player.Name, id, destination);
 
         return new IngenuityMoveResult(
-            player.IngenuityLocation,
-            player.IngenuityBatteryLevel,
-            Board.GetNeighbors(player.IngenuityLocation, IngenuityVisibilityRadius),
+            ingenuity.Location,
+            ingenuity.BatteryLevel,
+            Board.GetNeighbors(ingenuity.Location, IngenuityVisibilityRadius),
             message ?? throw new Exception("Game message not set?!")
         );
     }

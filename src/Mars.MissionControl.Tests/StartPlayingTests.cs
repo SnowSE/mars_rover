@@ -138,7 +138,7 @@ public class StartPlayingTests
         game.PlayGame();
         var playerInfo = game.Join("P1");
         var destination = new Location(playerInfo.PlayerLocation.X + 1, playerInfo.PlayerLocation.Y + 1);
-        var moveResult = game.MoveIngenuity(playerInfo.Token, destination);
+        var moveResult = game.MoveIngenuity(playerInfo.Token, 0, destination);
         moveResult.Location.Should().Be(destination);
     }
 
@@ -150,7 +150,7 @@ public class StartPlayingTests
         var playerInfo = game.Join("P1");
         var destination = new Location(playerInfo.PlayerLocation.X + 3, playerInfo.PlayerLocation.Y + 3);
 
-        var moveResult = game.MoveIngenuity(playerInfo.Token, destination);
+        var moveResult = game.MoveIngenuity(playerInfo.Token, 0, destination);
 
         moveResult.Message.Should().BeOneOf(GameMessages.MovedOutOfBounds, GameMessages.IngenuityTooFar);
     }

@@ -137,11 +137,33 @@ public class MovementTests
     public async Task MoveIngenuity()
     {
         var token = player1.Token;
+        var id = 0;
+        var destinationRow = player1.StartingX - 10;
+        var destinationCol = player1.StartingY - 10;
+        var response = await client.GetFromJsonAsync<IngenuityMoveResponse>(
+            $"/game/moveingenuity?token={token}&id={id}&destinationRow={destinationRow}&directionCol={destinationCol}");
+        response.Message.Should().Be(GameMessages.MovedOutOfBounds);
+    }
+
+
+    [Test]
+    public async Task MoveIngenuityWitUndefinedIdFails()
+    {
+        var token = player1.Token;
         var destinationRow = player1.StartingX - 1_000;
         var destinationCol = player1.StartingY - 1_000;
-        var response = await client.GetFromJsonAsync<IngenuityMoveResponse>(
-            $"/game/moveingenuity?token={token}&destinationRow={destinationRow}&directionCol={destinationCol}");
-        response.Message.Should().Be(GameMessages.MovedOutOfBounds);
+
+        //Fail with -1 id
+        var id = -1;
+        var response = await client.GetAsync(
+            $"/game/moveingenuity?token={token}&id={id}&destinationRow={destinationRow}&directionCol={destinationCol}");
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        //Fail with 10 id
+        id = 10;
+        response = await client.GetAsync(
+            $"/game/moveingenuity?token={token}&id={id}&destinationRow={destinationRow}&directionCol={destinationCol}");
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Test]

@@ -1,11 +1,11 @@
 ﻿@inject IConfiguration config
 
 <div style=@($"position: absolute; bottom: {bottomPercent}%; left: {leftPercent}%; z-index: 100")>
-    <progress value="@batteryPercent" max="100">@Player?.BatteryLevel</progress>
+    <progress value="@batteryPercent" max="100">@Ingenuity.BatteryLevel</progress>
     <div class="playerName">
-        <span>@Player?.Name</span>
+        <span>@Ingenuity.PlayerName</span>
     </div>
-    <img src=@imageName alt="@Player?.Name" />
+    <img src=@imageName alt="@Ingenuity.PlayerName" />
 </div>
 
 @code {
@@ -13,18 +13,18 @@
     public GameManager? gameManager { get; set; }
 
     [Parameter]
-    public Player? Player{ get; set; }
+    public Ingenuity Ingenuity{ get; set; }
 
     private double leftPercent, bottomPercent, batteryPercent;
     private string imageName = "images/HELI_icon.png";
 
     protected override void OnParametersSet()
     {
-        if (Player == null || gameManager == null)
+        if (gameManager == null || Ingenuity == null)
             return;
 
-        batteryPercent = (int)(Player.IngenuityBatteryLevel * 100.0 / gameManager.Game.StartingBatteryLevel);
-        leftPercent = ((double)Player.IngenuityLocation.X) / gameManager.Game.Board.Width * 100;
-        bottomPercent = ((double)Player.IngenuityLocation.Y) / gameManager.Game.Board.Height * 100;
+        batteryPercent = (int)(Ingenuity.BatteryLevel * 100.0 / gameManager.Game.IngenuityStartingBatteryLevel);
+        leftPercent = ((double)Ingenuity.Location.X) / gameManager.Game.Board.Width * 100;
+        bottomPercent = ((double)Ingenuity.Location.Y) / gameManager.Game.Board.Height * 100;
     }
 }

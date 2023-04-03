@@ -5,6 +5,7 @@ public class GameCreationOptions
     private int perseveranceVisibilityRadius = 2;
     private int ingenuityVisibilityRadius = 5;
     private int startingBatteryLevel = 18_000;
+    private int numberOfIngenuitiesPerPlayer = 10;
 
     public int StartingBatteryLevel
     {
@@ -45,6 +46,21 @@ public class GameCreationOptions
             }
 
             ingenuityVisibilityRadius = value;
+        }
+    }
+
+
+    public int NumberOfIngenuitiesPerPlayer
+    {
+        get => numberOfIngenuitiesPerPlayer;
+        set
+        {
+            if (value < 1 || value > 99)
+            {
+                throw new ArgumentOutOfRangeException(nameof(NumberOfIngenuitiesPerPlayer), "Must be between 1 and 99");
+            }
+
+            numberOfIngenuitiesPerPlayer = value;
         }
     }
 
