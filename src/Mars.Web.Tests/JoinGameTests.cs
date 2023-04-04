@@ -60,18 +60,4 @@ public class JoinGameTests
         var joinResponse = await client.GetAsync("/game/join");
         joinResponse.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
     }
-
-
-
-    [Test]
-    public async Task CannotMoveWithGameInJoiningState()
-    {
-        var client = _factory.CreateClient();
-
-        var joinResponse = await client.GetFromJsonAsync<JoinResponse>($"/game/join?gameId={gameId}&name=p1");
-        var moveResponse = await client.GetAsync($"/game/moveperseverance?token={joinResponse.Token}&move=Forward");
-        var content = await moveResponse.Content.ReadAsStringAsync();
-        content.Should().Contain("Game not in Playing state");
-    }
-
 }

@@ -21,8 +21,76 @@ public class MovementTests
     [SetUp]
     public async Task Setup()
     {
-        _factory = IntegrationTestHelper.CreateFactory();
+        await initializeGame();
+        currentOrientation = Enum.Parse<Orientation>(player1.Orientation);
+        lastLocation = currentLocation = new MissionControl.Location(player1.StartingX, player1.StartingY);
+        iWon = false;
 
+        gameManager.PlayGame(new GamePlayOptions { RechargePointsPerSecond = 1 });
+    }
+
+    [Test]
+    public async Task CanMoveAlongBorderBeforeGameStarts()
+    {
+        await initializeGame();
+        if (player1.StartingX == 0 || player1.StartingX == 4)//on a side
+        {
+            await moveAsync(player1.StartingY > 0 ? "South" : "North");
+        }
+        else
+        {
+            await moveAsync(player1.StartingX > 0 ? "West" : "East");
+        }
+    }
+
+
+    [Test]
+    public async Task CannotMoveIntoMapBeforeGameStarts()
+    {
+        await initializeGame();
+        var location = new Types.Location(player1.StartingX, player1.StartingY);
+        await makeSureYouAreNotInACorner(location);
+        if (player1.StartingX == 0)
+        {
+            await moveAsync("East", shouldSucceed: false);
+        }
+        else if(player1.StartingX == 4)
+        {
+            await moveAsync("West", shouldSucceed: false);
+        }
+        else if(player1.StartingY == 0)
+        {
+            await moveAsync("North", shouldSucceed: false);
+        }
+        else
+        {
+            await moveAsync("South", shouldSucceed: false);
+        }
+    }
+
+    private async Task makeSureYouAreNotInACorner(Types.Location location)
+    {
+        if(location == new Types.Location(0,0))
+        {
+            await moveAsync("North");
+        }
+        else if(location == new Types.Location(0, 4))
+        {
+            await moveAsync("South");
+        }
+        else if(location == new Types.Location(4, 0))
+        {
+            await moveAsync("North");
+        }
+        else if(location == new Types.Location(4, 4))
+        {
+            await moveAsync("South");
+        }
+    }
+
+    private async Task initializeGame()
+    {
+        _factory = IntegrationTestHelper.CreateFactory();
         multiGameHoster = _factory.Services.GetRequiredService<MultiGameHoster>();
         gameId = multiGameHoster.MakeNewGame();
         gameManager = multiGameHoster.Games[gameId];
@@ -34,11 +102,29 @@ public class MovementTests
 
         client = _factory.CreateClient();
         player1 = await client.GetFromJsonAsync<JoinResponse>($"/game/join?gameId={gameId}&name=P1");
-        currentOrientation = Enum.Parse<Orientation>(player1.Orientation);
-        lastLocation = currentLocation = new MissionControl.Location(player1.StartingX, player1.StartingY);
-        iWon = false;
+    }
 
-        gameManager.PlayGame(new GamePlayOptions { RechargePointsPerSecond = 1 });
+    private async Task moveAsync(string desiredOrientation, bool shouldSucceed = true)
+    {
+        if (player1.Orientation != desiredOrientation)
+        {
+            PerseveranceMoveResponse turnResult = null;
+            do
+            {
+                turnResult = await client.GetFromJsonAsync<PerseveranceMoveResponse>($"/game/moveperseverance?token={player1.Token}&direction=Right");
+
+            } while (turnResult.Orientation != desiredOrientation);
+        }
+        if (shouldSucceed)
+        {
+            var moveResult = await client.GetFromJsonAsync<PerseveranceMoveResponse>($"/game/moveperseverance?token={player1.Token}&direction=Forward");
+            new Types.Location(moveResult.X, moveResult.Y).Should().NotBe(new Web.Types.Location(player1.StartingX, player1.StartingY));
+        }
+        else
+        {
+            var response = await client.GetAsync($"/game/moveperseverance?token={player1.Token}&direction=Forward");
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        }
     }
 
     [Test]

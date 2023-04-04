@@ -214,10 +214,6 @@ public class Game : IDisposable
         {
             throw new UnableToUpdatePlayerException();
         }
-        if (GameState != GameState.Playing)
-        {
-            throw new InvalidGameStateException();
-        }
 
         if (players.ContainsKey(token) is false)
         {
@@ -245,6 +241,11 @@ public class Game : IDisposable
                 Direction.Reverse => player.CellInBack(),
                 _ => throw new Exception("What direction do you think you're going?")
             };
+
+            if (GameState != GameState.Playing && isNotOnBorder(desiredLocation.X) && isNotOnBorder(desiredLocation.Y))
+            {
+                throw new InvalidGameStateException();
+            }
 
             if (Board.Cells.ContainsKey(desiredLocation) is false)
             {
@@ -304,6 +305,8 @@ public class Game : IDisposable
             message ?? throw new Exception("Game message not set?!")
         );
     }
+
+    private bool isNotOnBorder(int value) => value != 0 && value != Board.Width - 1;
 
     private bool playerHasNotVisitedThisTarget(Player player) =>
         !targetVisitations.Any(tv => tv.Player.Token == player.Token && tv.Target == player.PerseveranceLocation);

@@ -49,15 +49,6 @@ internal class JoinGameTests
     }
 
     [Test]
-    public void PlayerCannotMoveIfGameStateIsNotPlaying()
-    {
-        var game = Helpers.CreateGame(5, 5);
-        var joinResult = game.Join("P1");
-        var token1 = joinResult.Token;
-        Assert.Throws<InvalidGameStateException>(() => game.MovePerseverance(token1, Direction.Forward));
-    }
-
-    [Test]
     public void WhenAPlayerJoinsTheyArePlacedOnTheMap()
     {
         var game = Helpers.CreateGame(5, 5);

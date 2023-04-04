@@ -118,12 +118,6 @@ public class GameController : ControllerBase
                         return Problem("Unrecognized token", statusCode: 400, title: "Bad Token");
                     }
 
-                    if (gameManager.Game.GameState != GameState.Playing)
-                    {
-                        logger.LogError($"Could not move: Game not in Playing state.");
-                        return Problem("Unable to move", statusCode: 400, title: "Game not in Playing state.");
-                    }
-
                     try
                     {
                         var moveResult = gameManager.Game.MovePerseverance(playerToken!, direction);
@@ -136,6 +130,11 @@ public class GameController : ControllerBase
                             Message = moveResult.Message,
                             Orientation = moveResult.Orientation.ToString()
                         };
+                    }
+                    catch(InvalidGameStateException gsx)
+                    {
+                        logger.LogError($"Could not move into map area: Game not in Playing state.");
+                        return Problem("Unable to move into map area", statusCode: 400, title: "Game not in Playing state.");
                     }
                     catch (Exception ex)
                     {
