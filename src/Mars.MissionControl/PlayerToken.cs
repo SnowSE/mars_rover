@@ -39,4 +39,6 @@ public class PlayerToken : IEquatable<PlayerToken?>
     {
         return !(left == right);
     }
+
+    public override string ToString() => Value;
 }

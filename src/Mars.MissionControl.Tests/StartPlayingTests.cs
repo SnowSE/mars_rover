@@ -25,18 +25,6 @@ public class StartPlayingTests
         moveResult.Should().NotBeNull();
     }
 
-
-    [Test]
-    public void TurningCostsOneBatteryPoint()
-    {
-        var scenario = new GameScenario(height: 7, width: 7, players: 1);
-        scenario.Game.PlayGame();
-        var origBattery = scenario.Players[0].BatteryLevel;
-        var moveResult = scenario.Game.MovePerseverance(scenario.Players[0].Token, Direction.Right);
-        var newBattery = moveResult.BatteryLevel;
-        newBattery.Should().Be(origBattery - 1);
-    }
-
     [Test]
     public void PlayerCannotLeaveTheBoard()
     {
@@ -80,8 +68,6 @@ public class StartPlayingTests
         var token = scenario.Players[0].Token;
         var origLocation = scenario.Players[0].PlayerLocation;
         var newLocation = origLocation;
-        int turnCount = 0;
-        int noopCount = 0;
         for (int i = 0; i < 4; i++)
         {
             var moveResult = scenario.Game.MovePerseverance(token, Direction.Forward);
@@ -89,13 +75,12 @@ public class StartPlayingTests
             if (newLocation == origLocation)//never moved
             {
                 log += $"\nno-op, didn't move: battery={moveResult.BatteryLevel}";
-                noopCount++;
             }
             else
             {
-                var expectedBattery = scenario.Players[0].BatteryLevel - turnCount - noopCount - scenario.Game.Board[newLocation].Difficulty.Value;
-                log += string.Format("\n{0} battery level - {1} turn count - {2} - no-op count {3} difficulty = {4} new battery",
-                    scenario.Players[0].BatteryLevel, turnCount, noopCount, scenario.Game.Board[newLocation].Difficulty.Value, expectedBattery);
+                var expectedBattery = scenario.Players[0].BatteryLevel - scenario.Game.Board[newLocation].Difficulty.Value;
+                log += string.Format("\n{0} battery level - {1} - difficulty = {2} new battery",
+                    scenario.Players[0].BatteryLevel, scenario.Game.Board[newLocation].Difficulty.Value, expectedBattery);
                 moveResult.BatteryLevel.Should().Be(expectedBattery, log);
                 return;
             }
@@ -103,7 +88,6 @@ public class StartPlayingTests
             //couldn't go forward? try turning.
             var result = scenario.Game.MovePerseverance(token, Direction.Right);
             log += $"\nturned right: battery={result.BatteryLevel}";
-            turnCount++;
         }
 
         Assert.Fail("Apparently you never moved.");

@@ -5,9 +5,9 @@ namespace Mars.MissionControl;
 
 public static class Helpers
 {
-    private static ILogger<Game> logger = NullLoggerFactory.Instance.CreateLogger<Game>();
+    private static ILogger<Game> nullLogger = NullLoggerFactory.Instance.CreateLogger<Game>();
 
-    public static Map CreateMap(int height, int width)
+    public static Map CreateMap(int height, int width, int difficulty = 1)
     {
 
         var cells = new List<Cell>();
@@ -15,26 +15,26 @@ public static class Helpers
         {
             for (int y = 0; y < height; y++)
             {
-                cells.Add(new Cell(new Location(x, y), new Difficulty(1)));
+                cells.Add(new Cell(new Location(x, y), new Difficulty(difficulty)));
             }
         }
         var map = new Map(1, cells, BuildLowResMap(cells));
         return map;
     }
 
-    public static Board CreateBoard(int height, int width, IEnumerable<Location> targets = null)
+    public static Board CreateBoard(int height, int width, IEnumerable<Location> targets = null, int cellDifficulty = 1)
     {
-        var map = CreateMap(height, width);
+        var map = CreateMap(height, width, cellDifficulty);
         return new Board(map);
     }
 
-    public static Game CreateGame(int height, int width, IEnumerable<Location> targets = null)
+    public static Game CreateGame(int height, int width, IEnumerable<Location> targets = null, int cellDifficulty = 1, int startingBatteryLevel = 18_000, ILogger<Game> customLogger = null)
     {
-        var map = Helpers.CreateMap(5, 5);
-        return CreateGame(map, targets);
+        var map = Helpers.CreateMap(height, width, cellDifficulty);
+        return CreateGame(map, targets, startingBatteryLevel: startingBatteryLevel, customLogger);
     }
 
-    public static Game CreateGame(Map map, IEnumerable<Location> targets = null)
+    public static Game CreateGame(Map map, IEnumerable<Location> targets = null, int startingBatteryLevel = 18_000, ILogger<Game> customLogger = null)
     {
         if (targets == null)
         {
@@ -43,9 +43,10 @@ public static class Helpers
 
         var startOptions = new GameCreationOptions
         {
-            MapWithTargets = new MapWithTargets(map, targets)
+            MapWithTargets = new MapWithTargets(map, targets),
+            StartingBatteryLevel = startingBatteryLevel
         };
-        var game = new Game(startOptions, logger);
+        var game = new Game(startOptions, customLogger ?? nullLogger);
         return game;
     }
 

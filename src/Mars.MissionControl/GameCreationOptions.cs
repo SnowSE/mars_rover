@@ -6,6 +6,8 @@ public class GameCreationOptions
     private int ingenuityVisibilityRadius = 5;
     private int startingBatteryLevel = 18_000;
     private int numberOfIngenuitiesPerPlayer = 10;
+    private int minimumBatteryThreshhold = 1_000;
+    private int keepTheGameGoingBatteryBoostAmount = 2_000;
 
     public int StartingBatteryLevel
     {
@@ -18,6 +20,34 @@ public class GameCreationOptions
             }
 
             startingBatteryLevel = value;
+        }
+    }
+
+    public int MinimumBatteryThreshhold
+    {
+        get => minimumBatteryThreshhold;
+        set
+        {
+            if(value < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(MinimumBatteryThreshhold), "Must be > 0");
+            }
+
+            minimumBatteryThreshhold = value;
+        }
+    }
+
+    public int KeepTheGameGoingBatteryBoostAmount
+    {
+        get => keepTheGameGoingBatteryBoostAmount;
+        set
+        {
+            if(value < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(KeepTheGameGoingBatteryBoostAmount), "Must be > 0");
+            }
+
+            keepTheGameGoingBatteryBoostAmount = value;
         }
     }
 

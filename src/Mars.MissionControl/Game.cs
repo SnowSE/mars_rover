@@ -20,6 +20,8 @@ public class Game : IDisposable
         StartingBatteryLevel = startOptions.StartingBatteryLevel;
         IngenuitiesPerPlayer = startOptions.NumberOfIngenuitiesPerPlayer;
         IngenuityStartingBatteryLevel = Board.Width * 2 + Board.Height * 2;
+        MinimumBatteryThreshhold = startOptions.MinimumBatteryThreshhold;
+        KeepTheGameGoingBatteryBoostAmount = startOptions.KeepTheGameGoingBatteryBoostAmount;
         this.logger = logger;
     }
 
@@ -30,7 +32,9 @@ public class Game : IDisposable
     public int IngenuityVisibilityRadius { get; }
     public int StartingBatteryLevel { get; }
     public int IngenuityStartingBatteryLevel { get; }
+    public int MinimumBatteryThreshhold { get; }
     public int IngenuitiesPerPlayer { get; }
+    public int KeepTheGameGoingBatteryBoostAmount { get; }
 
     private readonly ILogger<Game> logger;
 
@@ -228,7 +232,6 @@ public class Game : IDisposable
         {
             player = player with
             {
-                BatteryLevel = player.BatteryLevel - 1,
                 Orientation = player.Orientation.Turn(direction)
             };
             message = GameMessages.TurnedOK;
@@ -249,15 +252,21 @@ public class Game : IDisposable
 
             if (Board.Cells.ContainsKey(desiredLocation) is false)
             {
-                player = player with
-                {
-                    BatteryLevel = player.BatteryLevel - 1
-                };
                 message = GameMessages.MovedOutOfBounds;
             }
             else
             {
                 var newBatteryLevel = player.BatteryLevel - Board[desiredLocation].Difficulty.Value;
+                if (newBatteryLevel <= 0 && players.All(p => p.Value.BatteryLevel < MinimumBatteryThreshhold))
+                {
+                    logger.LogInformation("All players are below minimum battery threshhold of {minimumBatteryThreshhold}; giving bonus of {KeepTheGameGoingBatteryBoostAmount} to everyone", MinimumBatteryThreshhold, KeepTheGameGoingBatteryBoostAmount);
+                    foreach (var p in players)
+                    {
+                        players.TryUpdate(p.Key, p.Value with { BatteryLevel = KeepTheGameGoingBatteryBoostAmount }, p.Value);
+                    }
+                    newBatteryLevel = KeepTheGameGoingBatteryBoostAmount;
+                }
+
                 if (newBatteryLevel >= 0)
                 {
                     player = player with

@@ -22,10 +22,10 @@
 		<PackageReference Include="Microsoft.ApplicationInsights.EventCounterCollector" Version="2.22.0-beta2" />
 		<PackageReference Include="Microsoft.ApplicationInsights.PerfCounterCollector" Version="2.22.0-beta2" />
 		<PackageReference Include="Microsoft.ApplicationInsights.TraceListener" Version="2.22.0-beta2" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.2" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.4" />
 		<PackageReference Include="Microsoft.Extensions.Logging.ApplicationInsights" Version="2.22.0-beta2" />
-		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
-		<PackageReference Include="opentelemetry.exporter.jaeger" Version="1.4.0-rc.4" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
+		<PackageReference Include="opentelemetry.exporter.jaeger" Version="1.4.0" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9.13" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9.13" />
 		<PackageReference Include="Seq.Extensions.Logging" Version="6.1.0" />
