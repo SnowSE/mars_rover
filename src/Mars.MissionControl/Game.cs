@@ -20,7 +20,7 @@ public class Game : IDisposable
         StartingBatteryLevel = startOptions.StartingBatteryLevel;
         IngenuitiesPerPlayer = startOptions.NumberOfIngenuitiesPerPlayer;
         IngenuityStartingBatteryLevel = Board.Width * 2 + Board.Height * 2;
-        MinimumBatteryThreshhold = startOptions.MinimumBatteryThreshhold;
+        MinimumBatteryThreshold = startOptions.MinimumBatteryThreshold;
         KeepTheGameGoingBatteryBoostAmount = startOptions.KeepTheGameGoingBatteryBoostAmount;
         this.logger = logger;
     }
@@ -32,7 +32,7 @@ public class Game : IDisposable
     public int IngenuityVisibilityRadius { get; }
     public int StartingBatteryLevel { get; }
     public int IngenuityStartingBatteryLevel { get; }
-    public int MinimumBatteryThreshhold { get; }
+    public int MinimumBatteryThreshold { get; }
     public int IngenuitiesPerPlayer { get; }
     public int KeepTheGameGoingBatteryBoostAmount { get; }
 
@@ -257,9 +257,9 @@ public class Game : IDisposable
             else
             {
                 var newBatteryLevel = player.BatteryLevel - Board[desiredLocation].Difficulty.Value;
-                if (newBatteryLevel <= 0 && players.All(p => p.Value.BatteryLevel < MinimumBatteryThreshhold))
+                if (newBatteryLevel <= 0 && players.All(p => p.Value.BatteryLevel < MinimumBatteryThreshold))
                 {
-                    logger.LogInformation("All players are below minimum battery threshhold of {minimumBatteryThreshhold}; giving bonus of {KeepTheGameGoingBatteryBoostAmount} to everyone", MinimumBatteryThreshhold, KeepTheGameGoingBatteryBoostAmount);
+                    logger.LogInformation("All players are below minimum battery threshold of {minimumBatteryThreshold}; giving bonus of {KeepTheGameGoingBatteryBoostAmount} to everyone", MinimumBatteryThreshold, KeepTheGameGoingBatteryBoostAmount);
                     foreach (var p in players)
                     {
                         players.TryUpdate(p.Key, p.Value with { BatteryLevel = KeepTheGameGoingBatteryBoostAmount }, p.Value);
