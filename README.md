@@ -3,8 +3,7 @@
 [![Release to prod](https://github.com/SnowSE/mars_rover/actions/workflows/deploy-main-branch.yaml/badge.svg)](https://github.com/SnowSE/mars_rover/actions/workflows/deploy-main-branch.yaml)
 
 # 2023 Snow College Coding Competition: Mars Rover
-
-> **Next competition date:** Friday, March 31st 2023 @ 4PM  
+ 
 > **Final competition date:** Friday, April 21st 2023 @ 4PM   
 > Location: [Snow College Science Building, Room GRSC 124](https://goo.gl/maps/zKw4X9gioeNCKutZ9)
 
