@@ -25,7 +25,7 @@ public class GameManager
         CreatedOn = DateTime.Now;
         GameStartOptions = new GameCreationOptions
         {
-            MapWithTargets = new MapWithTargets(maps[7], map8_defaultTargets)
+            MapWithTargets = new MapWithTargets(maps.Last(), map8_defaultTargets)
         };
         this.Maps = maps;
         this.logger = logger;
