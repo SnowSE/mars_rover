@@ -6,9 +6,9 @@ namespace Mars.MissionControl.Tests;
 
 public class GameScenario
 {
-    public GameScenario(int height, int width, int players, int cellDifficulty = 1, int startingBatteryLevel = 18_000, ILogger<Game> customLogger = null)
+    public GameScenario(int height, int width, int players, int cellDifficulty = 1, int startingBatteryLevel = 18_000, ILogger<Game> customLogger = null, IEnumerable<Location> targets = null)
     {
-        Game = Helpers.CreateGame(height, width, cellDifficulty: cellDifficulty, startingBatteryLevel: startingBatteryLevel, customLogger: customLogger);
+        Game = Helpers.CreateGame(height, width, cellDifficulty: cellDifficulty, startingBatteryLevel: startingBatteryLevel, customLogger: customLogger, targets: targets);
         Players = new(Enumerable.Range(0, players)
                                 .Select(p => Game.Join($"Player{p}"))
                                 .ToArray());

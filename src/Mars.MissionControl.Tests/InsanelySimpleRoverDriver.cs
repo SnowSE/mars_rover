@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Mars.MissionControl.Tests;
 
@@ -22,9 +21,63 @@ public class InsanelySimpleRoverDriver
         this.game = game;
     }
 
+    public Location CurrentLocation => currentLocation;
+    public string LastMoveMessage { get; private set; }
+
     public void DriveUntilBatteryDies()
     {
-        MoveTowardTarget(int.MaxValue);
+        MakeMoves(int.MaxValue);
+    }
+
+    internal void MoveTo(Location destination)
+    {
+        while (true)
+        {
+            var direction = determineDirection(currentOrientation, currentLocation, destination);
+            var moveResult = game.MovePerseverance(token, direction);
+            LastMoveMessage = moveResult.Message;
+            if (moveResult.Message.Contains("Insufficient battery"))
+            {
+                return;
+            }
+
+            currentOrientation = moveResult.Orientation;
+            batteryLevel = moveResult.BatteryLevel;
+            currentLocation = moveResult.Location;
+
+            if (moveResult.Location == destination)
+            {
+                return;
+            }
+        }
+    }
+
+    internal void MakeMoves(int numberOfMoves)
+    {
+        var destination = targets.Dequeue();
+        for (int i = 0; i < numberOfMoves; i++)
+        {
+            var direction = determineDirection(currentOrientation, currentLocation, destination);
+            var moveResult = game.MovePerseverance(token, direction);
+            if (moveResult.Message.Contains("Insufficient battery"))
+            {
+                return;
+            }
+            if (moveResult.Message == GameMessages.YouMadeItToTheTarget || moveResult.Message == GameMessages.YouMadeItToAllTheTargets)
+            {
+                if (targets.Count == 0)
+                {
+                    return;
+                }
+                destination = targets.Dequeue();
+                Console.WriteLine();
+                Console.WriteLine($"You made it to a target, {targets.Count} targets remain.");
+            }
+
+            currentOrientation = moveResult.Orientation;
+            batteryLevel = moveResult.BatteryLevel;
+            currentLocation = moveResult.Location;
+        }
     }
 
     private Direction determineDirection(Orientation orientation, Location currentLocaiton, Location target)
@@ -61,28 +114,5 @@ public class InsanelySimpleRoverDriver
             return Direction.Forward;
         }
         return Direction.Right;
-    }
-
-    internal void MoveTowardTarget(int numberOfMoves)
-    {
-        for (int i = 0; i < numberOfMoves; i++)
-        {
-            var direction = determineDirection(currentOrientation, currentLocation, targets.First());
-            var moveResult = game.MovePerseverance(token, direction);
-            if (moveResult.Message.Contains("Insufficient battery"))
-            {
-                return;
-            }
-            if (moveResult.Message == "You made it to the target!")
-            {
-                targets.Dequeue();
-                Console.WriteLine();
-                Console.WriteLine($"You made it to a target, {targets.Count} targets remain.");
-            }
-
-            currentOrientation = moveResult.Orientation;
-            batteryLevel = moveResult.BatteryLevel;
-            currentLocation = moveResult.Location;
-        }
     }
 }

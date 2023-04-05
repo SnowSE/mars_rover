@@ -12,7 +12,7 @@ public class BatteryTests
         var scenario = new GameScenario(height: 7, width: 7, players: 1, customLogger: TestLogger.MakeNewGameLogger());
         scenario.Game.PlayGame();
         var player1Driver = new InsanelySimpleRoverDriver(scenario.Players[0], scenario.Game);
-        player1Driver.MoveTowardTarget(2);
+        player1Driver.MakeMoves(2);
         var previousBatteryLevel = scenario.Players[0].BatteryLevel;
 
         await Task.Delay(TimeSpan.FromMilliseconds(1_100));//wait for a charge

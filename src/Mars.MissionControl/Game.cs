@@ -289,7 +289,7 @@ public class Game : IDisposable
             return MovePerseverance(token, direction, updatePlayerTryAgainCount + 1);
         }
 
-        if (isOnATarget(player) && playerHasNotVisitedThisTarget(player))
+        if (isOnATarget(player) && thisIsTheNextTarget(player))
         {
             recordTargetVisitation(player);
             message = GameMessages.YouMadeItToTheTarget;
@@ -317,17 +317,31 @@ public class Game : IDisposable
 
     private bool isNotOnBorder(int value) => value != 0 && value != Board.Width - 1;
 
-    private bool playerHasNotVisitedThisTarget(Player player) =>
-        !targetVisitations.Any(tv => tv.Player.Token == player.Token && tv.Target == player.PerseveranceLocation);
+    private bool thisIsTheNextTarget(Player player)
+    {
+        var targetQueue = new Queue<Location>(Targets);
+        var playerTargetVisitations = targetVisitations.Where(tv => tv.Token == player.Token);
+        var nextTarget = targetQueue.Dequeue();
+        while (targetQueue.Any() && playerTargetVisitations.Any(tv => tv.Target == nextTarget))
+        {
+            logger.LogDebug("Player {token} already visited target {target}...", player.Token, nextTarget);
+            nextTarget = targetQueue.Dequeue();
+        }
+
+        return (player.PerseveranceLocation == nextTarget);
+    }
 
     private bool isOnATarget(Player player) => Targets.Contains(player.PerseveranceLocation);
 
-    private void recordTargetVisitation(Player player) =>
-        targetVisitations.Add(new TargetVisitation(player.PerseveranceLocation, player, DateTime.Now));
+    private void recordTargetVisitation(Player player)
+    {
+        targetVisitations.Add(new TargetVisitation(player.PerseveranceLocation, player.Token, DateTime.Now));
+        logger.LogInformation("Player {playerName} made it to target {location}", player.Name, player.PerseveranceLocation);
+    }
 
     private bool hasVisitedAllTargets(Player player)
     {
-        var targetsVisited = targetVisitations.Where(tv => tv.Player.Token == player.Token).Select(tv => tv.Target);
+        var targetsVisited = targetVisitations.Where(tv => tv.Token == player.Token).Select(tv => tv.Target);
         return !Targets.Except(targetsVisited).Any();
     }
 
@@ -338,7 +352,7 @@ public class Game : IDisposable
         rechargeTimer?.Dispose();
     }
 }
-public record TargetVisitation(Location Target, Player Player, DateTime Timestamp);
+public record TargetVisitation(Location Target, PlayerToken Token, DateTime Timestamp);
 
 public static class GameMessages
 {
