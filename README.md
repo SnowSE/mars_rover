@@ -32,7 +32,7 @@
 ## Changes for the April 2023 Competetion
 
 * [x] Each contestant is only allowed a single rover, but each rover has 10 helicopters
-* [ ] Impassable barriers / cliffs (require pathfinding)
+* [X] Impassable barriers / cliffs (require pathfinding)
 * [X] Allow players to move along the border before gameplay begins
 * [X] When all batteries get to 0, bump everyone's battery (to keep the game moving)
 * [X] Hide the maps
