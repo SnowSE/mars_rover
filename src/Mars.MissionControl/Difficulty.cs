@@ -4,7 +4,7 @@ public record Difficulty
 {
     public Difficulty(int value)
     {
-        if (value < 0 || value > 20480)
+        if (value < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(value));
         }

@@ -1,3 +1,4 @@
+using OfficeOpenXml;
 using System.Text.Json;
 
 namespace Mars.Web;
@@ -49,7 +50,49 @@ public class FileSystemMapProvider : IMapProvider
             maps.Add(new Map(mapNumber, cells, lowRes));
         }
 
+        loadExcelMaps(imagesFolder, maps);
+
         return maps;
+    }
+
+    private void loadExcelMaps(string imagesFolder, List<Map> maps)
+    {
+        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+        foreach (var excelFile in Directory.GetFiles(imagesFolder, "terrain_*.xlsx", SearchOption.AllDirectories))
+        {
+            logger.LogInformation("Beginning to process {excelFile}", excelFile);
+            using (var package = new ExcelPackage(new FileInfo(excelFile)))
+            {
+                var sheet = package.Workbook.Worksheets["rawValues"];
+                if (sheet == null)
+                {
+                    logger.LogError("Excel file {excelFile} doesn't have a 'rawValues' sheet!", excelFile);
+                    continue;
+                }
+
+                var cells = new List<MissionControl.Cell>();
+
+                for (int excelRow = 500, mapRow = 0; excelRow > 0; excelRow--, mapRow++)
+                {
+                    for (int excelCol = 1, mapCol = 0; excelCol <= 500; excelCol++, mapCol++)
+                    {
+                        var difficultyValue = (long)(double)sheet.Cells[excelRow, excelCol].Value;
+                        if (difficultyValue > int.MaxValue)
+                            difficultyValue = int.MaxValue;
+                        cells.Add(new MissionControl.Cell(new MissionControl.Location(mapCol, mapRow), new Difficulty((int)difficultyValue)));
+                    }
+                }
+
+                var lowResCachedPath = Path.Combine(imagesFolder, $"lowres_{Path.GetFileNameWithoutExtension(excelFile)}.json");
+                var lowRes = (File.Exists(lowResCachedPath)) ?
+                    parseLowResolutionMap(lowResCachedPath) :
+                    fillLowResoulutionMap(cells, lowResCachedPath);
+                var parts = Path.GetFileName(excelFile).Split('_', '.');
+                var mapNumber = int.Parse(parts[1]);
+                maps.Add(new Map(mapNumber, cells, lowRes));
+            }
+        }
     }
 
     private List<LowResolutionCell> parseLowResolutionMap(string lowResCachedPath)

@@ -6,16 +6,26 @@ public class GameManager
 {
     private readonly ILogger<Game> logger;
 
+    private IEnumerable<MissionControl.Location> map8_defaultTargets = new[]
+    {
+        new MissionControl.Location(110, 185),
+        new MissionControl.Location(120, 475),
+        new MissionControl.Location(250, 400),
+        new MissionControl.Location(440, 70)
+    };
+
+    private IEnumerable<MissionControl.Location> defaultTargets = new[]
+    {
+        new MissionControl.Location(250, 250),
+        new MissionControl.Location(125, 125),
+    };
+
     public GameManager(List<Map> maps, ILogger<Game> logger)
     {
         CreatedOn = DateTime.Now;
         GameStartOptions = new GameCreationOptions
         {
-            MapWithTargets = new MapWithTargets(maps[0], new[]
-            {
-                new MissionControl.Location(maps[0].Width / 2, maps[0].Height / 2),
-                new MissionControl.Location(maps[0].Width / 3, maps[0].Height / 3),
-            })
+            MapWithTargets = new MapWithTargets(maps[7], map8_defaultTargets)
         };
         this.Maps = maps;
         this.logger = logger;
