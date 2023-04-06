@@ -20,7 +20,7 @@ public class AdminController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     public IActionResult StartGame(StartGameRequest request)
     {
-        if (request.Password != config["GAME_PASSWORD"])
+        if (request.Password != config[ConfigKeys.GamePassword])
             return Problem("Invalid password", statusCode: 400, title: "Cannot start game with invalid password.");
 
         if (gameHoster.Games.TryGetValue(request.GameID, out var gameManager))

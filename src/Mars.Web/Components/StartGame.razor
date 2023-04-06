@@ -45,7 +45,7 @@
         set
         {
             password = value;
-            startGameButtonHidden = (password != config["GAME_PASSWORD"]);
+            startGameButtonHidden = (password != config[ConfigKeys.GamePassword]);
             StateHasChanged();
         }
     }
@@ -55,7 +55,7 @@
         if (gameManager == null)
             return;
 
-        if (password != config["GAME_PASSWORD"])
+        if (password != config[ConfigKeys.GamePassword])
         {
             logger.LogWarning("What?!  How did they click the 'start playing' button with a password mismatch?");
             return;

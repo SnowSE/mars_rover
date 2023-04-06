@@ -10,7 +10,7 @@ public class CleanupGameService : BackgroundService
     {
         this.multiGameHoster = multiGameHoster;
         this.logger = logger;
-        if (!int.TryParse(config["CleanupFrequencyMinutes"], out CleanupFrequencyMinutes))
+        if (!int.TryParse(config[ConfigKeys.CleanupFrequencyMinutes], out CleanupFrequencyMinutes))
             CleanupFrequencyMinutes = 20;
     }
 

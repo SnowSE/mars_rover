@@ -69,7 +69,7 @@
     {
         mapNumber = multiGameHoster.ParsedMaps.First().MapNumber;
 
-        if (!int.TryParse(config["MaxMaps"], out MaxMaps))
+        if (!int.TryParse(config[ConfigKeys.MaxMaps], out MaxMaps))
             MaxMaps = 3;
 
         targetLocations = targetsToString(creationOptions.MapWithTargets.Targets);
@@ -87,7 +87,7 @@
         set
         {
             password = value;
-            startGameButtonHidden = (password != config["GAME_PASSWORD"]);
+            startGameButtonHidden = (password != config[ConfigKeys.GamePassword]);
             StateHasChanged();
         }
     }
@@ -119,7 +119,7 @@
         if (gameManager == null)
             return;
 
-        if (password != config["GAME_PASSWORD"])
+        if (password != config[ConfigKeys.GamePassword])
         {
             logger.LogWarning("What?!  How did they click the button with a password mismatch?");
             return;
