@@ -14,7 +14,7 @@ on:
 env:
   WEBAPP_NAME: snow-rover
   RESOURCE_GROUP: mars_rover
-  SLOT_NAME: staging  # Create a slot on your web app called "staging"
+  #SLOT_NAME: staging  # Create a slot on your web app called "staging"
 
 jobs:
   build:
@@ -43,46 +43,71 @@ jobs:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
 
-  deploy-to-stage:
-    name: Deploy to staging
+  deploy-to-prod:
+    name: Deploy to production
     needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: 'Staging'
-      url: ${{ steps.deploy-to-stage.outputs.webapp-url }}
-
-    steps:
-    - name: Log into Azure CLI with service principal
-      uses: azure/login@v1.1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Download artifact from build job
-      uses: actions/download-artifact@v2
-      with:
-        name: .net-app
-
-    - name: Deploy to stage env
-      uses: azure/webapps-deploy@v2
-      id: deploy-to-stage
-      with:
-        app-name: ${{ env.WEBAPP_NAME }}
-        slot-name:  ${{ env.SLOT_NAME }}
-        package: .
-
-  release-to-prod:
-    name: Release to prod
-    needs: deploy-to-stage
     runs-on: ubuntu-latest
     environment:
       name: 'Production'
       url: 'https://${{ env.WEBAPP_NAME }}.azurewebsites.net/'
 
     steps:
-    - name: Log into Azure CLI with service principal
-      uses: azure/login@v1.1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Log into Azure CLI with service principal
+        uses: azure/login@v1.1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v2
+        with:
+          name: .net-app
+  
+      - name: Deploy to production env
+        uses: azure/webapps-deploy@v2
+        id: deploy-to-production
+        with:
+          app-name: ${{ env.WEBAPP_NAME }}
+          package: .          
 
-    - name: Swap slots
-      run: az webapp deployment slot swap -s ${{ env.SLOT_NAME }} -n ${{ env.WEBAPP_NAME }} -g ${{ env.RESOURCE_GROUP }}
+  # deploy-to-stage:
+  #   name: Deploy to staging
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: 'Staging'
+  #     url: ${{ steps.deploy-to-stage.outputs.webapp-url }}
+
+  #   steps:
+  #   - name: Log into Azure CLI with service principal
+  #     uses: azure/login@v1.1
+  #     with:
+  #       creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+  #   - name: Download artifact from build job
+  #     uses: actions/download-artifact@v2
+  #     with:
+  #       name: .net-app
+
+  #   - name: Deploy to stage env
+  #     uses: azure/webapps-deploy@v2
+  #     id: deploy-to-stage
+  #     with:
+  #       app-name: ${{ env.WEBAPP_NAME }}
+  #       slot-name:  ${{ env.SLOT_NAME }}
+  #       package: .
+
+  # release-to-prod:
+  #   name: Release to prod
+  #   needs: deploy-to-stage
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: 'Production'
+  #     url: 'https://${{ env.WEBAPP_NAME }}.azurewebsites.net/'
+
+  #   steps:
+  #   - name: Log into Azure CLI with service principal
+  #     uses: azure/login@v1.1
+  #     with:
+  #       creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+  #   - name: Swap slots
+  #     run: az webapp deployment slot swap -s ${{ env.SLOT_NAME }} -n ${{ env.WEBAPP_NAME }} -g ${{ env.RESOURCE_GROUP }}
