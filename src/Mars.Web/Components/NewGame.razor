@@ -16,8 +16,7 @@
                         <label class="input-label float-start">Select a map</label>
                     </div>
                 </div>
-                <div class="row mb-2">
-                    <InputRadioGroup Name="mapNumber" @bind-Value=mapNumber>
+                    @*<InputRadioGroup Name="mapNumber" @bind-Value=mapNumber>
                         @foreach (var map in multiGameHoster.ParsedMaps.Take(MaxMaps))
                         {
                             <div class="form-check mx-3">
@@ -25,17 +24,30 @@
                                 <label class="form-check-label float-start" for=@($"map{map.MapNumber}")>Map #@map.MapNumber</label>
                             </div>
                         }
-                    </InputRadioGroup>
+                    </InputRadioGroup>*@
+                <select class="form-control mb-3" @onchange="@(x => OnSelChange(int.Parse(x.Value?.ToString()??"1")))">
+                    @foreach (var map in multiGameHoster.ParsedMaps.Take(MaxMaps))
+                    {
+                        <option selected="@(map.MapNumber == mapNumber)" value=@map.MapNumber>Map #@map.MapNumber</option>
+                    }
+                </select>
 
-                </div>
                 <div class="form-floating mb-3">
                     <input type="text" class="form-control" id="targets" placeholder="Target Locations" @bind=TargetLocations />
                     <label for="targets">Target Coordinates</label>
                     <span id="errorSpan" style="color: red">@errorText</span>
                 </div>
                 <div class="form-floating mb-3">
-                    <input class="form-control" type="number" id="startingBatteryLevel" placeholder="width" @bind=creationOptions.StartingBatteryLevel />
+                    <input class="form-control" type="number" id="startingBatteryLevel" placeholder="Starting Battery Level" @bind=creationOptions.StartingBatteryLevel />
                     <label for="startingBatteryLevel">Starting Battery Level</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input class="form-control" type="number" id="minimumBatteryThreshold" placeholder="Minimum Battery Threshold" @bind=creationOptions.MinimumBatteryThreshold />
+                    <label for="minimumBatteryThreshold">Minimum Battery Threshold</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input class="form-control" type="number" id="keepTheGameGoingBatteryBoostAmount" placeholder="Battery Boost Amount" @bind=creationOptions.KeepTheGameGoingBatteryBoostAmount />
+                    <label for="keepTheGameGoingBatteryBoostAmount">Battery Boost Amount</label>
                 </div>
                 <div class="form-floating mb-3">
                     <input class="form-control" type="password" id="password" placeholder="what's the magic word?" @bind=Password @bind:event="oninput" />
@@ -64,6 +76,11 @@
     bool startGameButtonHidden = true;
     int mapNumber;
     string errorText = string.Empty;
+
+    public void OnSelChange(int mapNum)
+    {
+        mapNumber = mapNum;
+    }
 
     protected override void OnParametersSet()
     {
