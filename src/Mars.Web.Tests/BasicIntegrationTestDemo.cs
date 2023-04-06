@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
-using System.Threading.Tasks;
 
 namespace Mars.Web.Tests;
 
@@ -13,12 +12,16 @@ public class IntegrationTestHelper
         var mockMapProvider = new Mock<IMapProvider>();
         mockMapProvider.Setup(m => m.LoadMaps()).Returns(new[] { Helpers.CreateMap(10, 10) });
 
+        var configMock = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
+        configMock.Setup(m => m[ConfigKeys.MaxMaps]).Returns("1");
+
         return new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
                 {
                     services.Replace(new ServiceDescriptor(typeof(IMapProvider), (_) => mockMapProvider.Object, ServiceLifetime.Singleton));
+                    services.Replace(new ServiceDescriptor(typeof(Microsoft.Extensions.Configuration.IConfiguration), (_) => configMock.Object, ServiceLifetime.Singleton));
                 });
             });
     }

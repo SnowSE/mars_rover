@@ -19,11 +19,13 @@ internal class ComponentTests
         var mockMapProvider = new Mock<IMapProvider>();
         mockMapProvider.Setup(m => m.LoadMaps()).Returns(new[] { Helpers.CreateMap(10, 10) });
         var loggerMock = new Mock<ILogger<Game>>();
-        gameManager = new GameManager(mockMapProvider.Object.LoadMaps().ToList(), loggerMock.Object);
+        var configMock = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
+        configMock.Setup(m => m[ConfigKeys.MaxMaps]).Returns("1");
+        gameManager = new GameManager(mockMapProvider.Object.LoadMaps().ToList(), loggerMock.Object, configMock.Object);
 
         var mockLogFactory = new Mock<ILoggerFactory>();
 
-        multiGameHoster = new MultiGameHoster(mockMapProvider.Object, mockLogFactory.Object);
+        multiGameHoster = new MultiGameHoster(mockMapProvider.Object, mockLogFactory.Object, configMock.Object);
 
         var mockConfig = new Mock<Microsoft.Extensions.Configuration.IConfiguration>();
         mockConfig.Setup(c => c["GAME_PASSWORD"]).Returns("password");
