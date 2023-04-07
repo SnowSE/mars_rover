@@ -75,8 +75,18 @@ builder.Services.AddRateLimiter(options =>
 });
 
 var app = builder.Build();
+var pathBase = builder.Configuration["PathBase"] ?? string.Empty;
+if (!string.IsNullOrEmpty(pathBase))
+{
+    app.UsePathBase(pathBase);
+    app.Use((context, next) =>
+    {
+    context.Request.PathBase = pathBase;
+    return next();
+    });
+}
 
-app.UsePathBase(builder.Configuration["PathBase"] ?? string.Empty);
+
 
 if (!app.Environment.IsDevelopment())
 {
