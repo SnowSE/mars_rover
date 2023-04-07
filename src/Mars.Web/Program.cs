@@ -1,6 +1,7 @@
 using Hellang.Middleware.ProblemDetails;
 using Mars.Web;
 using Mars.Web.Controllers;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
@@ -81,7 +82,11 @@ var pathBase = builder.Configuration["PathBase"] ?? string.Empty;
 if (!string.IsNullOrEmpty(pathBase))
 {
     app.UsePathBase(pathBase);
-    
+    app.UseForwardedHeaders(new ForwardedHeadersOptions
+    {
+        ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+    });
+
 }
 
 
