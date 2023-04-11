@@ -131,7 +131,7 @@ public class GameController : ControllerBase
                             Orientation = moveResult.Orientation.ToString()
                         };
                     }
-                    catch(InvalidGameStateException gsx)
+                    catch (InvalidGameStateException gsx)
                     {
                         logger.LogError($"Could not move into map area: Game not in Playing state.");
                         return Problem("Unable to move into map area", statusCode: 400, title: "Game not in Playing state.");
@@ -154,13 +154,13 @@ public class GameController : ControllerBase
     /// </summary>
     /// <param name="token"></param>
     /// <param name="id">Which ingenuity helicopter you're moving</param>
-    /// <param name="destinationColumn"></param>
-    /// <param name="destinationRow"></param>
+    /// <param name="destinationY"></param>
+    /// <param name="destinationX"></param>
     /// <returns></returns>
     [HttpGet("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IngenuityMoveResponse))]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult<IngenuityMoveResponse> MoveIngenuity(string token, int id, int destinationRow, int destinationColumn)
+    public ActionResult<IngenuityMoveResponse> MoveIngenuity(string token, int id, int destinationX, int destinationY)
     {
         var tokenHasGame = tokenMap.TryGetValue(token, out string? gameId);
         using (logger.BeginScope("ScopeUserToken: {ScopeUser} GameId: {ScopeGameId} ", token, gameId))
@@ -182,7 +182,7 @@ public class GameController : ControllerBase
 
                 try
                 {
-                    var moveResult = gameManager.Game.MoveIngenuity(playerToken!, id, new MissionControl.Location(destinationRow, destinationColumn));
+                    var moveResult = gameManager.Game.MoveIngenuity(playerToken!, id, new MissionControl.Location(destinationX, destinationY));
                     return new IngenuityMoveResponse
                     {
                         X = moveResult.Location.X,
