@@ -104,7 +104,7 @@ app.UseRouting();
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Mars Rover v1");
+    c.SwaggerEndpoint("v1/swagger.json", "Mars Rover v1");
 });
 
 app.MapBlazorHub()

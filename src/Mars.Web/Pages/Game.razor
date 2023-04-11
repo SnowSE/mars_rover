@@ -9,10 +9,10 @@
 
 <CascadingValue Name="GameManager" Value="@GameManager">
     <div class="row mt-1 mx-1 border-bottom">
-        <span class="h3 col" style="font-family:'Cascadia Code', Consolas"><a href="/">Mars Rover</a> (Game '@Id')</span>
+        <span class="h3 col" style="font-family:'Cascadia Code', Consolas"><a href="./">Mars Rover</a> (Game '@Id')</span>
         <div class="col-auto text-end">
             <GameStatus /> |
-            <a class="" href="/swagger/index.html">Swagger API Docs</a> |
+            <a class="" href="swagger/index.html">Swagger API Docs</a> |
             <NewGame /> |
             <StartGame />
         </div>
@@ -38,7 +38,7 @@
         }
         else
         {
-            navManager.NavigateTo("/");
+            navManager.NavigateTo("./");
         }
     }
 }

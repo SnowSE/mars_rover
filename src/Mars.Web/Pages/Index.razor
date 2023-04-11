@@ -19,7 +19,7 @@
 
                 <div class="row">
                     <p>
-                        ➡️ <a href=@($"/game/{game.Key}")>Game '@game.Key'</a><span> (created @minutes @minuteText ago)</span>
+                        ➡️ <a href=@($"game/{game.Key}")>Game '@game.Key'</a><span> (created @minutes @minuteText ago)</span>
                     </p>
                 </div>
             }
@@ -52,6 +52,6 @@
     void makeNewGame()
     {
         var gameId = multiGameHoster.MakeNewGame();
-        navManager.NavigateTo($"/game/{gameId}");
+        navManager.NavigateTo($"game/{gameId}");
     }
 }
