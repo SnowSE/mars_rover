@@ -81,6 +81,7 @@ var app = builder.Build();
 var pathBase = Environment.GetEnvironmentVariable("PATH_BASE");
 if (!string.IsNullOrEmpty(pathBase))
 {
+    Console.WriteLine($"Using path base: {pathBase}");
     app.UsePathBase(pathBase);
     app.UseForwardedHeaders(new ForwardedHeadersOptions
     {
