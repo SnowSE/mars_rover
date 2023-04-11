@@ -78,7 +78,7 @@ builder.Services.AddRateLimiter(options =>
 var app = builder.Build();
 
 //Path base is needed for running behind a reverse proxy, otherwise the app will not be able to find the static files
-var pathBase = builder.Configuration["PathBase"] ?? string.Empty;
+var pathBase = Environment.GetEnvironmentVariable("PATH_BASE");
 if (!string.IsNullOrEmpty(pathBase))
 {
     app.UsePathBase(pathBase);
