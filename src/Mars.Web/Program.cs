@@ -79,17 +79,7 @@ var app = builder.Build();
 
 //Path base is needed for running behind a reverse proxy, otherwise the app will not be able to find the static files
 var pathBase = builder.Configuration["PATH_BASE"];
-if (!string.IsNullOrEmpty(pathBase))
-{
-    Console.WriteLine($"Using path base: {pathBase}");
-    app.UsePathBase(pathBase);
-    app.UseForwardedHeaders(new ForwardedHeadersOptions
-    {
-        ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-    });
-}
-
-
+app.UsePathBase(pathBase);
 
 if (!app.Environment.IsDevelopment())
 {
