@@ -8,6 +8,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Exceptions;
+using Serilog.Sinks.Loki;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
@@ -39,7 +40,11 @@ builder.Host.UseSerilog((context, loggerConfig) =>
 {
     loggerConfig.WriteTo.Console()
     .Enrich.WithExceptionDetails()
-    .WriteTo.Seq(builder.Configuration["SeqServer"] ?? throw new ApplicationException("Unable to locate key SeqServer in configuration"));
+    .WriteTo.Seq(builder.Configuration["SeqServer"] ?? throw new ApplicationException("Unable to locate key SeqServer in configuration"))
+    .WriteTo.LokiHttp(() => new LokiSinkConfiguration
+    {
+        LokiUrl = builder.Configuration["LokiServer"] 
+    });
 });
 
 builder.Services.AddProblemDetails(opts =>
