@@ -54,11 +54,11 @@ public class MovementTests
         {
             await moveAsync("East", shouldSucceed: false);
         }
-        else if(player1.StartingX == 4)
+        else if (player1.StartingX == 4)
         {
             await moveAsync("West", shouldSucceed: false);
         }
-        else if(player1.StartingY == 0)
+        else if (player1.StartingY == 0)
         {
             await moveAsync("North", shouldSucceed: false);
         }
@@ -70,19 +70,19 @@ public class MovementTests
 
     private async Task makeSureYouAreNotInACorner(Types.Location location)
     {
-        if(location == new Types.Location(0,0))
+        if (location == new Types.Location(0, 0))
         {
             await moveAsync("North");
         }
-        else if(location == new Types.Location(0, 4))
+        else if (location == new Types.Location(0, 4))
         {
             await moveAsync("South");
         }
-        else if(location == new Types.Location(4, 0))
+        else if (location == new Types.Location(4, 0))
         {
             await moveAsync("North");
         }
-        else if(location == new Types.Location(4, 4))
+        else if (location == new Types.Location(4, 4))
         {
             await moveAsync("South");
         }
@@ -227,7 +227,7 @@ public class MovementTests
         var destinationRow = player1.StartingX - 10;
         var destinationCol = player1.StartingY - 10;
         var response = await client.GetFromJsonAsync<IngenuityMoveResponse>(
-            $"/game/moveingenuity?token={token}&id={id}&destinationRow={destinationRow}&directionCol={destinationCol}");
+            $"/game/moveingenuity?token={token}&id={id}&destinationX={destinationRow}&directionY={destinationCol}");
         response.Message.Should().Be(GameMessages.MovedOutOfBounds);
     }
 
