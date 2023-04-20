@@ -242,13 +242,13 @@ public class MovementTests
         //Fail with -1 id
         var id = -1;
         var response = await client.GetAsync(
-            $"/game/moveingenuity?token={token}&id={id}&destinationRow={destinationRow}&directionCol={destinationCol}");
+            $"/game/moveingenuity?token={token}&id={id}&destinationX={destinationRow}&directionY={destinationCol}");
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
         //Fail with 10 id
         id = 10;
         response = await client.GetAsync(
-            $"/game/moveingenuity?token={token}&id={id}&destinationRow={destinationRow}&directionCol={destinationCol}");
+            $"/game/moveingenuity?token={token}&id={id}&destinationX={destinationRow}&directionY={destinationCol}");
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
