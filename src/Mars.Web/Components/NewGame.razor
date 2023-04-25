@@ -1,5 +1,5 @@
 ﻿@inject ILogger<NewGame> logger
-@inject IConfiguration config
+@inject GameConfig gameConfig
 @inject MultiGameHoster multiGameHoster
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.Extensions.DependencyInjection.Extensions
@@ -67,11 +67,11 @@
 
 @code {
     [CascadingParameter(Name = "GameManager")]
-    public GameManager? gameManager { get; set; }
+    public GameManager? GameManager { get; set; }
 
     int MaxMaps = 3;
 
-    private GameCreationOptions creationOptions => gameManager!.GameStartOptions;
+    private GameCreationOptions creationOptions => GameManager!.GameStartOptions;
 
     bool startGameButtonHidden = true;
     int mapNumber;
@@ -85,10 +85,7 @@
     protected override void OnParametersSet()
     {
         mapNumber = multiGameHoster.ParsedMaps.First().MapNumber;
-
-        if (!int.TryParse(config[ConfigKeys.MaxMaps], out MaxMaps))
-            MaxMaps = 3;
-
+        MaxMaps = gameConfig.MaxMaps;
         targetLocations = targetsToString(creationOptions.MapWithTargets.Targets);
     }
 
@@ -104,7 +101,7 @@
         set
         {
             password = value;
-            startGameButtonHidden = (password != config[ConfigKeys.GamePassword]);
+            startGameButtonHidden = (password != gameConfig.Password);
             StateHasChanged();
         }
     }
@@ -133,10 +130,10 @@
     {
         errorText = string.Empty;
 
-        if (gameManager == null)
+        if (GameManager == null)
             return;
 
-        if (password != config[ConfigKeys.GamePassword])
+        if (password != gameConfig.Password)
         {
             logger.LogWarning("What?!  How did they click the button with a password mismatch?");
             return;
@@ -152,7 +149,7 @@
             return;
         }
         logger.LogInformation("Starting new game with {options}", creationOptions);
-        gameManager.StartNewGame(creationOptions);
+        GameManager.StartNewGame(creationOptions);
     }
 
 }

@@ -25,6 +25,7 @@ using var traceProvider = Sdk.CreateTracerProviderBuilder()
     .AddAspNetCoreInstrumentation()
     .Build();
 
+builder.Services.AddOptions<GameConfig>().BindConfiguration(nameof(GameConfig));
 builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
@@ -63,15 +64,21 @@ builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = 429;
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: httpContext.Request.Query["token"].FirstOrDefault() ?? httpContext.Request.Headers.Host.ToString(),
+    {
+        var token = httpContext.Request.Query["token"].FirstOrDefault();
+        var ipAddress = httpContext.Request.Headers.Host.ToString();
+        var apiLimit = httpContext.RequestServices.GetRequiredService<GameConfig>().ApiLimitPerSecond;
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: token ?? ipAddress,
             factory: partition => new FixedWindowRateLimiterOptions
             {
                 AutoReplenishment = true,
-                PermitLimit = int.Parse(builder.Configuration["ApiLimitPerSecond"] ?? throw new Exception("Unable to find ApiLimitPerSecond in config")),
+                PermitLimit = apiLimit,
                 QueueLimit = 0,
                 Window = TimeSpan.FromSeconds(1)
-            }));
+            });
+    });
 });
 
 var app = builder.Build();

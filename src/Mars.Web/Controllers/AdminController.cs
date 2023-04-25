@@ -4,13 +4,13 @@ namespace Mars.Web.Controllers;
 [Route("[controller]")]
 public class AdminController : ControllerBase
 {
-    private readonly IConfiguration config;
+    private readonly GameConfig gameConfig;
     private readonly ILogger<AdminController> logger;
     private readonly MultiGameHoster gameHoster;
 
-    public AdminController(IConfiguration config, ILogger<AdminController> logger, MultiGameHoster gameHoster)
+    public AdminController(GameConfig gameConfig, ILogger<AdminController> logger, MultiGameHoster gameHoster)
     {
-        this.config = config;
+        this.gameConfig = gameConfig;
         this.logger = logger;
         this.gameHoster = gameHoster;
     }
@@ -20,7 +20,7 @@ public class AdminController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), 400)]
     public IActionResult StartGame(StartGameRequest request)
     {
-        if (request.Password != config[ConfigKeys.GamePassword])
+        if (request.Password != gameConfig.Password)
             return Problem("Invalid password", statusCode: 400, title: "Cannot start game with invalid password.");
 
         if (gameHoster.Games.TryGetValue(request.GameID, out var gameManager))

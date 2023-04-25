@@ -20,13 +20,12 @@ public class GameManager
         new MissionControl.Location(125, 125),
     };
 
-    public GameManager(List<Map> maps, ILogger<Game> logger, IConfiguration config)
+    public GameManager(List<Map> maps, ILogger<Game> logger, GameConfig gameConfig)
     {
         CreatedOn = DateTime.Now;
-        var mapNumber = int.Parse(config[ConfigKeys.MaxMaps] ?? "1") - 1;
         GameStartOptions = new GameCreationOptions
         {
-            MapWithTargets = new MapWithTargets(maps[mapNumber], map8_defaultTargets)
+            MapWithTargets = new MapWithTargets(maps[gameConfig.DefaultMap], defaultTargets)
         };
         this.Maps = maps;
         this.logger = logger;

@@ -6,12 +6,11 @@ public class CleanupGameService : BackgroundService
     private readonly ILogger<CleanupGameService> logger;
     public readonly int CleanupFrequencyMinutes;
 
-    public CleanupGameService(MultiGameHoster multiGameHoster, ILogger<CleanupGameService> logger, IConfiguration config)
+    public CleanupGameService(MultiGameHoster multiGameHoster, ILogger<CleanupGameService> logger, GameConfig gameConfig)
     {
         this.multiGameHoster = multiGameHoster;
         this.logger = logger;
-        if (!int.TryParse(config[ConfigKeys.CleanupFrequencyMinutes], out CleanupFrequencyMinutes))
-            CleanupFrequencyMinutes = 20;
+        CleanupFrequencyMinutes = gameConfig.CleanupFrequencyMinutes;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
