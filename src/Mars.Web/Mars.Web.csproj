@@ -11,12 +11,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Content Include="data\terrain_01.csv" />
-	  <Content Include="data\terrain_02.csv" />
-	  <Content Include="data\terrain_03.csv" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="EPPlus" Version="6.2.0" />
 		<PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.5.1" />
 		<PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0-beta2" />
