@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Mars.Web;
@@ -20,12 +21,16 @@ public partial class GameManager
 		new MissionControl.Location(125, 125),
 	};
 
-	public GameManager(List<Map> maps, ILogger<Game> logger, GameConfig gameConfig)
+	public GameManager(List<Map> maps, ILogger<Game> logger, IOptions<GameConfig> gameConfig)
 	{
 		CreatedOn = DateTime.Now;
+		var mapNum = gameConfig.Value.DefaultMap;
+		if (mapNum >= maps.Count)
+			mapNum = maps.Count - 1;
+
 		GameStartOptions = new GameCreationOptions
 		{
-			MapWithTargets = new MapWithTargets(maps[gameConfig.DefaultMap], defaultTargets)
+			MapWithTargets = new MapWithTargets(maps[mapNum], defaultTargets)
 		};
 		this.Maps = maps;
 		this.logger = logger;
@@ -69,7 +74,7 @@ public partial class GameManager
 		//unsubscribe from old event
 		if (Game != null)
 		{
-			Game.GameStateChanged -= Game_GameStateChanged;
+			Game.GameStateChanged -= gameStateChanged;
 			Game.Dispose();
 			LogEndingPreviouslyRunningGame();
 		}
@@ -81,7 +86,7 @@ public partial class GameManager
 		GameStateChanged?.Invoke(this, EventArgs.Empty);
 
 		//subscribe to new event
-		Game.GameStateChanged += Game_GameStateChanged;
+		Game.GameStateChanged += gameStateChanged;
 	}
 
 	public void PlayGame(GamePlayOptions playOptions)
@@ -89,7 +94,7 @@ public partial class GameManager
 		Game?.PlayGame(playOptions);
 	}
 
-	private void Game_GameStateChanged(object? sender, EventArgs e)
+	private void gameStateChanged(object? sender, EventArgs e)
 	{
 		GameStateChanged?.Invoke(this, e);
 	}

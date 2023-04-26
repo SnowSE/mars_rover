@@ -1,6 +1,7 @@
 ﻿@inject ILogger<NewGame> logger
-@inject GameConfig gameConfig
+@inject IOptions<GameConfig> gameConfigOptions
 @using Microsoft.Extensions.DependencyInjection.Extensions
+@using Microsoft.Extensions.Options;
 
 <div class="modal" id="startGameModal">
     <div class="modal-dialog">
@@ -45,7 +46,7 @@
         set
         {
             password = value;
-            startGameButtonHidden = (password != gameConfig.Password);
+            startGameButtonHidden = (password != gameConfigOptions.Value.Password);
             StateHasChanged();
         }
     }
@@ -55,7 +56,7 @@
         if (gameManager == null)
             return;
 
-        if (password != gameConfig.Password)
+        if (password != gameConfigOptions.Value.Password)
         {
             logger.LogWarning("What?!  How did they click the 'start playing' button with a password mismatch?");
             return;

@@ -1,13 +1,15 @@
-﻿namespace Mars.Web;
+﻿using Microsoft.Extensions.Options;
+
+namespace Mars.Web;
 
 public partial class MultiGameHoster
 {
-	public MultiGameHoster(IMapProvider mapProvider, ILoggerFactory logFactory, GameConfig gameConfig)
+	public MultiGameHoster(IMapProvider mapProvider, ILoggerFactory logFactory, IOptions<GameConfig> gameConfigOptions)
 	{
 		ParsedMaps = new List<Map>(mapProvider.LoadMaps());
 		this.logger = logFactory.CreateLogger<MultiGameHoster>();
 		this.logFactory = logFactory;
-		this.gameConfig = gameConfig;
+		this.gameConfigOptions = gameConfigOptions;
 	}
 	[LoggerMessage(1, LogLevel.Information, "New Game Created: {gameId}")] partial void LogNewGameCreated(string gameId);
 	public void RaiseOldGamesPurged() => OldGamesPurged?.Invoke(this, EventArgs.Empty);
@@ -21,14 +23,14 @@ public partial class MultiGameHoster
 	private string nextGame = "a";
 	private readonly object lockObject = new();
 	private readonly ILoggerFactory logFactory;
-	private readonly GameConfig gameConfig;
+	private readonly IOptions<GameConfig> gameConfigOptions;
 
 	public string MakeNewGame()
 	{
 		lock (lockObject)
 		{
 			var gameId = nextGame;
-			Games.TryAdd(gameId, new GameManager(ParsedMaps, logFactory.CreateLogger<Game>(), gameConfig));
+			Games.TryAdd(gameId, new GameManager(ParsedMaps, logFactory.CreateLogger<Game>(), gameConfigOptions));
 
 			nextGame = IncrementGameId(nextGame);
 			LogNewGameCreated(gameId);

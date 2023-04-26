@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace Mars.Web.Controllers;
 
 /// <summary>
@@ -11,9 +13,9 @@ public class AdminController : ControllerBase
 	private readonly ILogger<AdminController> logger;
 	private readonly MultiGameHoster gameHoster;
 
-	public AdminController(GameConfig gameConfig, ILogger<AdminController> logger, MultiGameHoster gameHoster)
+	public AdminController(IOptions<GameConfig> gameConfigOptions, ILogger<AdminController> logger, MultiGameHoster gameHoster)
 	{
-		this.gameConfig = gameConfig;
+		this.gameConfig = gameConfigOptions.Value;
 		this.logger = logger;
 		this.gameHoster = gameHoster;
 	}

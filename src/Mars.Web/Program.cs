@@ -1,12 +1,14 @@
 using Hellang.Middleware.ProblemDetails;
 using Mars.Web;
 using Mars.Web.Controllers;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Exceptions;
+using System.Configuration;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
@@ -42,7 +44,7 @@ builder.Host.UseSerilog((context, loggerConfig) =>
 {
 	loggerConfig.WriteTo.Console()
 	.Enrich.WithExceptionDetails()
-	.WriteTo.Seq(builder.Configuration["SeqServer"] ?? throw new ApplicationException("Unable to locate key SeqServer in configuration"));
+	.WriteTo.Seq(builder.Configuration["SeqServer"] ?? throw new ConfigurationErrorsException("Unable to locate key SeqServer in configuration"));
 });
 
 builder.Services.AddProblemDetails(opts =>
@@ -69,7 +71,7 @@ builder.Services.AddRateLimiter(options =>
 	{
 		var token = httpContext.Request.Query["token"].FirstOrDefault();
 		var ipAddress = httpContext.Request.Headers.Host.ToString();
-		var apiLimit = httpContext.RequestServices.GetRequiredService<GameConfig>().ApiLimitPerSecond;
+		var apiLimit = httpContext.RequestServices.GetRequiredService<IOptions<GameConfig>>().Value.ApiLimitPerSecond;
 
 		return RateLimitPartition.GetFixedWindowLimiter(
 			partitionKey: token ?? ipAddress,

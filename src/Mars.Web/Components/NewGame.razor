@@ -1,8 +1,9 @@
 ﻿@inject ILogger<NewGame> logger
-@inject GameConfig gameConfig
+@inject IOptions<GameConfig> gameConfigOptions
 @inject MultiGameHoster multiGameHoster
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.Extensions.DependencyInjection.Extensions
+@using Microsoft.Extensions.Options;
 
 <div class="modal" id="optionsModal">
     <div class="modal-dialog">
@@ -85,7 +86,7 @@
     protected override void OnParametersSet()
     {
         mapNumber = multiGameHoster.ParsedMaps.First().MapNumber;
-        MaxMaps = gameConfig.MaxMaps;
+        MaxMaps = gameConfigOptions.Value.MaxMaps;
         targetLocations = targetsToString(creationOptions.MapWithTargets!.Targets);
     }
 
@@ -101,7 +102,7 @@
         set
         {
             password = value;
-            startGameButtonHidden = (password != gameConfig.Password);
+            startGameButtonHidden = (password != gameConfigOptions.Value.Password);
             StateHasChanged();
         }
     }
@@ -134,7 +135,7 @@
         if (GameManager == null || targetLocations == null)
             return;
 
-        if (password != gameConfig.Password)
+        if (password != gameConfigOptions.Value.Password)
         {
             logger.LogWarning("What?!  How did they click the button with a password mismatch?");
             return;

@@ -2,6 +2,7 @@
 using Mars.MissionControl;
 using Mars.Web.Components;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using System.Linq;
 
@@ -18,11 +19,13 @@ internal class ComponentTests
 		var mockMapProvider = new Mock<IMapProvider>();
 		mockMapProvider.Setup(m => m.LoadMaps()).Returns(new[] { Helpers.CreateMap(10, 10) });
 		var loggerMock = new Mock<ILogger<Game>>();
-		gameManager = new GameManager(mockMapProvider.Object.LoadMaps().ToList(), loggerMock.Object, new GameConfig());
+		var optionsMock = new Mock<IOptions<GameConfig>>();
+		optionsMock.Setup(o => o.Value).Returns(new GameConfig() { DefaultMap = 0 });
+		gameManager = new GameManager(mockMapProvider.Object.LoadMaps().ToList(), loggerMock.Object, optionsMock.Object);
 
 		var mockLogFactory = new Mock<ILoggerFactory>();
 
-		multiGameHoster = new MultiGameHoster(mockMapProvider.Object, mockLogFactory.Object, new GameConfig());
+		multiGameHoster = new MultiGameHoster(mockMapProvider.Object, mockLogFactory.Object, optionsMock.Object);
 	}
 
 	[Test]

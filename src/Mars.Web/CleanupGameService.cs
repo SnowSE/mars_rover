@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Options;
+
 namespace Mars.Web;
 
 public class CleanupGameService : BackgroundService
@@ -6,11 +8,11 @@ public class CleanupGameService : BackgroundService
 	private readonly ILogger<CleanupGameService> logger;
 	private readonly int cleanupFrequencyMinutes;
 
-	public CleanupGameService(MultiGameHoster multiGameHoster, ILogger<CleanupGameService> logger, GameConfig gameConfig)
+	public CleanupGameService(MultiGameHoster multiGameHoster, ILogger<CleanupGameService> logger, IOptions<GameConfig> gameConfig)
 	{
 		this.multiGameHoster = multiGameHoster;
 		this.logger = logger;
-		cleanupFrequencyMinutes = gameConfig.CleanupFrequencyMinutes;
+		cleanupFrequencyMinutes = gameConfig.Value.CleanupFrequencyMinutes;
 	}
 
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
