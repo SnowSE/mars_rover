@@ -86,7 +86,7 @@
     {
         mapNumber = multiGameHoster.ParsedMaps.First().MapNumber;
         MaxMaps = gameConfig.MaxMaps;
-        targetLocations = targetsToString(creationOptions.MapWithTargets.Targets);
+        targetLocations = targetsToString(creationOptions.MapWithTargets!.Targets);
     }
 
     private string targetsToString(IEnumerable<Location> targets)
@@ -115,7 +115,8 @@
             errorText = string.Empty;
             try
             {
-                MapWithTargets.ParseLocations(value);
+                if(value != null)
+                    MapWithTargets.ParseLocations(value);
                 targetLocations = value;
             }
             catch(Exception ex)
@@ -130,7 +131,7 @@
     {
         errorText = string.Empty;
 
-        if (GameManager == null)
+        if (GameManager == null || targetLocations == null)
             return;
 
         if (password != gameConfig.Password)

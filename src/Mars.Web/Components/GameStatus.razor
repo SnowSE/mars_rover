@@ -7,6 +7,9 @@
 
     protected override void OnParametersSet()
     {
+        if (gameManager == null)
+            return;
+
         gameManager.GameStateChanged += (_, _) => InvokeAsync(()=> StateHasChanged());
     }
 }
