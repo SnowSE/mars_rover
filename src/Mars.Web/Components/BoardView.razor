@@ -52,6 +52,8 @@
 
     protected override void OnParametersSet()
     {
+        if (gameManager == null)
+            return;
         gameManager.GameStateChanged += (_, _) => InvokeAsync(() =>
         {
             StateHasChanged();
@@ -69,6 +71,8 @@
 
     void refreshMap()
     {
+        if (gameManager == null)
+            return;
         backgroundStyle = $"background-image: url('images/terrain_{gameManager.Game.MapNumber:00}.png'); ";
     }
 }

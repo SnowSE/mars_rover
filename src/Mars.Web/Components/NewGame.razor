@@ -1,8 +1,9 @@
 ﻿@inject ILogger<NewGame> logger
-@inject IConfiguration config
+@inject IOptions<GameConfig> gameConfigOptions
 @inject MultiGameHoster multiGameHoster
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.Extensions.DependencyInjection.Extensions
+@using Microsoft.Extensions.Options;
 
 <div class="modal" id="optionsModal">
     <div class="modal-dialog">
@@ -67,11 +68,11 @@
 
 @code {
     [CascadingParameter(Name = "GameManager")]
-    public GameManager? gameManager { get; set; }
+    public GameManager? GameManager { get; set; }
 
     int MaxMaps = 3;
 
-    private GameCreationOptions creationOptions => gameManager!.GameStartOptions;
+    private GameCreationOptions creationOptions => GameManager!.GameStartOptions;
 
     bool startGameButtonHidden = true;
     int mapNumber;
@@ -85,11 +86,8 @@
     protected override void OnParametersSet()
     {
         mapNumber = multiGameHoster.ParsedMaps.First().MapNumber;
-
-        if (!int.TryParse(config[ConfigKeys.MaxMaps], out MaxMaps))
-            MaxMaps = 3;
-
-        targetLocations = targetsToString(creationOptions.MapWithTargets.Targets);
+        MaxMaps = gameConfigOptions.Value.MaxMaps;
+        targetLocations = targetsToString(creationOptions.MapWithTargets!.Targets);
     }
 
     private string targetsToString(IEnumerable<Location> targets)
@@ -104,7 +102,7 @@
         set
         {
             password = value;
-            startGameButtonHidden = (password != config[ConfigKeys.GamePassword]);
+            startGameButtonHidden = (password != gameConfigOptions.Value.Password);
             StateHasChanged();
         }
     }
@@ -118,7 +116,8 @@
             errorText = string.Empty;
             try
             {
-                MapWithTargets.ParseLocations(value);
+                if(value != null)
+                    MapWithTargets.ParseLocations(value);
                 targetLocations = value;
             }
             catch(Exception ex)
@@ -133,10 +132,10 @@
     {
         errorText = string.Empty;
 
-        if (gameManager == null)
+        if (GameManager == null || targetLocations == null)
             return;
 
-        if (password != config[ConfigKeys.GamePassword])
+        if (password != gameConfigOptions.Value.Password)
         {
             logger.LogWarning("What?!  How did they click the button with a password mismatch?");
             return;
@@ -152,7 +151,7 @@
             return;
         }
         logger.LogInformation("Starting new game with {options}", creationOptions);
-        gameManager.StartNewGame(creationOptions);
+        GameManager.StartNewGame(creationOptions);
     }
 
 }

@@ -2,6 +2,7 @@ using Hellang.Middleware.ProblemDetails;
 using Mars.Web;
 using Mars.Web.Controllers;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
@@ -10,6 +11,7 @@ using Prometheus;
 using Serilog;
 using Serilog.Exceptions;
 using Serilog.Sinks.Loki;
+using System.Configuration;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
@@ -17,23 +19,27 @@ using System.Threading.RateLimiting;
 var builder = WebApplication.CreateBuilder(args);
 
 using var traceProvider = Sdk.CreateTracerProviderBuilder()
-    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Mars.Web"))
-    .AddSource(GameActivitySource.Instance.Name)
-    .AddJaegerExporter(o =>
-    {
-        o.Protocol = OpenTelemetry.Exporter.JaegerExportProtocol.HttpBinaryThrift;
-        o.Endpoint = new Uri("http://jaeger:14268/api/traces");
-    })
-    .AddHttpClientInstrumentation()
-    .AddAspNetCoreInstrumentation()
-    .Build();
+	.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Mars.Web"))
+	.AddSource(GameActivitySource.Instance.Name)
+	.AddJaegerExporter(o =>
+	{
+		o.Protocol = OpenTelemetry.Exporter.JaegerExportProtocol.HttpBinaryThrift;
+		o.Endpoint = new Uri("http://jaeger:14268/api/traces");
+	})
+	.AddHttpClientInstrumentation()
+	.AddAspNetCoreInstrumentation()
+	.Build();
 
+builder.Services.AddOptions<GameConfig>()
+	.BindConfiguration(nameof(GameConfig))
+	.ValidateDataAnnotations()
+	.ValidateOnStart();
 builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
-    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+	options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 builder.Services.AddEndpointsApiExplorer();
 
@@ -51,15 +57,14 @@ builder.Host.UseSerilog((context, loggerConfig) =>
 
 builder.Services.AddProblemDetails(opts =>
 {
-    opts.IncludeExceptionDetails = (ctx, ex) => false;
-}
-);
+	opts.IncludeExceptionDetails = (ctx, ex) => false;
+});
 
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Mars Rover", Version = "v1" });
-    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+	c.SwaggerDoc("v1", new OpenApiInfo { Title = "Mars Rover", Version = "v1" });
+	var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+	c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
 builder.Services.AddSingleton<MultiGameHoster>();
@@ -69,17 +74,23 @@ builder.Services.AddHostedService<CleanupGameService>();
 
 builder.Services.AddRateLimiter(options =>
 {
-    options.RejectionStatusCode = 429;
-    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: httpContext.Request.Query["token"].FirstOrDefault() ?? httpContext.Request.Headers.Host.ToString(),
-            factory: partition => new FixedWindowRateLimiterOptions
-            {
-                AutoReplenishment = true,
-                PermitLimit = int.Parse(builder.Configuration["ApiLimitPerSecond"] ?? throw new Exception("Unable to find ApiLimitPerSecond in config")),
-                QueueLimit = 0,
-                Window = TimeSpan.FromSeconds(1)
-            }));
+	options.RejectionStatusCode = 429;
+	options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+	{
+		var token = httpContext.Request.Query["token"].FirstOrDefault();
+		var ipAddress = httpContext.Request.Headers.Host.ToString();
+		var apiLimit = httpContext.RequestServices.GetRequiredService<IOptions<GameConfig>>().Value.ApiLimitPerSecond;
+
+		return RateLimitPartition.GetFixedWindowLimiter(
+			partitionKey: token ?? ipAddress,
+			factory: partition => new FixedWindowRateLimiterOptions
+			{
+				AutoReplenishment = true,
+				PermitLimit = apiLimit,
+				QueueLimit = 0,
+				Window = TimeSpan.FromSeconds(1)
+			});
+	});
 });
 
 var app = builder.Build();
@@ -90,8 +101,8 @@ app.UsePathBase(pathBase);
 
 if (!app.Environment.IsDevelopment())
 {
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+	app.UseHsts();
 }
 
 //Prometheus

@@ -1,93 +1,94 @@
-﻿using Mars.Web;
+﻿using Microsoft.Extensions.Options;
 
-public class MultiGameHoster
+namespace Mars.Web;
+
+public partial class MultiGameHoster
 {
-    public MultiGameHoster(IMapProvider mapProvider, ILoggerFactory logFactory, IConfiguration config)
-    {
-        ParsedMaps = new List<Map>(mapProvider.LoadMaps());
-        this.logger = logFactory.CreateLogger<MultiGameHoster>();
-        this.gameLogger = logFactory.CreateLogger<Game>();
-        this.config = config;
-    }
+	public MultiGameHoster(IMapProvider mapProvider, ILoggerFactory logFactory, IOptions<GameConfig> gameConfigOptions)
+	{
+		ParsedMaps = new List<Map>(mapProvider.LoadMaps());
+		this.logger = logFactory.CreateLogger<MultiGameHoster>();
+		this.logFactory = logFactory;
+		this.gameConfigOptions = gameConfigOptions;
+	}
+	[LoggerMessage(1, LogLevel.Information, "New Game Created: {gameId}")] partial void LogNewGameCreated(string gameId);
+	public void RaiseOldGamesPurged() => OldGamesPurged?.Invoke(this, EventArgs.Empty);
 
-    public void RaiseOldGamesPurged() => OldGamesPurged?.Invoke(this, EventArgs.Empty);
+	public event EventHandler? OldGamesPurged;
+	public ConcurrentDictionary<string, GameManager> Games { get; } = new();
+	public ConcurrentDictionary<string, string> TokenMap { get; } = new();
+	public List<Map> ParsedMaps { get; private set; } = new();
 
-    public event EventHandler OldGamesPurged;
-    public ConcurrentDictionary<string, GameManager> Games { get; } = new();
-    public ConcurrentDictionary<string, string> TokenMap { get; } = new();
+	private readonly ILogger<MultiGameHoster> logger;
+	private string nextGame = "a";
+	private readonly object lockObject = new();
+	private readonly ILoggerFactory logFactory;
+	private readonly IOptions<GameConfig> gameConfigOptions;
 
-    private string nextGame = "a";
-    private readonly object lockObject = new();
-    private readonly ILogger<MultiGameHoster> logger;
-    private readonly ILogger<Game> gameLogger;
-    private readonly IConfiguration config;
+	public string MakeNewGame()
+	{
+		lock (lockObject)
+		{
+			var gameId = nextGame;
+			Games.TryAdd(gameId, new GameManager(ParsedMaps, logFactory.CreateLogger<Game>(), gameConfigOptions));
 
-    public string MakeNewGame()
-    {
-        lock (lockObject)
-        {
-            var gameId = nextGame;
-            Games.TryAdd(gameId, new GameManager(ParsedMaps, gameLogger, config));
+			nextGame = IncrementGameId(nextGame);
+			LogNewGameCreated(gameId);
+			return gameId;
+		}
+	}
 
-            nextGame = IncrementGameId(nextGame);
-            logger.LogInformation($"New Game Created: {gameId}");
-            return gameId;
-        }
-    }
+	public static string IncrementGameId(string nextGame)
+	{
+		var chars = nextGame.ToCharArray();
 
-    public static string IncrementGameId(string nextGame)
-    {
-        var chars = nextGame.ToCharArray();
+		if (chars.All(c => c == 'z'))
+		{
+			return new string('a', chars.Length + 1);
+		}
 
-        if (chars.All(c => c == 'z'))
-        {
-            return new string('a', chars.Length + 1);
-        }
+		var lastIndex = chars.Length - 1;
+		if (chars[lastIndex] < 'z')
+		{
+			chars[lastIndex]++;
+			return new string(chars);
+		}
 
-        var lastIndex = chars.Length - 1;
-        if (chars[lastIndex] < 'z')
-        {
-            chars[lastIndex]++;
-            return new string(chars);
-        }
+		chars[lastIndex--] = 'a';
+		while (lastIndex >= 0)
+		{
+			if (chars[lastIndex] < 'z')
+			{
+				chars[lastIndex]++;
+				break;
+			}
+			else
+			{
+				chars[lastIndex--] = 'a';
+			}
+		}
 
-        chars[lastIndex--] = 'a';
-        while (lastIndex >= 0)
-        {
-            if (chars[lastIndex] < 'z')
-            {
-                chars[lastIndex]++;
-                break;
-            }
-            else
-            {
-                chars[lastIndex--] = 'a';
-            }
-        }
-
-        return new string(chars);
-    }
-
-    public List<Map> ParsedMaps { get; private set; } = new();
+		return new string(chars);
+	}
 }
 
 public class SerializedLowResolutionCell
 {
-    public int AverageDifficulty { get; set; }
-    public int LowerLeftRow { get; set; }
-    public int LowerLeftColumn { get; set; }
-    public int UpperRightRow { get; set; }
-    public int UpperRightColumn { get; set; }
+	public int AverageDifficulty { get; set; }
+	public int LowerLeftRow { get; set; }
+	public int LowerLeftColumn { get; set; }
+	public int UpperRightRow { get; set; }
+	public int UpperRightColumn { get; set; }
 
-    public static SerializedLowResolutionCell FromLowResCel(LowResolutionCell lowRes)
-    {
-        return new SerializedLowResolutionCell
-        {
-            AverageDifficulty = lowRes.AverageDifficulty.Value,
-            LowerLeftColumn = lowRes.LowerLeftY,
-            LowerLeftRow = lowRes.LowerLeftX,
-            UpperRightColumn = lowRes.UpperRightY,
-            UpperRightRow = lowRes.UpperRightX
-        };
-    }
+	public static SerializedLowResolutionCell FromLowResCel(LowResolutionCell lowRes)
+	{
+		return new SerializedLowResolutionCell
+		{
+			AverageDifficulty = lowRes.AverageDifficulty.Value,
+			LowerLeftColumn = lowRes.LowerLeftY,
+			LowerLeftRow = lowRes.LowerLeftX,
+			UpperRightColumn = lowRes.UpperRightY,
+			UpperRightRow = lowRes.UpperRightX
+		};
+	}
 }
