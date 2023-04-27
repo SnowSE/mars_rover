@@ -44,7 +44,8 @@ builder.Host.UseSerilog((context, loggerConfig) =>
     .WriteTo.Seq(builder.Configuration["SeqServer"] ?? throw new ApplicationException("Unable to locate key SeqServer in configuration"))
     .WriteTo.LokiHttp(() => new LokiSinkConfiguration
     {
-        LokiUrl = builder.Configuration["LokiServer"] 
+        LokiUrl = builder.Configuration["LokiServer"] ,
+        LogLabelProvider = new LogLabelProvider(),
     });
 });
 
