@@ -1,13 +1,16 @@
 using Hellang.Middleware.ProblemDetails;
 using Mars.Web;
 using Mars.Web.Controllers;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Prometheus;
 using Serilog;
 using Serilog.Exceptions;
+using Serilog.Sinks.Loki;
 using System.Configuration;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -42,9 +45,14 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Host.UseSerilog((context, loggerConfig) =>
 {
-	loggerConfig.WriteTo.Console()
-	.Enrich.WithExceptionDetails()
-	.WriteTo.Seq(builder.Configuration["SeqServer"] ?? throw new ConfigurationErrorsException("Unable to locate key SeqServer in configuration"));
+    loggerConfig.WriteTo.Console()
+    .Enrich.WithExceptionDetails()
+    .WriteTo.Seq(builder.Configuration["SeqServer"] ?? throw new ApplicationException("Unable to locate key SeqServer in configuration"))
+    .WriteTo.LokiHttp(() => new LokiSinkConfiguration
+    {
+        LokiUrl = builder.Configuration["LokiServer"] ,
+        LogLabelProvider = new LogLabelProvider(),
+    });
 });
 
 builder.Services.AddProblemDetails(opts =>
@@ -87,11 +95,19 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
+//Path base is needed for running behind a reverse proxy, otherwise the app will not be able to find the static files
+var pathBase = builder.Configuration["PATH_BASE"];
+app.UsePathBase(pathBase);
+
 if (!app.Environment.IsDevelopment())
 {
 	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 	app.UseHsts();
 }
+
+//Prometheus
+app.UseMetricServer();
+app.UseHttpMetrics();
 
 app.UseStaticFiles();
 
@@ -100,7 +116,7 @@ app.UseRouting();
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-	c.SwaggerEndpoint("/swagger/v1/swagger.json", "Mars Rover v1");
+    c.SwaggerEndpoint("v1/swagger.json", "Mars Rover v1");
 });
 
 app.MapBlazorHub()

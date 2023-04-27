@@ -26,7 +26,7 @@
         batteryPercent = (int)(Player.BatteryLevel * 100.0 / gameManager.Game.StartingBatteryLevel);
         leftPercent = ((double)Player.PerseveranceLocation.X) / gameManager.Game.Board.Width * 100;
         bottomPercent = ((double)Player.PerseveranceLocation.Y) / gameManager.Game.Board.Height * 100;
-        imageName = "/images/"+Player.Orientation switch
+        imageName = "images/"+Player.Orientation switch
         {
             Orientation.North => "perseverance_128_north_arrow.png",
             Orientation.East => "perseverance_128_east_arrow.png",
