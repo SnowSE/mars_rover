@@ -55,6 +55,16 @@
 * [ ] closing ring, as time passes boot players outside of a certain radius
 * [ ] ***Change scoring: most efficient wins (battery used / time taken), within 60 seconds of first to target***
 
+## Competition Coordinates
+- map#6
+ - (107, 166); (65, 700); (740, 160); (575, 643); (375, 525)
+- map#7
+ - (177, 236); (135, 740); (672, 172); (715, 613); (375, 375)
+- Map#9 
+ - (70,350); (263, 436); (273, 276); (425, 148) 
+- Map#10 (make sure that goes fast)
+ - (360, 115); (150, 80); (210, 440); (240, 220)
+
 ## API Documentation
 
 There is an [API Playground](https://snow-rover.azurewebsites.net/swagger/index.html) where you can see exactly what endpoints exist on the server, what arguments need to be passed in, and what type of data you get back.  Feel free to use that to help you get familiar with how to interact with the server.  While you *can* play the game using nothing more than the API Playground, or a commandline with `curl` in bash or `Invoke-RestMethod` in PowerShell (or even from a few different browser tabs), you will have the best success by writing a program to automate your server interactions.
